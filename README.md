@@ -31,7 +31,20 @@ A free and open-source file transfer tool that harnesses the power of [cutting-e
 
 Why rely on WeTransfer, Dropbox, or Google Drive when you can reliably and easily transfer files directly, end-to-end encrypted and without revealing any personal information?
 
-Join our [Discord](https://discord.gg/xwb7z22Eve) to contribute
+## Real-world stats
+
+<div align="center">
+
+| Metric | Reported |
+|--------|--------|
+| **Largest transfer** | 452 GB |
+| **Fastest large transfer** | 54 GB @ 123 MB/s (~1 Gbps) |
+| **High-speed bulk transfer** | 328 GB @ 93 MB/s |
+| **Peak speed measured** | 125 MB/s (1 Gbps) |
+
+*Transfer throughput depends on your device, network, and connection path.*
+
+</div>
 
 ## Features
 
@@ -48,8 +61,11 @@ Join our [Discord](https://discord.gg/xwb7z22Eve) to contribute
 - [**NAT traversal via QUIC**](https://www.iroh.computer/docs/faq#does-iroh-use-relay-servers) – Secure, low-latency connections using QUIC hole punching with encrypted relay fallback.
 - **CLI integration** – Interoperable with the [Sendme CLI](https://www.iroh.computer/sendme).
 - **Free & open source** – No upload costs, no size limits, and fully community-driven.
-- **Coming Soon** – Mobile and Web versions
+- **Coming Soon** – iOS and Web versions
 
+
+
+Join our [Discord](https://discord.gg/xwb7z22Eve) to contribute
 
 
 ## Installation
@@ -81,6 +97,8 @@ The easiest way to get started is by downloading one of the following versions f
 
 **Windows on ARM** (Snapdragon / Copilot+ PC): use `AltSendme_*_aarch64-setup.exe` from [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases).
 
+
+
 **Windows (Scoop)**
 
 
@@ -104,6 +122,7 @@ More download options in [GitHub Releases](https://github.com/tonyantony300/alt-
 We're looking for Partners to join our mission! Partner with us and support while we push the boundaries of peer-to-peer file transfer.
 
 [**LET'S CHAT**](https://www.altsendme.com/en/contact)
+
 
 ## Supported Languages
  🇺🇸 🇷🇺 🇫🇷 🇨🇳 🇩🇪 🇯🇵 🇮🇳 🇹🇭 🇮🇹 🇨🇿 🇪🇸 🇧🇷 🇸🇦 🇮🇷 🇰🇷  🇵🇱 🇺🇦 🇹🇷 🇳🇴 🇧🇩 🇭🇺 🇷🇸 🇹🇼 🇰🇭
@@ -204,16 +223,6 @@ So mixed setups are fine for getting files across, but they're **not fully priva
 - **Want no relays at all?** Both people set **Disabled** — only works when a direct connection is possible (e.g. same network).
 
 
-## Roadmap 🚧
-
-- Cross-platform Mobile versions
-- Phrase-based Addressing via Iroh-gossip and PAKE
-- Web version (Send and receive from browser)
-- Better system/network insights into transfer process
-
-
-[📫 Drop your Email to recieve updates](https://tally.so/r/ob2Vkx)
-
 
 ## Development Setup
 
@@ -293,6 +302,18 @@ See [PRIVACY.md](PRIVACY.md) for information about how AltSendme handles your da
 <a href="https://github.com/tonyantony300/alt-sendme/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=tonyantony300/alt-sendme" />
 </a>
+
+
+## Roadmap 🚧
+
+- Better distribution
+- Phrase-based Addressing via Iroh-gossip and PAKE
+- Web version (Send and receive from browser)
+- iOS app
+
+[📫 Drop your Email to recieve updates](https://tally.so/r/ob2Vkx)
+
+
 
 
 ## Contact
