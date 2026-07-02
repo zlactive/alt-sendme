@@ -31,6 +31,7 @@ A free and open-source file transfer tool that harnesses the power of [cutting-e
 
 Why rely on WeTransfer, Dropbox, or Google Drive when you can reliably and easily transfer files directly, end-to-end encrypted and without revealing any personal information?
 
+
 ## Real-world stats
 
 <div align="center">
@@ -79,18 +80,18 @@ The easiest way to get started is by downloading one of the following versions f
   </tr>
   <tr>
     <td><b>Windows</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.1/AltSendme_0.4.1_x64-setup.exe'>AltSendme.exe</a> (x64)</td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_x64-setup.exe'>AltSendme.exe</a> (x64)</td>
   </tr>
   <tr>
     <td><b>macOS</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.1/AltSendme_0.4.1_universal.dmg'>AltSendme.dmg</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_universal.dmg'>AltSendme.dmg</a></td>
   <tr>
     <td><b>Linux </b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.1/AltSendme_0.4.1_amd64.deb'>AltSendme.deb</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_amd64.deb'>AltSendme.deb</a></td>
   </tr>
   <tr>
     <td><b>Android</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.1/AltSendme-v0.4.1-universal.apk'>AltSendme.apk</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme-v0.4.2-universal.apk'>AltSendme.apk</a></td>
   </tr>
 
 </table>
@@ -340,7 +341,7 @@ Thank you for checking out this project! If you find it useful, consider giving 
 <!-- <div align="center" style="color: gray;"></div> -->
 
 [badge-website]: https://img.shields.io/badge/website-altsendme.com-orange
-[badge-version]: https://img.shields.io/badge/version-0.4.1-blue
+[badge-version]: https://img.shields.io/badge/version-0.4.2-blue
 [badge-discord]: https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white
 [badge-platforms]: https://img.shields.io/badge/platforms-macOS%2C%20Windows%2C%20Linux%2C%20Android%2C%20-green
 [badge-sponsor]: https://img.shields.io/badge/sponsor-ff69b4
