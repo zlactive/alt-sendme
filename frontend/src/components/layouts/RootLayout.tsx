@@ -11,12 +11,13 @@ export function RootLayout() {
 	return (
 		<>
 			{IS_TAURI && !IS_ANDROID && <AppUpdater />}
-			<main className="h-dvh min-h-screen flex flex-col relative glass-background select-none bg-background">
-				{IS_WEB && (
-					<div className="shrink-0 border-b border-border bg-muted/60 px-4 py-2 text-center text-sm text-muted-foreground">
-						{t('webPreview.banner')}
-					</div>
-				)}
+			<main
+				className={
+					IS_WEB
+						? 'h-full flex flex-col relative glass-background select-none bg-background'
+						: 'h-dvh min-h-screen flex flex-col relative glass-background select-none bg-background'
+				}
+			>
 				{IS_LINUX && !IS_ANDROID && <TitleBar title={t('appTitle')} />}
 
 				{IS_MACOS && (
