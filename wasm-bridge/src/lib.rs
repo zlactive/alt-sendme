@@ -1,9 +1,13 @@
 //! WASM bridge: wasm-bindgen exports over `wasm-io` + `protocol`.
 
 use wasm_io::{
-    download_bytes, fetch_metadata, set_wasm_secret_key, start_share_bytes, AddrInfoOptions,
-    AppHandle, EventEmitter, FileMetadata, ReceiveOptions, RelayModeOption, SendOptions,
-    WasmReceiveResult, WasmShareSession,
+    download_bytes, fetch_metadata, start_share_bytes, AddrInfoOptions, AppHandle, EventEmitter,
+    FileMetadata, ReceiveOptions, RelayModeOption, SendOptions, WasmReceiveResult,
+    WasmShareSession,
+};
+use protocol::{
+    get_relay_status as engine_get_relay_status, resolve_relay_mode_with_fallback,
+    set_wasm_secret_key, verify_relays as engine_verify_relays, RelayConfigArg,
 };
 use std::str::FromStr;
 use std::sync::{Arc, Mutex, OnceLock};
@@ -62,6 +66,27 @@ fn app_handle() -> AppHandle {
 
 fn js_err(err: impl std::fmt::Display) -> JsValue {
     JsValue::from_str(&err.to_string())
+}
+
+fn parse_relay_config(json: Option<String>) -> Result<Option<RelayConfigArg>, JsValue> {
+    match json {
+        None => Ok(None),
+        Some(raw) if raw.trim().is_empty() => Ok(None),
+        Some(raw) => serde_json::from_str(&raw).map_err(js_err),
+    }
+}
+
+async fn resolve_relay_mode(json: Option<String>) -> Result<RelayModeOption, JsValue> {
+    let arg = parse_relay_config(json)?;
+    let (relay_mode, fell_back) = resolve_relay_mode_with_fallback(arg)
+        .await
+        .map_err(js_err)?;
+    if fell_back {
+        if let Some(handle) = app_handle() {
+            let _ = handle.emit_event_with_payload("relay-fell-back", "send");
+        }
+    }
+    Ok(relay_mode)
 }
 
 /// Register `(eventName, payload?) => void` for transfer progress events.
@@ -128,14 +153,16 @@ pub async fn send_file(
     file_name: String,
     bytes: Vec<u8>,
     metadata_json: Option<String>,
+    relay_json: Option<String>,
 ) -> Result<WasmSendResult, JsValue> {
     let metadata = match metadata_json {
         Some(json) => Some(serde_json::from_str::<FileMetadata>(&json).map_err(js_err)?),
         None => None,
     };
 
+    let relay_mode = resolve_relay_mode(relay_json).await?;
     let options = SendOptions {
-        relay_mode: RelayModeOption::Default,
+        relay_mode,
         ticket_type: AddrInfoOptions::Relay,
         magic_ipv4_addr: None,
         magic_ipv6_addr: None,
@@ -163,10 +190,14 @@ pub fn stop_sharing() {
 
 /// Fetch sender metadata JSON for a ticket (no file download).
 #[wasm_bindgen]
-pub async fn fetch_ticket_metadata(ticket: String) -> Result<String, JsValue> {
+pub async fn fetch_ticket_metadata(
+    ticket: String,
+    relay_json: Option<String>,
+) -> Result<String, JsValue> {
+    let relay_mode = resolve_relay_mode(relay_json).await?;
     let options = ReceiveOptions {
         output_dir: None,
-        relay_mode: RelayModeOption::Default,
+        relay_mode,
         magic_ipv4_addr: None,
         magic_ipv6_addr: None,
     };
@@ -177,10 +208,14 @@ pub async fn fetch_ticket_metadata(ticket: String) -> Result<String, JsValue> {
 
 /// Download a single-file ticket into memory.
 #[wasm_bindgen]
-pub async fn receive_file(ticket: String) -> Result<WasmReceiveFileResult, JsValue> {
+pub async fn receive_file(
+    ticket: String,
+    relay_json: Option<String>,
+) -> Result<WasmReceiveFileResult, JsValue> {
+    let relay_mode = resolve_relay_mode(relay_json).await?;
     let options = ReceiveOptions {
         output_dir: None,
-        relay_mode: RelayModeOption::Default,
+        relay_mode,
         magic_ipv4_addr: None,
         magic_ipv6_addr: None,
     };
@@ -189,6 +224,22 @@ pub async fn receive_file(ticket: String) -> Result<WasmReceiveFileResult, JsVal
         download_bytes(ticket, options, app_handle()).await.map_err(js_err)?;
 
     Ok(WasmReceiveFileResult { file_name, bytes })
+}
+
+/// Verify connectivity to configured relay servers. Returns JSON (`VerifyRelaysResponse`).
+#[wasm_bindgen]
+pub async fn verify_relays(relay_json: String) -> Result<String, JsValue> {
+    let relay: RelayConfigArg = serde_json::from_str(&relay_json).map_err(js_err)?;
+    let response = engine_verify_relays(relay).await.map_err(js_err)?;
+    serde_json::to_string(&response).map_err(js_err)
+}
+
+/// Check which relay the app can reach. Returns JSON (`RelayStatusResponse`).
+#[wasm_bindgen]
+pub async fn get_relay_status(relay_json: Option<String>) -> Result<String, JsValue> {
+    let relay = parse_relay_config(relay_json)?;
+    let response = engine_get_relay_status(relay).await.map_err(js_err)?;
+    serde_json::to_string(&response).map_err(js_err)
 }
 
 /// Bind a relay-only iroh endpoint and return its node id (smoke test).
@@ -205,4 +256,30 @@ pub async fn smoke_test_endpoint() -> Result<String, JsValue> {
     let id = endpoint.id().to_string();
     endpoint.close().await;
     Ok(id)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn parse_relay_config_accepts_absent_json() {
+        assert!(parse_relay_config(None).unwrap().is_none());
+        assert!(parse_relay_config(Some("".to_string())).unwrap().is_none());
+    }
+
+    #[test]
+    fn parse_relay_config_deserializes_frontend_payload() {
+        let arg = parse_relay_config(Some(
+            r#"{"mode":"custom","urls":["https://relay.example.com"],"auth_token":"secret","fallback":"strict"}"#
+                .to_string(),
+        ))
+        .unwrap()
+        .expect("relay config should parse");
+
+        assert_eq!(arg.mode, "custom");
+        assert_eq!(arg.urls, vec!["https://relay.example.com".to_string()]);
+        assert_eq!(arg.auth_token.as_deref(), Some("secret"));
+        assert_eq!(arg.fallback.as_deref(), Some("strict"));
+    }
 }

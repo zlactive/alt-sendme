@@ -23,5 +23,8 @@ pub use wasm_io::*;
 
 /// Shared protocol helpers not re-exported by the platform crates.
 pub use protocol::{
-    download_to_store, run_share_session, DownloadToStoreResult, METADATA_ALPN, ShareSessionOutcome,
+    build_relay_mode, download_to_store, get_relay_status, relay_fallback_policy,
+    resolve_relay_mode_with_fallback, run_share_session, verify_relays, DownloadToStoreResult,
+    RelayConfigArg, RelayFallbackPolicy, RelayStatusResponse, VerifyRelaysResponse, METADATA_ALPN,
+    ShareSessionOutcome,
 };

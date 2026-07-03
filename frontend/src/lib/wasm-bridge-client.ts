@@ -1,9 +1,27 @@
 import { dispatchWebEvent } from './web-event-bus'
+import type { RelayConfigArg } from './relay-config'
 
 type WasmBridgeModule = typeof import('../wasm/pkg/wasm_bridge.js')
 
+export type VerifyRelaysResponse = {
+	url: string | null
+	latencyMs: number
+}
+
+export type RelayStatusResponse = {
+	kind: 'public' | 'custom' | 'disabled' | 'unavailable'
+	url: string | null
+	connected: boolean
+	fellBackToPublic: boolean
+}
+
 let initPromise: Promise<WasmBridgeModule> | null = null
 let currentTicket: string | null = null
+
+function relayJson(relay?: RelayConfigArg | null): string | undefined {
+	if (!relay) return undefined
+	return JSON.stringify(relay)
+}
 
 async function loadWasmBridge(): Promise<WasmBridgeModule> {
 	const wasm = await import('../wasm/pkg/wasm_bridge.js')
@@ -33,10 +51,16 @@ export function getWebSharingTicket(): string | null {
 export async function wasmSendFile(
 	fileName: string,
 	bytes: Uint8Array,
-	metadataJson?: string
+	metadataJson?: string,
+	relay?: RelayConfigArg
 ): Promise<string> {
 	const wasm = await ensureWasmBridge()
-	const result = await wasm.send_file(fileName, bytes, metadataJson ?? undefined)
+	const result = await wasm.send_file(
+		fileName,
+		bytes,
+		metadataJson ?? undefined,
+		relayJson(relay)
+	)
 	currentTicket = result.ticket
 	return result.ticket
 }
@@ -47,20 +71,40 @@ export async function wasmStopSharing(): Promise<void> {
 	currentTicket = null
 }
 
-export async function wasmFetchTicketMetadata(ticket: string): Promise<string> {
+export async function wasmFetchTicketMetadata(
+	ticket: string,
+	relay?: RelayConfigArg
+): Promise<string> {
 	const wasm = await ensureWasmBridge()
-	return wasm.fetch_ticket_metadata(ticket)
+	return wasm.fetch_ticket_metadata(ticket, relayJson(relay))
 }
 
 export async function wasmReceiveFile(
-	ticket: string
+	ticket: string,
+	relay?: RelayConfigArg
 ): Promise<{ fileName: string; bytes: Uint8Array }> {
 	const wasm = await ensureWasmBridge()
-	const result = await wasm.receive_file(ticket)
+	const result = await wasm.receive_file(ticket, relayJson(relay))
 	return {
 		fileName: result.file_name,
 		bytes: new Uint8Array(result.bytes),
 	}
+}
+
+export async function wasmVerifyRelays(
+	relay: RelayConfigArg
+): Promise<VerifyRelaysResponse> {
+	const wasm = await ensureWasmBridge()
+	const json = await wasm.verify_relays(JSON.stringify(relay))
+	return JSON.parse(json) as VerifyRelaysResponse
+}
+
+export async function wasmGetRelayStatus(
+	relay?: RelayConfigArg
+): Promise<RelayStatusResponse> {
+	const wasm = await ensureWasmBridge()
+	const json = await wasm.get_relay_status(relayJson(relay))
+	return JSON.parse(json) as RelayStatusResponse
 }
 
 export function triggerBrowserDownload(bytes: Uint8Array, fileName: string): void {

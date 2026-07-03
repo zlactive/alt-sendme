@@ -5,10 +5,13 @@ import {
 	ensureWasmBridge,
 	getWebSharingTicket,
 	wasmFetchTicketMetadata,
+	wasmGetRelayStatus,
 	wasmReceiveFile,
 	wasmSendFile,
 	wasmStopSharing,
+	wasmVerifyRelays,
 } from './wasm-bridge-client'
+import type { RelayConfigArg } from './relay-config'
 import { IS_TAURI, IS_WEB } from './platform'
 import { dispatchWebEvent, subscribeWebEvent } from './web-event-bus'
 import { initWebSaveLocation, writeReceivedFile } from './web-save-location'
@@ -60,6 +63,14 @@ function buildWebSendMetadata(file: File) {
 	})
 }
 
+function relayFromArgs(args?: Record<string, unknown>): RelayConfigArg | undefined {
+	const relay = args?.relay
+	if (relay && typeof relay === 'object') {
+		return relay as RelayConfigArg
+	}
+	return undefined
+}
+
 async function invokeWebTransfer<T>(
 	cmd: string,
 	args?: Record<string, unknown>
@@ -70,7 +81,7 @@ async function invokeWebTransfer<T>(
 			if (!ticket) {
 				throw new Error('Ticket is required')
 			}
-			const json = await wasmFetchTicketMetadata(ticket)
+			const json = await wasmFetchTicketMetadata(ticket, relayFromArgs(args))
 			return JSON.parse(json) as T
 		}
 		case 'send_items':
@@ -107,7 +118,8 @@ async function invokeWebTransfer<T>(
 			const ticket = await wasmSendFile(
 				file.name,
 				bytes,
-				buildWebSendMetadata(file)
+				buildWebSendMetadata(file),
+				relayFromArgs(args)
 			)
 			return ticket as T
 		}
@@ -119,7 +131,10 @@ async function invokeWebTransfer<T>(
 
 			dispatchWebEvent('receive-started')
 
-			const { fileName, bytes } = await wasmReceiveFile(ticket)
+			const { fileName, bytes } = await wasmReceiveFile(
+				ticket,
+				relayFromArgs(args)
+			)
 			dispatchWebEvent('receive-file-names', JSON.stringify([fileName]))
 
 			await writeReceivedFile(fileName, bytes)
@@ -128,6 +143,15 @@ async function invokeWebTransfer<T>(
 		case 'stop_sharing':
 			await wasmStopSharing()
 			return undefined as T
+		case 'verify_relays': {
+			const relay = relayFromArgs(args)
+			if (!relay) {
+				throw new Error('Relay config is required')
+			}
+			return (await wasmVerifyRelays(relay)) as T
+		}
+		case 'get_relay_status':
+			return (await wasmGetRelayStatus(relayFromArgs(args))) as T
 		default:
 			return invokeWebStub<T>(cmd, args)
 	}
@@ -143,6 +167,8 @@ async function invokeWeb<T>(
 		case 'start_sharing':
 		case 'receive_file':
 		case 'stop_sharing':
+		case 'verify_relays':
+		case 'get_relay_status':
 			try {
 				await ensureWasmBridge()
 			} catch (error) {
@@ -187,17 +213,6 @@ function invokeWebStub<T>(cmd: string, args?: Record<string, unknown>): T {
 		case 'get_sharing_status':
 			return getWebSharingTicket() as T
 		case 'toggle_context_menu':
-			return undefined as T
-		case 'get_relay_status':
-			return {
-				kind: 'unavailable',
-				url: null,
-				connected: false,
-				fellBackToPublic: false,
-			} as T
-		case 'verify_relays':
-			throw new WebPreviewError('Relay verification is not available in the web preview.')
-		case 'plugin:native-utils|select_download_folder':
 		case 'plugin:native-utils|select_send_document':
 		case 'plugin:native-utils|select_send_folder':
 		case 'plugin:native-utils|cancel_job':
