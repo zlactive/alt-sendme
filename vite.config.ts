@@ -9,8 +9,6 @@ export default defineConfig(({ mode }) => {
 
 	return {
 		plugins: [react()],
-		// Load .env.web / .env.tauri from the repo root (not frontend/).
-		envDir: path.resolve(__dirname),
 		base: isWeb ? '/web/' : '/',
 		root: path.resolve(__dirname, './frontend'),
 		resolve: {
@@ -20,7 +18,9 @@ export default defineConfig(({ mode }) => {
 			},
 		},
 		define: {
-			// Single string so platform.ts can derive flags; Vite replaces import.meta.env reliably
+			'import.meta.env.VITE_APP_PLATFORM': JSON.stringify(
+				isWeb ? 'web' : 'tauri'
+			),
 			'import.meta.env.TAURI_PLATFORM': JSON.stringify(
 				process.env.TAURI_ENV_PLATFORM ?? ''
 			),
