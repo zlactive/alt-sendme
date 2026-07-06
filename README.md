@@ -17,7 +17,7 @@
 
 
 [![Discord][badge-discord]](https://discord.gg/xwb7z22Eve)
-![Version][badge-version]
+[![Version][badge-version]](https://github.com/tonyantony300/alt-sendme/releases/latest)
 ![Website][badge-website]
 ![Platforms][badge-platforms]
 [![Sponsor][badge-sponsor]](https://github.com/sponsors/tonyantony300)
@@ -79,7 +79,7 @@ The easiest way to get started is by downloading one of the following versions f
   </tr>
   <tr>
     <td><b>Windows</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_x64-setup.exe'>AltSendme.exe</a> (x64)</td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_x64-setup.exe'>AltSendme.exe</a></td>
   </tr>
   <tr>
     <td><b>macOS</b></td>
@@ -95,7 +95,7 @@ The easiest way to get started is by downloading one of the following versions f
 
 </table>
 
-**Windows on ARM** (Snapdragon / Copilot+ PC): use `AltSendme_*_aarch64-setup.exe` from [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases).
+More options at [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases).
 
 
 
@@ -186,41 +186,7 @@ AltSendme uses open-source public relay servers to support establishing direct c
 
 ### Self-hosting relays
 
-You can run your own iroh relay and point AltSendme at it instead of the public infrastructure:
-
-1. Deploy a relay using the assets in [`deploy/relay/`](deploy/relay/README.md) (Docker Compose on a VPS or Fly.io).
-2. In the app, open **Settings → Network** and choose **Custom self-hosted**.
-3. Add your relay URL(s) and optional auth token if you enabled `access.shared_token` on the server.
-4. Use **Test connection** to verify registration.
-
-For a fully private setup, configure the same relay URLs on both sender and receiver devices.
-
-### What if only one person uses a self-hosted relay?
-
-Transfers can still work when one side uses custom relays and the other uses the default public relays. Here's the simple version:
-
-**Your relay setting controls where *your* device registers.** When you share a file, the ticket includes *your* relay URL. The other person connects using that ticket — they don't need to match your settings.
-
-| Who shares | Sender uses | Receiver uses | Usually works? |
-|------------|-------------|---------------|----------------|
-| Alice | Custom (open relay) | Public relays | Yes — receiver reaches Alice via the relay URL in the ticket |
-| Alice | Custom (auth token required) | Public relays, no token | Often no — receiver can't authenticate to Alice's private relay |
-| Alice | Custom (auth token required) | Same relay + same token | Yes |
-| Either side | Any | Any, same LAN or good NAT | Yes — direct peer-to-peer may skip relays entirely |
-
-**Direction matters for privacy, not just connectivity:**
-
-- **You share, they use public relays:** If a relay is needed, traffic may go through *your* relay. They still use public relays for their own device.
-- **They share, you use a self-hosted relay:** If a relay is needed, traffic may go through *their* public relay — yours isn't used for that path.
-
-So mixed setups are fine for getting files across, but they're **not fully private** unless both people use the same self-hosted relay(s) (or connect directly without relay fallback).
-
-**Quick rules of thumb:**
-
-- **Just want it to work?** An open self-hosted relay (no auth token) is enough; the other person can keep default public relays.
-- **Want a private relay?** Both people need your relay URL **and** the auth token in **Settings → Network**.
-- **Want zero public relay use?** Both people must set **Custom self-hosted** to the same relay(s).
-- **Want no relays at all?** Both people set **Disabled** — only works when a direct connection is possible (e.g. same network).
+For how to run your own iroh relay, configure AltSendme to use it, and how mixed public/self-hosted setups behave, see [`deploy/relay/README.md`](deploy/relay/README.md#using-self-hosted-relays-with-altsendme).
 
 
 ## Development
