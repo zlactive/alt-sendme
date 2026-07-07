@@ -1,19 +1,18 @@
 use crate::features::thumbnail::generate_thumbnail;
 use crate::state::{AppStateMutex, ShareHandle};
 use engine::{
-    build_relay_mode, download, fetch_metadata, get_relay_status as engine_get_relay_status,
+    download, fetch_metadata, get_relay_status as engine_get_relay_status,
     resolve_relay_mode_with_fallback, start_share_items, verify_relays as engine_verify_relays,
     AddrInfoOptions, AppHandle, EventEmitter, FileMetadata, FilePreviewItem, ReceiveOptions,
-    RelayConfigArg, RelayFallbackPolicy, RelayModeOption, RelayStatusResponse, SendOptions,
-    VerifyRelaysResponse,
+    SendOptions,
 };
-use n0_watcher::Watcher;
 use std::collections::BTreeMap;
 use std::path::Path;
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{Emitter, Manager, State};
 
+#[allow(unused_imports)]
 pub use engine::{
     build_relay_mode, relay_fallback_policy, RelayConfigArg, RelayFallbackPolicy,
     RelayStatusResponse, VerifyRelaysResponse,
@@ -527,7 +526,7 @@ pub async fn verify_relays(relay: RelayConfigArg) -> Result<VerifyRelaysResponse
 #[cfg(test)]
 mod tests {
     use super::*;
-    use engine::start_share;
+    use engine::{start_share, RelayModeOption};
     use std::fs;
     use std::path::PathBuf;
     use std::time::{SystemTime, UNIX_EPOCH};
