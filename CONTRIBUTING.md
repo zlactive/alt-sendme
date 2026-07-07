@@ -18,11 +18,10 @@ pnpm install
 pnpm tauri dev
 ```
 
-Production build:
+Production build (skips installer/bundle packaging):
 
 ```bash
-pnpm build
-pnpm tauri build
+pnpm tauri build --no-bundle
 ```
 
 ### Web app setup
