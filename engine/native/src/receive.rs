@@ -5,8 +5,6 @@ use iroh::endpoint::presets;
 use iroh::{address_lookup::dns::DnsAddressLookup, Endpoint};
 use iroh_blobs::ticket::BlobTicket;
 use std::str::FromStr;
-use tokio::select;
-
 use crate::export::export_to_directory;
 use crate::storage;
 use crate::types::ReceiveResult;
@@ -85,20 +83,13 @@ pub async fn download(
         ))
     };
 
-    let (total_files, payload_size, _stats, output_dir, conflict_count) = select! {
-        x = fut => match x {
-            Ok(x) => x,
-            Err(e) => {
-                tracing::error!("Download operation failed: {}", e);
-                cleanup_guard.disarm();
-                db2.shutdown().await?;
-                anyhow::bail!("error: {e}");
-            }
-        },
-        _ = tokio::signal::ctrl_c() => {
-            tracing::warn!("Operation cancelled by user");
+    let (total_files, payload_size, _stats, output_dir, conflict_count) = match fut.await {
+        Ok(x) => x,
+        Err(e) => {
+            tracing::error!("Download operation failed: {}", e);
+            cleanup_guard.disarm();
             db2.shutdown().await?;
-            anyhow::bail!("Operation cancelled");
+            anyhow::bail!("error: {e}");
         }
     };
 

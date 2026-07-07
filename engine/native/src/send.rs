@@ -9,7 +9,6 @@ use iroh_blobs::{
     provider::events::{ConnectMode, EventMask, EventSender, RequestMode},
     BlobsProtocol,
 };
-use tokio::select;
 use tokio::sync::mpsc;
 
 use crate::import::canonicalize_input_paths;
@@ -117,12 +116,5 @@ pub async fn start_share_items(
         })
     };
 
-    let send_result = select! {
-        x = setup => x?,
-        _ = tokio::signal::ctrl_c() => {
-            anyhow::bail!("Operation cancelled");
-        }
-    };
-
-    Ok(send_result)
+    Ok(setup.await?)
 }
