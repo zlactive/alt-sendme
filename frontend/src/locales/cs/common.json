@@ -112,7 +112,8 @@
 		"duration": "Doba trvání",
 		"avgSpeed": "Průměrná rychlost",
 		"multipleFiles": "{{count}} souborů",
-		"donatePrompt": "Vylepšete to -"
+		"donatePrompt": "Zlepšete AltSendme ",
+		"donateLink": "přispěním"
 	},
 	"errors": {
 		"sharingFailed": "Sdílení selhalo",

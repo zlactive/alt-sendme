@@ -112,7 +112,8 @@
 		"duration": "ระยะเวลา",
 		"avgSpeed": "ความเร็วเฉลี่ย",
 		"multipleFiles": "{{count}} ไฟล์",
-		"donatePrompt": "ทำให้ดีขึ้น -"
+		"donatePrompt": "ทำให้ AltSendme ดีขึ้นด้วยการ ",
+		"donateLink": "บริจาค"
 	},
 	"errors": {
 		"sharingFailed": "การแชร์ล้มเหลว",

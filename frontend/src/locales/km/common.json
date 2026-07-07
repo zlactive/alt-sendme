@@ -112,7 +112,8 @@
 		"duration": "រយៈពេល",
 		"avgSpeed": "ល្បឿនមធ្យម",
 		"multipleFiles": "{{count}} ឯកសារ",
-		"donatePrompt": "ធ្វើឱ្យវាប្រសើរឡើង -"
+		"donatePrompt": "ធ្វើឱ្យ AltSendme ប្រសើរឡើងដោយ ",
+		"donateLink": "បរិច្ចាគ"
 	},
 	"errors": {
 		"sharingFailed": "ការចែករំលែកបរាជ័យ",

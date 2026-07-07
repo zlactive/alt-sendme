@@ -112,7 +112,8 @@
 		"duration": "Duração",
 		"avgSpeed": "Velocidade Média",
 		"multipleFiles": "{{count}} arquivos",
-		"donatePrompt": "Torne-o melhor -"
+		"donatePrompt": "Melhore o AltSendme ",
+		"donateLink": "doando"
 	},
 	"errors": {
 		"sharingFailed": "Falha ao Compartilhar",

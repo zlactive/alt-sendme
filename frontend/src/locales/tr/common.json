@@ -112,7 +112,8 @@
 		"duration": "Süre",
 		"avgSpeed": "Ort. Hız",
 		"multipleFiles": "{{count}} dosya",
-		"donatePrompt": "Daha iyi hale getir -"
+		"donatePrompt": "AltSendme'yi daha iyi hale getirmek için ",
+		"donateLink": "bağış yapın"
 	},
 	"errors": {
 		"sharingFailed": "Paylaşım Başarısız",

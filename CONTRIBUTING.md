@@ -31,6 +31,7 @@ Use the web target to run the app in a browser during development.
 Start the web dev server:
 
 ```bash
+pnpm build:wasm   
 pnpm dev:web
 ```
 
@@ -92,6 +93,5 @@ git checkout origin/main -- pnpm-lock.yaml src-tauri/Cargo.lock engine/Cargo.loc
 - [Discord](https://discord.gg/xwb7z22Eve)
 - [GitHub Issues](https://github.com/tonyantony300/alt-sendme/issues)
 
-## Code of Conduct
 
 Please be respectful and considerate in all project spaces.

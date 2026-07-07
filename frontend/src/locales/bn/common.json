@@ -112,7 +112,8 @@
 		"duration": "সময়কাল",
 		"avgSpeed": "গড় গতি",
 		"multipleFiles": "{{count}}টি ফাইল",
-		"donatePrompt": "এটিকে আরও ভালো করুন -"
+		"donatePrompt": "AltSendmeকে আরও ভালো করতে ",
+		"donateLink": "অনুদান দিয়ে"
 	},
 	"errors": {
 		"sharingFailed": "শেয়ার ব্যর্থ হয়েছে",

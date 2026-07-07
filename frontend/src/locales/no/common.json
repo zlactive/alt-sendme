@@ -112,7 +112,8 @@
 		"duration": "Varighet",
 		"avgSpeed": "Gjennomsnittlig hastighet",
 		"multipleFiles": "{{count}} filer",
-		"donatePrompt": "Gjør det bedre -"
+		"donatePrompt": "Gjør AltSendme bedre ved å ",
+		"donateLink": "donere"
 	},
 	"errors": {
 		"sharingFailed": "Deling feilet",

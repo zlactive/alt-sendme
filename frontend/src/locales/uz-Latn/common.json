@@ -112,7 +112,8 @@
 		"duration": "Davomiyligi",
 		"avgSpeed": "O'rtacha tezlik",
 		"multipleFiles": "{{count}} ta fayl",
-		"donatePrompt": "Buni yaxshilang -"
+		"donatePrompt": "AltSendme-ni yaxshilang, ",
+		"donateLink": "xayriya qiling"
 	},
 	"errors": {
 		"sharingFailed": "Ulashish muvaffaqiyatsiz",
