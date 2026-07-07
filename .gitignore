@@ -55,6 +55,9 @@ Thumbs.db
 *.log
 logs/
 
+.vercel/
+frontend/dist/.vercel/
+
 # Environment files
 .env
 .env.local
@@ -130,3 +133,6 @@ docs/
 .github-reference-readest/
 docs/fdroid-metadata-example.yml
 docs/fdroid-metadata-example.yml
+
+monorepo-reference
+

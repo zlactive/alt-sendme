@@ -4,9 +4,16 @@
 	"version": "0.4.2",
 	"type": "module",
 	"scripts": {
-		"dev": "vite",
+		"dev": "vite --config vite.config.ts --mode tauri",
+		"dev:web": "vite --config vite.config.ts --mode web",
+		"predev:web": "test -f frontend/src/wasm/pkg/wasm_bridge.js || ./scripts/build-wasm-bridge.sh",
 		"build": "tsc -b && vite build",
-		"preview": "vite preview",
+		"build:web": "pnpm build:wasm && tsc -b && vite build --config vite.config.ts --mode web",
+		"build:web:vercel": "WEB_BASE=/ pnpm build:wasm && tsc -b && WEB_BASE=/ vite build --config vite.config.ts --mode web",
+		"deploy:web:vercel": "./scripts/deploy-web-vercel.sh",
+		"build:wasm": "./scripts/build-wasm-bridge.sh --release",
+		"preview": "vite preview --config vite.config.ts",
+		"preview:web": "vite preview --config vite.config.ts --mode web",
 		"tauri": "tauri",
 		"android:dev": "tauri android dev",
 		"android:build": "tauri android build",
@@ -23,7 +30,7 @@
 	"engines": {
 		"node": ">=20.19"
 	},
-	"packageManager": "npm@11.12.1",
+	"packageManager": "pnpm@10.12.1",
 	"dependencies": {
 		"@base-ui/react": "^1.1.0",
 		"@phosphor-icons/react": "^2.1.10",
