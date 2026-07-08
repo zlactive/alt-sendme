@@ -30,6 +30,7 @@ jobs:
         uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5
         with:
           node-version: '24.x'
+          package-manager-cache: false
 
       - name: Extract version from tag and validate
         id: version
@@ -299,6 +300,7 @@ jobs:
           TAURI_LINUX_AYATANA_APPINDICATOR: ${{ contains(matrix.platform, 'ubuntu') && '1' || '' }}
         with:
           projectPath: ./src-tauri
+          tauriScript: 'pnpm tauri --'
           releaseId: ${{ needs.prepare-release.outputs.release_id }}
           tagName: ${{ github.ref_name }}
           args: ${{ matrix.args }}
