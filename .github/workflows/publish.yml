@@ -230,6 +230,10 @@ jobs:
         shell: bash
         run: |
           set -eux
+          if [ "${{ matrix.platform }}" = "macos-latest" ]; then
+            brew install llvm
+            echo "CC=$(brew --prefix llvm)/bin/clang" >> "$GITHUB_ENV"
+          fi
           rustup target add wasm32-unknown-unknown
           cargo install wasm-bindgen-cli --version 0.2.126 --locked
 

@@ -75,6 +75,11 @@ const env = { ...process.env }
 const cc = resolveCc(env)
 if (cc) {
 	env.CC = cc
+} else if (process.platform === 'darwin') {
+	console.error(
+		'build-wasm-bridge: macOS needs LLVM clang for wasm32 (Apple clang cannot target wasm32-unknown-unknown). Install with: brew install llvm'
+	)
+	process.exit(1)
 }
 
 const wasmBridgeDir = path.join(root, 'wasm-bridge')
