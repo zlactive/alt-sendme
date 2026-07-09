@@ -32,6 +32,22 @@ A free and open-source file transfer tool that harnesses the power of [cutting-e
 Why rely on WeTransfer, Dropbox, or Google Drive when you can reliably and easily transfer files directly, end-to-end encrypted and without revealing any personal information?
 
 
+
+## Features
+
+- **Send anywhere, from anything** - Desktop, Android, terminal, or browser - start on one platform, receive on any other.
+- **Transfer anything, any size** - Files or entire directories, verified end-to-end with BLAKE3 integrity checks.
+- **Fast enough to matter** – Saturates multi-gigabit connections for lightning-fast transfers.
+- **Private by default** - No accounts, no sign-ups, no tracking, no ads. 
+- **Direct device-to-device transfer** - Files move directly between your devices, avoiding corporate cloud storage where data is the price.
+- **End-to-end encryption, always on** - Every transfer uses QUIC with TLS 1.3; relays only see encrypted traffic even if they are involved.
+- **Cryptographic authentication** - Every ticket verifies you're connected to the intended sender before any files transfer.
+- **Resumable & broadcastable** - Interrupted transfers resume automatically; share the same file with any number of peers at once.
+- **Preview before you commit** - See what you're receiving before you download it.
+- **Featherlight** - Tiny installs, minimal web footprint.
+- **Free & open source** - No upload costs, no size limits, community-driven.
+
+
 ## Real-world stats
 
 
@@ -46,28 +62,6 @@ Why rely on WeTransfer, Dropbox, or Google Drive when you can reliably and easil
 
 
 
-## Features
-
-- **Send anywhere** – Works seamlessly on local networks or across continents.
-- [**Transfer anything**](https://www.iroh.computer/proto/iroh-blobs) – Send files or directories of any size or any format, verified with BLAKE3-based integrity checks.
-- **No accounts or personal info** – Transfer files without sign-ups or exposing personal info.
-- **Peer-to-peer direct transfer** – Send files straight between devices, with no cloud storage in between.
-- **Authentication** - Tickets contains cryptographic identity info for authentication.
-- **End-to-end encryption** – Always-on protection with QUIC + TLS 1.3 for forward and backward secrecy.
-- **Resumable transfers** – Interrupted downloads automatically resume where they left off.
-- **Broadcast** - Share same file/folder with any number of peers.
-- **Preview** - View and verify before downloading
-- **Fast & reliable** – Capable of saturating multi-gigabit connections for lightning-fast transfers.
-- [**NAT traversal via QUIC**](https://www.iroh.computer/docs/faq#does-iroh-use-relay-servers) – Secure, low-latency connections using QUIC hole punching with encrypted relay fallback.
-- **CLI integration** – Interoperable with the [Sendme CLI](https://www.iroh.computer/sendme).
-- **Free & open source** – No upload costs, no size limits, and fully community-driven.
-- **Coming Soon** – iOS and Web versions
-
-
-
-Join our [Discord](https://discord.gg/xwb7z22Eve) to contribute
-
-
 ## Installation
 
 The easiest way to get started is by downloading one of the following versions for your respective operating system:
@@ -75,39 +69,65 @@ The easiest way to get started is by downloading one of the following versions f
 <table>
   <tr>
     <td><b>Platform</b></td>
-    <td><b>Download</b></td>
+    <td><b>Recommended</b></td>
+    <td><b>Other formats</b></td>
+    <td><b>CLI</b></td>
+    <td><b>Size</b></td>
+    <td><b>Notes</b></td>
   </tr>
   <tr>
-    <td><b>Windows</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_x64-setup.exe'>AltSendme.exe</a></td>
+    <td>💻 <b>Windows (x64)</b></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_x64-setup.exe'>Setup.exe</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_x64_en-US.msi'>MSI</a></td>
+    <td><a href='https://www.altsendme.com/en/downloads'>Link</a></td>
+    <td>~10 MB</td>
+    <td>None</td>
   </tr>
   <tr>
-    <td><b>macOS</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_universal.dmg'>AltSendme.dmg</a></td>
-  <tr>
-    <td><b>Linux </b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme_0.4.2_amd64.deb'>AltSendme.deb</a></td>
+    <td>💻 <b>macOS (Universal)</b></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_universal.dmg'>AltSendme.dmg</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_aarch64.dmg'>Apple Silicon</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_x64.dmg'>Intel</a></td>
+    <td><a href='https://www.altsendme.com/en/downloads'>Link</a></td>
+    <td>~15 MB</td>
+    <td>None</td>
   </tr>
   <tr>
-    <td><b>Android</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.4.2/AltSendme-v0.4.2-universal.apk'>AltSendme.apk</a></td>
+    <td>💻 <b>Linux (amd64)</b></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_amd64.deb'>AltSendme.deb</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-0.5.0-1.x86_64.rpm'>.rpm</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_amd64.AppImage'>AppImage</a></td>
+    <td><a href='https://www.altsendme.com/en/downloads'>Link</a></td>
+    <td>~13 MB</td>
+    <td>Debian/Ubuntu; Fedora/RHEL → .rpm</td>
   </tr>
-
+  <tr>
+    <td>📱 <b>Android (arm64)</b></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-arm64.apk'>AltSendme.apk</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-armv7.apk'>armv7</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-universal.apk'>universal</a></td>
+    <td>-</td>
+    <td>~50 MB</td>
+    <td>Sideload APK; arm64 recommended</td>
+  </tr>
+  <tr>
+    <td>⌨️ <b>CLI</b></td>
+    <td><a href='https://www.altsendme.com/en/downloads'>Downloads</a></td>
+    <td>-</td>
+    <td>-</td>
+    <td>~4–5 MB</td>
+    <td>None</td>
+  </tr>
+  <tr>
+    <td>🌐 <b>Web</b></td>
+    <td><a href='https://app.altsendme.com'>app.altsendme.com</a></td>
+    <td>-</td>
+    <td>-</td>
+    <td>~2 MB</td>
+    <td>Limited throughput without custom relay.</td>
+  </tr>
 </table>
 
-More options at [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases).
+More options at [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases) or in [Downloads](https://www.altsendme.com/en/downloads) page.
 
 
-
-**Windows (Scoop)**
-
-
-```bash
-scoop bucket add extras
-scoop install extras/altsendme
-```
-
-More download options in [GitHub Releases](https://github.com/tonyantony300/alt-sendme/releases).
 
 ## Partners
 
@@ -135,7 +155,7 @@ We're looking for Partners to join our mission! Partner with us and support whil
 3. Your friend pastes the ticket in their app, and the transfer begins.
 
 
-## Under the hood ⚙️🛠️
+## Under the hood 
 
 AltSendme uses [Iroh](https://www.iroh.computer) under the hood to enable peer-to-peer file transfer. It is a modern modular alternative to technologies like WebRTC and libp2p.
 
@@ -217,18 +237,6 @@ See [PRIVACY.md](PRIVACY.md) for information about how AltSendme handles your da
 </a>
 
 
-## Roadmap 🚧
-
-- Better distribution
-- Phrase-based Addressing via Iroh-gossip and PAKE
-- Web preview (browser UI shell — transfers coming later)
-- iOS app
-
-[📫 Drop your Email to recieve updates](https://tally.so/r/ob2Vkx)
-
-
-
-
 ## Contact
 
 Reach me [here](https://www.altsendme.com/en/contact) for suggestions, feedback or media related communication.
@@ -253,9 +261,9 @@ Thank you for checking out this project! If you find it useful, consider giving 
 <!-- <div align="center" style="color: gray;"></div> -->
 
 [badge-website]: https://img.shields.io/badge/website-altsendme.com-orange
-[badge-version]: https://img.shields.io/badge/version-0.4.2-blue
+[badge-version]: https://img.shields.io/badge/version-0.5.0-blue
 [badge-discord]: https://img.shields.io/badge/Discord-join-5865F2?logo=discord&logoColor=white
-[badge-platforms]: https://img.shields.io/badge/platforms-macOS%2C%20Windows%2C%20Linux%2C%20Android%2C%20-green
+[badge-platforms]: https://img.shields.io/badge/platforms-macOS%2C%20Windows%2C%20Linux%2C%20Android%2C%20CLI%2C%20-green
 [badge-sponsor]: https://img.shields.io/badge/sponsor-ff69b4
 
 
