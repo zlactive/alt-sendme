@@ -1,8 +1,8 @@
 import { IS_LINUX, IS_MACOS, IS_TAURI, IS_WEB, IS_WINDOWS } from './platform'
 
-/** Match default Tauri window size in `src-tauri/tauri.conf.json`. */
+/** Max width for the framed web app shell (Tauri default window is 1024). */
 export const WEB_APP_MAX_WIDTH = 1024
-export const WEB_APP_MAX_HEIGHT = 680
+export const WEB_APP_MAX_HEIGHT = 660
 export const WEB_APP_PORTAL_ID = 'web-app-portal'
 
 export function getWebAppOverlayContainer(): HTMLElement | undefined {
