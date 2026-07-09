@@ -94,15 +94,15 @@ The easiest way to get started is by downloading one of the following versions f
   <tr>
     <td>💻 <b>Linux (amd64)</b></td>
     <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_amd64.deb'>AltSendme.deb</a></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-0.4.2-1.x86_64.rpm'>.rpm</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_amd64.AppImage'>AppImage</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-0.5.0-1.x86_64.rpm'>.rpm</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme_0.5.0_amd64.AppImage'>AppImage</a></td>
     <td><a href='https://www.altsendme.com/en/downloads'>Link</a></td>
     <td>~13 MB</td>
     <td>Debian/Ubuntu; Fedora/RHEL → .rpm</td>
   </tr>
   <tr>
     <td>📱 <b>Android (arm64)</b></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.4.2-arm64.apk'>AltSendme.apk</a></td>
-    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.4.2-armv7.apk'>armv7</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.4.2-universal.apk'>universal</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-arm64.apk'>AltSendme.apk</a></td>
+    <td><a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-armv7.apk'>armv7</a>, <a href='https://github.com/tonyantony300/alt-sendme/releases/download/v0.5.0/AltSendme-v0.5.0-universal.apk'>universal</a></td>
     <td>-</td>
     <td>~50 MB</td>
     <td>Sideload APK; arm64 recommended</td>
