@@ -1,4 +1,3 @@
-import { InfoIcon } from 'lucide-react'
 import { useTranslation } from '@/i18n'
 import { handleExternalLinkClick } from '@/lib/openExternalUrl'
 import {
@@ -26,23 +25,16 @@ const links = [
 ] as const
 
 const bodyTextClassName =
-	'text-[11px] leading-snug text-muted-foreground text-balance'
+	'w-full max-w-full text-[11px] leading-snug text-muted-foreground'
 
 export function WebPromoPanel() {
 	const { t } = useTranslation('common')
 
 	return (
-		<aside className="web-promo-panel max-w-[10.5rem] shrink-0 flex-col gap-2.5">
-			<InfoIcon
-				className="size-3.5 text-muted-foreground"
-				aria-hidden
-			/>
-			<div className="flex flex-col gap-2">
-				<p className={bodyTextClassName}>{t('webPromo.platforms')}</p>
-				<p className={bodyTextClassName}>{t('webPromo.notice')}</p>
-			</div>
+		<aside className="web-promo-panel flex-col gap-2 pt-1">
+			<p className={bodyTextClassName}>{t('webPromo.notice')}</p>
 			<nav
-				className="flex flex-col items-start gap-1.5"
+				className="flex flex-wrap items-center justify-center gap-x-4 gap-y-1"
 				aria-label={t('webPromo.linksLabel')}
 			>
 				{links.map(({ href, labelKey }) => (

@@ -10,14 +10,16 @@ const queryClient = new QueryClient()
 
 function WebAppShell({ children }: { children: React.ReactNode }) {
 	return (
-		<div className="web-app-layout">
-			<div className="web-app-frame relative min-h-0">
-				<div className="relative flex h-full min-h-0 w-full flex-col">
-					{children}
-					<div
-						id={WEB_APP_PORTAL_ID}
-						className="pointer-events-none absolute inset-0 z-[100] [&>*]:pointer-events-auto"
-					/>
+		<div className="web-app-shell-inner">
+			<div className="web-app-layout">
+				<div className="web-app-frame relative min-h-0">
+					<div className="relative flex h-full min-h-0 w-full flex-col">
+						{children}
+						<div
+							id={WEB_APP_PORTAL_ID}
+							className="pointer-events-none absolute inset-0 z-[100] [&>*]:pointer-events-auto"
+						/>
+					</div>
 				</div>
 			</div>
 			<WebPromoPanel />
