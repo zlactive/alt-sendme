@@ -1,4 +1,4 @@
-import { useEffect } from 'react'
+import { useEffect, useRef } from 'react'
 import { listen } from '@/lib/platform-api'
 import { IS_DESKTOP } from '@/lib/platform'
 import { getRelayConfigArg } from '@/lib/relay'
@@ -11,10 +11,14 @@ import { useNodeCapability } from '@/hooks/useNodeCapability'
 export function DeviceNodeSync() {
 	const { isNodeReady, refreshNodeStatus } = useNodeCapability()
 	const setInvite = usePairedInviteStore((s) => s.setInvite)
+	const didSyncRelay = useRef(false)
 
 	useEffect(() => {
-		if (!IS_DESKTOP || !isNodeReady) return
+		if (!IS_DESKTOP || !isNodeReady || didSyncRelay.current) return
+		didSyncRelay.current = true
 		void reconfigureNodeRelay(getRelayConfigArg()).catch((error) => {
+			// Allow a later retry if the first sync failed (e.g. node still settling).
+			didSyncRelay.current = false
 			console.warn('Failed to sync node relay on startup:', error)
 		})
 	}, [isNodeReady])

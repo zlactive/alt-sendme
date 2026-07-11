@@ -28,13 +28,17 @@ function PairHostModal({
 	ticket,
 	isLoading,
 	expiresIn,
-	onClose,
+	onDismiss,
+	onCancelPairing,
 }: {
 	open: boolean
 	ticket: string | null
 	isLoading: boolean
 	expiresIn: number | null
-	onClose: () => void
+	/** Hide the dialog but keep the pairing window open until TTL. */
+	onDismiss: () => void
+	/** Abort pairing immediately. */
+	onCancelPairing: () => void
 }) {
 	const { t } = useTranslation()
 
@@ -51,7 +55,9 @@ function PairHostModal({
 		<AlertDialog
 			open={open}
 			onOpenChange={(next) => {
-				if (!next) onClose()
+				// Dismissing the dialog must NOT stop pairing — the peer still
+				// needs the host window open after the code is copied.
+				if (!next) onDismiss()
 			}}
 		>
 			<AlertDialogContent>
@@ -89,7 +95,14 @@ function PairHostModal({
 					</Button>
 				</div>
 				<AlertDialogFooter>
-					<Button type="button" onClick={onClose}>
+					<Button
+						type="button"
+						variant="outline"
+						onClick={onCancelPairing}
+					>
+						{t('common:settings.devices.cancelPairing')}
+					</Button>
+					<Button type="button" onClick={onDismiss}>
 						{t('common:ok')}
 					</Button>
 				</AlertDialogFooter>
@@ -244,7 +257,11 @@ export function DevicesSettings() {
 		}
 	}
 
-	const closeHost = async () => {
+	const dismissHost = () => {
+		setHostOpen(false)
+	}
+
+	const cancelHost = async () => {
 		setHostOpen(false)
 		await closeHostPairing()
 	}
@@ -281,6 +298,34 @@ export function DevicesSettings() {
 							</Button>
 						</div>
 					</div>
+
+					{pairingTicket && hostExpiresIn != null && hostExpiresIn > 0 && !hostOpen ? (
+						<div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm">
+							<p className="text-muted-foreground">
+								{t('common:settings.devices.hostStillOpen', {
+									seconds: hostExpiresIn,
+								})}
+							</p>
+							<div className="flex gap-2">
+								<Button
+									type="button"
+									size="sm"
+									variant="outline"
+									onClick={() => setHostOpen(true)}
+								>
+									{t('common:settings.devices.showQrCode')}
+								</Button>
+								<Button
+									type="button"
+									size="sm"
+									variant="ghost"
+									onClick={cancelHost}
+								>
+									{t('common:settings.devices.cancelPairing')}
+								</Button>
+							</div>
+						</div>
+					) : null}
 
 					{devices.length === 0 ? (
 						<div className="py-8 text-center text-sm text-muted-foreground border-t">
@@ -339,7 +384,8 @@ export function DevicesSettings() {
 				ticket={pairingTicket}
 				isLoading={isLoading}
 				expiresIn={hostExpiresIn}
-				onClose={closeHost}
+				onDismiss={dismissHost}
+				onCancelPairing={cancelHost}
 			/>
 			<PairJoinModal
 				open={joinOpen}

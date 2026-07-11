@@ -51,6 +51,13 @@ impl PairedDeviceStore {
     }
 
     pub fn remember(&self, device: PairedDevice) -> anyhow::Result<PairedDevice> {
+        tracing::info!(
+            target: "pairing-dev",
+            step = "store.remember.start",
+            endpoint_id = %device.endpoint_id,
+            display_name = %device.display_name,
+            "pairing-dev"
+        );
         let mut file = self.read_file()?;
         let id = device.endpoint_id.to_lowercase();
         if let Some(existing) = file
@@ -63,14 +70,33 @@ impl PairedDeviceStore {
             existing.last_seen_at = device.last_seen_at;
             let saved = existing.clone();
             self.write_file(&file)?;
+            tracing::info!(
+                target: "pairing-dev",
+                step = "store.remember.updated",
+                endpoint_id = %saved.endpoint_id,
+                "pairing-dev"
+            );
             return Ok(saved);
         }
         file.devices.push(device.clone());
         self.write_file(&file)?;
+        tracing::info!(
+            target: "pairing-dev",
+            step = "store.remember.inserted",
+            endpoint_id = %device.endpoint_id,
+            total_devices = file.devices.len(),
+            "pairing-dev"
+        );
         Ok(device)
     }
 
     pub fn forget(&self, endpoint_id: &str) -> anyhow::Result<()> {
+        tracing::info!(
+            target: "pairing-dev",
+            step = "store.forget",
+            endpoint_id = %endpoint_id,
+            "pairing-dev"
+        );
         let mut file = self.read_file()?;
         let id = endpoint_id.to_lowercase();
         file.devices
@@ -80,6 +106,13 @@ impl PairedDeviceStore {
     }
 
     pub fn touch(&self, endpoint_id: &str, last_seen_at: u64) -> anyhow::Result<()> {
+        tracing::info!(
+            target: "pairing-dev",
+            step = "store.touch",
+            endpoint_id = %endpoint_id,
+            last_seen_at,
+            "pairing-dev"
+        );
         let mut file = self.read_file()?;
         let id = endpoint_id.to_lowercase();
         if let Some(existing) = file
@@ -126,6 +159,13 @@ pub fn load_or_create_identity(data_dir: &Path) -> anyhow::Result<DeviceIdentity
             .context("invalid device.json")?;
         if meta.endpoint_id.to_lowercase() != endpoint_id {
             tracing::warn!("device.json endpoint_id mismatch; updating to keychain identity");
+            tracing::info!(
+                target: "pairing-dev",
+                step = "identity.endpoint_mismatch",
+                old = %meta.endpoint_id,
+                new = %endpoint_id,
+                "pairing-dev"
+            );
             meta.endpoint_id = endpoint_id;
         }
         meta

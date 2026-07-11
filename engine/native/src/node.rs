@@ -18,9 +18,10 @@ use protocol::{
 };
 use tokio::sync::{Mutex, RwLock};
 use tokio::task::JoinHandle;
-use tracing::{debug, info, warn};
+use tracing::debug;
 
 use crate::device_identity::{load_or_create_identity, DeviceIdentity, DeviceInfo, PairedDeviceStore};
+use crate::{pairing_dev, pairing_dev_warn};
 
 #[derive(Debug)]
 struct AccessState {
@@ -36,28 +37,35 @@ struct PairedOnlyHook {
 impl EndpointHooks for PairedOnlyHook {
     async fn after_handshake(&self, conn: &Connection) -> AfterHandshakeOutcome {
         if conn.side() != Side::Server {
+            pairing_dev!("hook.skip", side = ?conn.side(), reason = "not_server");
             return AfterHandshakeOutcome::accept();
         }
         if conn.alpn() != CONTROL_ALPN {
+            pairing_dev!(
+                "hook.skip",
+                alpn = ?String::from_utf8_lossy(conn.alpn()),
+                reason = "not_control_alpn"
+            );
             return AfterHandshakeOutcome::accept();
         }
         let remote = conn.remote_id();
         let access = self.access.read().await;
         let allowed = access.allowed.contains(&remote);
         if access.pairing_host_open || allowed {
-            info!(
+            pairing_dev!(
+                "hook.accept",
                 remote = %remote,
                 pairing_host_open = access.pairing_host_open,
-                allowed,
-                allowed_count = access.allowed.len(),
-                "paired-invite: control handshake accepted"
+                peer_in_allowlist = allowed,
+                allowlist_size = access.allowed.len()
             );
             return AfterHandshakeOutcome::accept();
         }
-        warn!(
+        pairing_dev_warn!(
+            "hook.reject",
             remote = %remote,
-            allowed_count = access.allowed.len(),
-            "paired-invite: control handshake rejected (peer not allowed)"
+            pairing_host_open = access.pairing_host_open,
+            allowlist_size = access.allowed.len()
         );
         AfterHandshakeOutcome::Reject {
             error_code: 403u32.into(),
@@ -89,22 +97,27 @@ impl ControlProtocol {
     async fn handle_connection(&self, conn: Connection) -> anyhow::Result<()> {
         let remote = conn.remote_id();
         let local = self.ctx.identity.endpoint_id();
+        let pairing_host_open = self.ctx.access.read().await.pairing_host_open;
         let allowed = self.is_allowed(&remote).await;
         let in_store = self.is_in_paired_store(&remote).await;
-        info!(
+        pairing_dev!(
+            "control.session.start",
             remote = %remote,
             local = %local,
-            allowed,
-            in_paired_store = in_store,
-            "paired-invite: control session started"
+            pairing_host_open,
+            peer_in_allowlist = allowed,
+            peer_in_paired_store = in_store
         );
 
+        pairing_dev!("control.session.export_keying", remote = %remote);
         let keying = export_connection_keying_material(&conn).context("export keying material")?;
+
+        pairing_dev!("control.session.accept_bi", remote = %remote);
         let (mut send, mut recv) = conn
             .accept_bi()
             .await
             .context("accept bi stream for control session")?;
-        info!(remote = %remote, "paired-invite: bi stream accepted");
+        pairing_dev!("control.session.bi_ready", remote = %remote);
 
         let our_info = ControlMessage::PairingInfo {
             endpoint_id: self.ctx.identity.endpoint_id(),
@@ -115,7 +128,12 @@ impl ControlProtocol {
         write_message(&mut send, &our_info)
             .await
             .context("write local PairingInfo")?;
-        info!(remote = %remote, "paired-invite: sent local PairingInfo");
+        pairing_dev!(
+            "control.session.sent_pairing_info",
+            remote = %remote,
+            local = %local,
+            display_name = %self.ctx.identity.display_name()
+        );
 
         let mut remote_info: Option<ControlMessage> = None;
         let mut remote_vote: Option<RememberVote> = None;
@@ -125,15 +143,41 @@ impl ControlProtocol {
             let msg = match read_message(&mut recv).await {
                 Ok(m) => m,
                 Err(err) => {
-                    info!(
+                    pairing_dev!(
+                        "control.session.read_end",
                         remote = %remote,
                         error = %err,
-                        had_remote_info = remote_info.is_some(),
-                        "paired-invite: control read ended"
+                        has_remote_pairing_info = remote_info.is_some(),
+                        has_remote_remember_vote = remote_vote.is_some()
                     );
                     break;
                 }
             };
+            match &msg {
+                ControlMessage::PairingInfo { .. } => {
+                    pairing_dev!("control.session.msg", remote = %remote, kind = "PairingInfo");
+                }
+                ControlMessage::RememberVote { vote, .. } => {
+                    pairing_dev!("control.session.msg", remote = %remote, kind = "RememberVote", ?vote);
+                }
+                ControlMessage::Invite { file_count, total_size, sender_name, blob_ticket, .. } => {
+                    pairing_dev!(
+                        "control.session.msg",
+                        remote = %remote,
+                        kind = "Invite",
+                        file_count,
+                        total_size,
+                        sender_name = %sender_name,
+                        ticket_len = blob_ticket.len()
+                    );
+                }
+                ControlMessage::InviteResponse { .. } => {
+                    pairing_dev!("control.session.msg", remote = %remote, kind = "InviteResponse");
+                }
+                ControlMessage::Recognition { .. } => {
+                    pairing_dev!("control.session.msg", remote = %remote, kind = "Recognition");
+                }
+            }
             match msg {
                 ControlMessage::PairingInfo {
                     endpoint_id,
@@ -142,21 +186,27 @@ impl ControlProtocol {
                     signature,
                 } => {
                     let Ok(peer_id) = EndpointId::from_str(&endpoint_id) else {
+                        pairing_dev_warn!(
+                            "control.session.pairing_info_invalid_id",
+                            remote = %remote,
+                            peer_id = %endpoint_id
+                        );
                         continue;
                     };
                     if !verify_challenge(&peer_id, &keying, &signature) {
-                        warn!(
+                        pairing_dev_warn!(
+                            "control.session.pairing_info_bad_sig",
                             remote = %remote,
-                            peer_id = %endpoint_id,
-                            "paired-invite: PairingInfo signature invalid"
+                            peer_id = %endpoint_id
                         );
                         continue;
                     }
-                    info!(
+                    pairing_dev!(
+                        "control.session.pairing_info_ok",
                         remote = %remote,
                         peer_id = %endpoint_id,
                         display_name = %display_name,
-                        "paired-invite: received remote PairingInfo"
+                        device_type = %device_type
                     );
                     remote_info = Some(ControlMessage::PairingInfo {
                         endpoint_id,
@@ -166,7 +216,6 @@ impl ControlProtocol {
                     });
                 }
                 ControlMessage::RememberVote { vote, .. } => {
-                    info!(remote = %remote, ?vote, "paired-invite: received RememberVote");
                     remote_vote = Some(vote);
                 }
                 ControlMessage::Invite {
@@ -177,21 +226,21 @@ impl ControlProtocol {
                 } => {
                     let allowed = self.is_allowed(&remote).await;
                     let in_store = self.is_in_paired_store(&remote).await;
-                    info!(
+                    pairing_dev!(
+                        "invite.received",
                         remote = %remote,
-                        allowed,
-                        in_paired_store = in_store,
+                        peer_in_allowlist = allowed,
+                        peer_in_paired_store = in_store,
                         file_count,
                         total_size,
                         sender_name = %sender_name,
-                        ticket_len = blob_ticket.len(),
-                        "paired-invite: received Invite"
+                        ticket_len = blob_ticket.len()
                     );
                     if !allowed {
-                        warn!(
+                        pairing_dev_warn!(
+                            "invite.dropped_not_allowed",
                             remote = %remote,
-                            in_paired_store = in_store,
-                            "paired-invite: Invite dropped (peer not in access allowlist)"
+                            peer_in_paired_store = in_store
                         );
                         continue;
                     }
@@ -203,24 +252,36 @@ impl ControlProtocol {
                         "remote_endpoint_id": remote.to_string(),
                     });
                     if let Some(handle) = &self.ctx.app_handle {
+                        pairing_dev!(
+                            "invite.emit_ui",
+                            remote = %remote,
+                            event = "paired-invite-received",
+                            payload_len = payload.to_string().len()
+                        );
                         match handle.emit_event_with_payload(
                             "paired-invite-received",
                             &payload.to_string(),
                         ) {
-                            Ok(()) => info!(
-                                remote = %remote,
-                                "paired-invite: emitted paired-invite-received event"
-                            ),
-                            Err(err) => warn!(
-                                remote = %remote,
-                                error = %err,
-                                "paired-invite: failed to emit paired-invite-received event"
-                            ),
+                            Ok(()) => {
+                                pairing_dev!(
+                                    "invite.emit_ui_ok",
+                                    remote = %remote,
+                                    event = "paired-invite-received"
+                                );
+                            }
+                            Err(err) => {
+                                pairing_dev_warn!(
+                                    "invite.emit_ui_failed",
+                                    remote = %remote,
+                                    error = %err
+                                );
+                            }
                         }
                     } else {
-                        warn!(
+                        pairing_dev_warn!(
+                            "invite.emit_ui_skipped",
                             remote = %remote,
-                            "paired-invite: no app handle; Invite not forwarded to UI"
+                            reason = "no_app_handle"
                         );
                     }
                 }
@@ -229,15 +290,23 @@ impl ControlProtocol {
                 }
                 ControlMessage::Recognition { signature } => {
                     if verify_challenge(&remote, &keying, &signature) {
+                        pairing_dev!("control.session.recognition_ok", remote = %remote);
                         let _ = self.ctx.paired_store.touch(
                             &remote.to_string(),
                             protocol::identity::unix_now_ms(),
                         );
+                    } else {
+                        pairing_dev_warn!("control.session.recognition_bad_sig", remote = %remote);
                     }
                 }
             }
 
             if remote_info.is_some() && remote_vote == Some(RememberVote::Remember) {
+                pairing_dev!(
+                    "pair.complete.handshake",
+                    remote = %remote,
+                    role = "host"
+                );
                 if let Some(ControlMessage::PairingInfo {
                     endpoint_id,
                     display_name,
@@ -255,7 +324,15 @@ impl ControlProtocol {
                     };
                     let _ = self.ctx.paired_store.remember(device);
                     self.allow_peer(remote).await;
+                    pairing_dev!(
+                        "pair.complete.stored",
+                        remote = %remote,
+                        peer_id = %endpoint_id,
+                        display_name = %display_name,
+                        role = "host"
+                    );
                     if let Some(handle) = &self.ctx.app_handle {
+                        pairing_dev!("pair.emit_ui", event = "device-paired", role = "host");
                         let _ = handle.emit_event("device-paired");
                     }
                 }
@@ -264,20 +341,27 @@ impl ControlProtocol {
         }
 
         if remote_info.is_some() {
+            pairing_dev!(
+                "control.session.send_remember_vote",
+                remote = %remote,
+                vote = ?RememberVote::Remember
+            );
             let vote = ControlMessage::RememberVote {
                 session_id,
                 vote: RememberVote::Remember,
             };
             if let Err(err) = write_message(&mut send, &vote).await {
-                info!(
+                pairing_dev!(
+                    "control.session.send_remember_vote_failed",
                     remote = %remote,
-                    error = %err,
-                    "paired-invite: failed to send RememberVote (peer may have closed)"
+                    error = %err
                 );
+            } else {
+                pairing_dev!("control.session.send_remember_vote_ok", remote = %remote);
             }
         }
 
-        info!(remote = %remote, "paired-invite: control session finished");
+        pairing_dev!("control.session.finish", remote = %remote);
         Ok(())
     }
 
@@ -295,7 +379,16 @@ impl ControlProtocol {
     }
 
     async fn allow_peer(&self, remote: EndpointId) {
-        self.ctx.access.write().await.allowed.insert(remote);
+        let allowlist_size = {
+            let mut access = self.ctx.access.write().await;
+            access.allowed.insert(remote);
+            access.allowed.len()
+        };
+        pairing_dev!(
+            "allowlist.add",
+            remote = %remote,
+            allowlist_size
+        );
     }
 }
 
@@ -303,11 +396,12 @@ impl ProtocolHandler for ControlProtocol {
     async fn accept(&self, connection: Connection) -> Result<(), AcceptError> {
         let this = self.clone();
         let remote = connection.remote_id();
+        pairing_dev!("control.incoming", remote = %remote);
         if let Err(err) = this.handle_connection(connection).await {
-            warn!(
+            pairing_dev_warn!(
+                "control.session.error",
                 remote = %remote,
-                error = %err,
-                "paired-invite: control connection failed"
+                error = %err
             );
         }
         Ok(())
@@ -336,18 +430,29 @@ impl NodeService {
         relay_mode: RelayMode,
         app_handle: AppHandle,
     ) -> anyhow::Result<Self> {
+        pairing_dev!("node.init.start", data_dir = %data_dir.display());
         let identity = Arc::new(load_or_create_identity(data_dir)?);
         let paired_store = Arc::new(PairedDeviceStore::new(data_dir));
         let allowed = load_allowed_from_store(&paired_store)?;
-        info!(
+        let paired_list = paired_store.list().unwrap_or_default();
+        pairing_dev!(
+            "node.init.identity",
             local_endpoint = %identity.endpoint_id(),
-            allowed_peers = ?allowed.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
-            allowed_count = allowed.len(),
-            "paired-invite: node started"
+            display_name = %identity.display_name(),
+            device_type = %identity.meta.device_type,
+            allowlist_size = allowed.len(),
+            stored_devices = paired_list.len()
         );
+        for device in &paired_list {
+            pairing_dev!(
+                "node.init.stored_device",
+                endpoint_id = %device.endpoint_id,
+                display_name = %device.display_name
+            );
+        }
 
         let access = Arc::new(RwLock::new(AccessState {
-            allowed,
+            allowed: allowed.clone(),
             pairing_host_open: false,
         }));
         let pairing_host_open = Arc::new(AtomicBool::new(false));
@@ -360,6 +465,12 @@ impl NodeService {
             relay_mode.clone(),
         )
         .await?;
+
+        pairing_dev!(
+            "node.init.ready",
+            local_endpoint = %identity.endpoint_id(),
+            allowlist_size = allowed.len()
+        );
 
         Ok(Self {
             runtime: Mutex::new(runtime),
@@ -374,14 +485,34 @@ impl NodeService {
     }
 
     pub async fn shutdown(&self) -> anyhow::Result<()> {
+        pairing_dev!("node.shutdown.start", local_endpoint = %self.identity.endpoint_id());
         self.stop_pairing_host().await;
-        let mut runtime = self.runtime.lock().await;
+        let runtime = self.runtime.lock().await;
         runtime.router.shutdown().await?;
         runtime.endpoint.close().await;
+        pairing_dev!("node.shutdown.done", local_endpoint = %self.identity.endpoint_id());
         Ok(())
     }
 
     pub async fn reconfigure_relay(&self, relay_mode: RelayMode) -> anyhow::Result<()> {
+        {
+            let current = self.relay_mode.lock().await;
+            if format!("{current:?}") == format!("{relay_mode:?}") {
+                pairing_dev!(
+                    "node.relay.skip",
+                    local_endpoint = %self.identity.endpoint_id(),
+                    reason = "unchanged"
+                );
+                return Ok(());
+            }
+            pairing_dev!(
+                "node.relay.reconfigure",
+                local_endpoint = %self.identity.endpoint_id(),
+                from = ?*current,
+                to = ?relay_mode
+            );
+        }
+
         self.stop_pairing_host().await;
 
         let mut runtime = self.runtime.lock().await;
@@ -399,6 +530,7 @@ impl NodeService {
 
         *runtime = new_runtime;
         *self.relay_mode.lock().await = relay_mode;
+        pairing_dev!("node.relay.reconfigure_done", local_endpoint = %self.identity.endpoint_id());
         Ok(())
     }
 
@@ -407,17 +539,33 @@ impl NodeService {
     }
 
     pub fn list_paired(&self) -> anyhow::Result<Vec<PairedDevice>> {
-        self.paired_store.list()
+        let devices = self.paired_store.list()?;
+        pairing_dev!(
+            "store.list",
+            count = devices.len(),
+            endpoint_ids = ?devices.iter().map(|d| d.endpoint_id.as_str()).collect::<Vec<_>>()
+        );
+        Ok(devices)
     }
 
     pub async fn forget_paired(&self, endpoint_id: &str) -> anyhow::Result<()> {
+        pairing_dev!("store.forget.start", endpoint_id = %endpoint_id);
         if let Ok(id) = EndpointId::from_str(endpoint_id) {
             self.access.write().await.allowed.remove(&id);
+            let allowlist_size = self.access.read().await.allowed.len();
+            pairing_dev!(
+                "allowlist.remove",
+                endpoint_id = %endpoint_id,
+                allowlist_size
+            );
         }
-        self.paired_store.forget(endpoint_id)
+        self.paired_store.forget(endpoint_id)?;
+        pairing_dev!("store.forget.done", endpoint_id = %endpoint_id);
+        Ok(())
     }
 
     pub fn pairing_ticket(&self) -> anyhow::Result<String> {
+        pairing_dev!("host.ticket.build", local_endpoint = %self.identity.endpoint_id());
         let runtime = self
             .runtime
             .try_lock()
@@ -429,17 +577,29 @@ impl NodeService {
             v: 1,
             kind: protocol::PairingTicket::KIND.to_string(),
             endpoint_id: self.identity.endpoint_id(),
-            relay_url,
+            relay_url: relay_url.clone(),
         };
-        ticket.encode()
+        let encoded = ticket.encode()?;
+        pairing_dev!(
+            "host.ticket.ready",
+            local_endpoint = %self.identity.endpoint_id(),
+            relay_url = ?relay_url,
+            ticket_len = encoded.len()
+        );
+        Ok(encoded)
     }
 
     pub async fn start_pairing_host(&self) -> anyhow::Result<String> {
+        pairing_dev!("host.open.start", local_endpoint = %self.identity.endpoint_id());
         self.stop_pairing_host().await;
 
         self.pairing_host_open.store(true, Ordering::SeqCst);
         self.access.write().await.pairing_host_open = true;
-
+        pairing_dev!(
+            "host.open.active",
+            local_endpoint = %self.identity.endpoint_id(),
+            ttl_secs = protocol::pairing::PAIRING_VOTE_TIMEOUT_SECS
+        );
         let access = self.access.clone();
         let flag = self.pairing_host_open.clone();
         let app_handle = self.app_handle.clone();
@@ -450,32 +610,58 @@ impl NodeService {
             .await;
             flag.store(false, Ordering::SeqCst);
             access.write().await.pairing_host_open = false;
+            pairing_dev!("host.expired", reason = "ttl_elapsed");
             if let Some(handle) = &app_handle {
+                pairing_dev!("host.emit_ui", event = "pairing-host-expired");
                 let _ = handle.emit_event("pairing-host-expired");
             }
         });
         *self.pairing_expire_task.lock().await = Some(handle);
 
-        self.pairing_ticket()
+        let ticket = self.pairing_ticket()?;
+        pairing_dev!(
+            "host.open.done",
+            local_endpoint = %self.identity.endpoint_id(),
+            ticket_len = ticket.len()
+        );
+        Ok(ticket)
     }
 
     pub async fn stop_pairing_host(&self) {
         if let Some(handle) = self.pairing_expire_task.lock().await.take() {
             handle.abort();
+            pairing_dev!("host.timer_aborted", local_endpoint = %self.identity.endpoint_id());
         }
-        self.pairing_host_open.store(false, Ordering::SeqCst);
+        let was_open = self.pairing_host_open.swap(false, Ordering::SeqCst);
         self.access.write().await.pairing_host_open = false;
+        if was_open {
+            pairing_dev!("host.close", local_endpoint = %self.identity.endpoint_id());
+        }
     }
 
     pub async fn join_pairing(&self, ticket_str: &str) -> anyhow::Result<()> {
+        pairing_dev!(
+            "join.start",
+            local_endpoint = %self.identity.endpoint_id(),
+            ticket_len = ticket_str.len()
+        );
         let ticket = protocol::PairingTicket::decode(ticket_str)?;
-        let mut addr = EndpointAddr::from(EndpointId::from_str(&ticket.endpoint_id)?);
+        let remote = EndpointId::from_str(&ticket.endpoint_id)?;
+        pairing_dev!(
+            "join.ticket_decoded",
+            local_endpoint = %self.identity.endpoint_id(),
+            host_endpoint = %remote,
+            relay_url = ?ticket.relay_url
+        );
+        let mut addr = EndpointAddr::from(remote);
         if let Some(relay) = ticket.relay_url {
             if let Ok(url) = relay.parse() {
                 addr.addrs.insert(TransportAddr::Relay(url));
+                pairing_dev!("join.relay_hint", host_endpoint = %remote, relay = %relay);
             }
         }
 
+        pairing_dev!("join.connect", host_endpoint = %remote);
         let runtime = self.runtime.lock().await;
         let conn = runtime
             .endpoint
@@ -483,8 +669,16 @@ impl NodeService {
             .await
             .context("pairing connect failed")?;
         drop(runtime);
+        pairing_dev!(
+            "join.connected",
+            host_endpoint = %remote,
+            remote_conn = %conn.remote_id()
+        );
 
+        pairing_dev!("join.export_keying", host_endpoint = %remote);
         let keying = export_connection_keying_material(&conn)?;
+
+        pairing_dev!("join.open_bi", host_endpoint = %remote);
         let (mut send, mut recv) = conn.open_bi().await?;
 
         let info = ControlMessage::PairingInfo {
@@ -494,33 +688,72 @@ impl NodeService {
             signature: sign_challenge(&self.identity.secret_key, &keying),
         };
         write_message(&mut send, &info).await?;
+        pairing_dev!(
+            "join.sent_pairing_info",
+            host_endpoint = %remote,
+            local_endpoint = %self.identity.endpoint_id()
+        );
+
         let vote = ControlMessage::RememberVote {
             session_id: uuid::Uuid::new_v4().to_string(),
             vote: RememberVote::Remember,
         };
         write_message(&mut send, &vote).await?;
+        pairing_dev!(
+            "join.sent_remember_vote",
+            host_endpoint = %remote,
+            vote = ?RememberVote::Remember
+        );
 
-        if let Ok(ControlMessage::PairingInfo {
-            endpoint_id,
-            display_name,
-            device_type,
-            signature,
-        }) = read_message(&mut recv).await
-        {
-            let peer_id = EndpointId::from_str(&endpoint_id)?;
-            if verify_challenge(&peer_id, &keying, &signature) {
-                let now = protocol::identity::unix_now_ms();
-                self.paired_store.remember(PairedDevice {
-                    endpoint_id,
-                    display_name,
-                    device_type,
-                    paired_at: now,
-                    last_seen_at: now,
-                })?;
-                self.access.write().await.allowed.insert(peer_id);
-                if let Some(handle) = &self.app_handle {
-                    let _ = handle.emit_event("device-paired");
+        pairing_dev!("join.read_host_pairing_info", host_endpoint = %remote);
+        match read_message(&mut recv).await {
+            Ok(ControlMessage::PairingInfo {
+                endpoint_id,
+                display_name,
+                device_type,
+                signature,
+            }) => {
+                let peer_id = EndpointId::from_str(&endpoint_id)?;
+                if verify_challenge(&peer_id, &keying, &signature) {
+                    let now = protocol::identity::unix_now_ms();
+                    self.paired_store.remember(PairedDevice {
+                        endpoint_id: endpoint_id.clone(),
+                        display_name: display_name.clone(),
+                        device_type,
+                        paired_at: now,
+                        last_seen_at: now,
+                    })?;
+                    self.access.write().await.allowed.insert(peer_id);
+                    pairing_dev!(
+                        "pair.complete.stored",
+                        role = "joiner",
+                        host_endpoint = %endpoint_id,
+                        display_name = %display_name
+                    );
+                    if let Some(handle) = &self.app_handle {
+                        pairing_dev!("pair.emit_ui", event = "device-paired", role = "joiner");
+                        let _ = handle.emit_event("device-paired");
+                    }
+                    pairing_dev!("join.done", host_endpoint = %endpoint_id, success = true);
+                } else {
+                    pairing_dev_warn!(
+                        "join.host_pairing_info_bad_sig",
+                        host_endpoint = %endpoint_id
+                    );
                 }
+            }
+            Ok(_other) => {
+                pairing_dev_warn!(
+                    "join.unexpected_host_message",
+                    host_endpoint = %remote
+                );
+            }
+            Err(err) => {
+                pairing_dev_warn!(
+                    "join.read_host_pairing_info_failed",
+                    host_endpoint = %remote,
+                    error = %err
+                );
             }
         }
         Ok(())
@@ -535,31 +768,40 @@ impl NodeService {
     ) -> anyhow::Result<bool> {
         let remote = EndpointId::from_str(remote_endpoint_id)?;
         let local = self.identity.endpoint_id();
-        let in_allowlist = self.access.read().await.allowed.contains(&remote);
-        info!(
+        let access = self.access.read().await;
+        let in_allowlist = access.allowed.contains(&remote);
+        let allowlist: Vec<String> = access.allowed.iter().map(|id| id.to_string()).collect();
+        drop(access);
+
+        pairing_dev!(
+            "invite.start",
             local_endpoint = %local,
             remote_endpoint = %remote,
-            in_allowlist,
+            peer_in_allowlist = in_allowlist,
+            allowlist_size = allowlist.len(),
+            allowlist = ?allowlist,
             file_count,
             total_size,
-            ticket_len = blob_ticket.len(),
-            "paired-invite: sender inviting paired device"
+            ticket_len = blob_ticket.len()
         );
         if !in_allowlist {
-            warn!(
+            pairing_dev_warn!(
+                "invite.abort_not_allowed",
                 remote_endpoint = %remote,
-                "paired-invite: sender abort — remote not in allowlist"
+                allowlist = ?allowlist
             );
             anyhow::bail!("unknown paired device");
         }
+
         let addr = EndpointAddr::from(remote);
+        pairing_dev!("invite.connect", remote_endpoint = %remote);
         let runtime = self.runtime.lock().await;
         let local_node = runtime.endpoint.id().to_string();
-        info!(
+        pairing_dev!(
+            "invite.connecting",
             local_endpoint = %local,
             local_node = %local_node,
-            remote_endpoint = %remote,
-            "paired-invite: sender connecting control channel"
+            remote_endpoint = %remote
         );
         let connect = tokio::time::timeout(
             Duration::from_secs(30),
@@ -570,35 +812,36 @@ impl NodeService {
 
         let conn = match connect {
             Ok(Ok(conn)) => {
-                info!(
+                pairing_dev!(
+                    "invite.connected",
                     remote_endpoint = %remote,
-                    remote_conn = %conn.remote_id(),
-                    "paired-invite: sender connected"
+                    remote_conn = %conn.remote_id()
                 );
                 conn
             }
             Ok(Err(err)) => {
-                warn!(
+                pairing_dev_warn!(
+                    "invite.connect_failed",
                     remote_endpoint = %remote,
-                    error = %err,
-                    "paired-invite: sender connect failed"
+                    error = %err
                 );
                 return Ok(false);
             }
             Err(_) => {
-                warn!(
+                pairing_dev_warn!(
+                    "invite.connect_timeout",
                     remote_endpoint = %remote,
-                    "paired-invite: sender connect timed out (30s)"
+                    timeout_secs = 30
                 );
                 return Ok(false);
             }
         };
 
+        pairing_dev!("invite.open_bi", remote_endpoint = %remote);
         let (mut send, _recv) = conn
             .open_bi()
             .await
             .context("open bi stream for invite")?;
-        info!(remote_endpoint = %remote, "paired-invite: sender opened bi stream");
 
         let invite = ControlMessage::Invite {
             blob_ticket: blob_ticket.to_string(),
@@ -609,11 +852,17 @@ impl NodeService {
         write_message(&mut send, &invite)
             .await
             .context("write Invite message")?;
-        info!(
+        pairing_dev!(
+            "invite.sent",
             remote_endpoint = %remote,
             file_count,
             total_size,
-            "paired-invite: sender wrote Invite (closing connection)"
+            sender_name = %self.identity.display_name()
+        );
+        pairing_dev!(
+            "invite.done",
+            remote_endpoint = %remote,
+            delivered = true
         );
         Ok(true)
     }
@@ -624,8 +873,18 @@ fn load_allowed_from_store(paired_store: &PairedDeviceStore) -> anyhow::Result<H
     for device in paired_store.list()? {
         if let Ok(id) = EndpointId::from_str(&device.endpoint_id) {
             allowed.insert(id);
+        } else {
+            pairing_dev_warn!(
+                "store.allowlist_skip",
+                endpoint_id = %device.endpoint_id,
+                reason = "invalid_endpoint_id"
+            );
         }
     }
+    pairing_dev!(
+        "store.allowlist_loaded",
+        count = allowed.len()
+    );
     Ok(allowed)
 }
 
@@ -636,6 +895,11 @@ async fn build_runtime(
     app_handle: AppHandle,
     relay_mode: RelayMode,
 ) -> anyhow::Result<NodeRuntime> {
+    pairing_dev!(
+        "runtime.build.start",
+        local_endpoint = %identity.endpoint_id(),
+        relay_mode = ?relay_mode
+    );
     let hook = PairedOnlyHook {
         access: access.clone(),
     };
@@ -650,6 +914,11 @@ async fn build_runtime(
         .await?;
 
     endpoint.online().await;
+    pairing_dev!(
+        "runtime.endpoint.online",
+        local_endpoint = %identity.endpoint_id(),
+        node_id = %endpoint.id()
+    );
 
     let control = ControlProtocol {
         ctx: ControlCtx {
@@ -663,6 +932,11 @@ async fn build_runtime(
     let router = Router::builder(endpoint.clone())
         .accept(CONTROL_ALPN, control)
         .spawn();
+
+    pairing_dev!(
+        "runtime.build.done",
+        alpn = %String::from_utf8_lossy(CONTROL_ALPN)
+    );
 
     Ok(NodeRuntime { endpoint, router })
 }

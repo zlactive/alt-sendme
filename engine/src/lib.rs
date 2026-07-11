@@ -16,6 +16,8 @@
 //! Workspace layout: `protocol` (shared P2P logic) · `native` (disk I/O) · `wasm-io` (memory I/O).
 
 #[cfg(not(target_arch = "wasm32"))]
+pub use native::{pairing_dev, pairing_dev_warn};
+#[cfg(not(target_arch = "wasm32"))]
 pub use native::*;
 
 #[cfg(target_arch = "wasm32")]

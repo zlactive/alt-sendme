@@ -1,3 +1,5 @@
+#[macro_use]
+pub mod pairing_dev_log;
 pub mod device_identity;
 pub mod export;
 pub mod import;
