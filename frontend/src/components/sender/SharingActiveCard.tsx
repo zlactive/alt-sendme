@@ -55,7 +55,7 @@ export function SharingActiveCard({
 
 			{IS_DESKTOP ? (
 				<Sheet open={devicesOpen} onOpenChange={setDevicesOpen}>
-					<SheetContent side="right" className="sm:max-w-md">
+					<SheetContent side="right" inset className="sm:max-w-md">
 						<SheetHeader>
 							<SheetTitle>
 								{t('common:sender.sharingActive.devices.title')}

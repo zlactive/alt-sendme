@@ -48,7 +48,7 @@ fn unpaired_remotely_devices_are_not_active() {
 }
 
 #[test]
-fn pairing_ticket_roundtrip_json() {
+fn pairing_ticket_roundtrip_json_with_relay() {
     let ticket = PairingTicket {
         v: 1,
         kind: PairingTicket::KIND.to_string(),
@@ -59,12 +59,57 @@ fn pairing_ticket_roundtrip_json() {
     let decoded = PairingTicket::decode(&encoded).expect("decode");
     assert_eq!(decoded.endpoint_id, ticket.endpoint_id);
     assert_eq!(decoded.relay_url, ticket.relay_url);
+    assert!(encoded.contains("relay_url"));
+    assert!(!encoded.contains("\"v\":"));
+}
+
+#[test]
+fn pairing_ticket_encodes_bare_endpoint_id_without_relay() {
+    let endpoint_id = "a".repeat(64);
+    let ticket = PairingTicket {
+        v: 1,
+        kind: PairingTicket::KIND.to_string(),
+        endpoint_id: endpoint_id.clone(),
+        relay_url: None,
+    };
+    let encoded = ticket.encode().expect("encode");
+    assert_eq!(encoded, endpoint_id);
+    assert_eq!(encoded.len(), 64);
+    let decoded = PairingTicket::decode(&encoded).expect("decode");
+    assert_eq!(decoded.endpoint_id, endpoint_id);
+    assert!(decoded.relay_url.is_none());
+    assert_eq!(decoded.v, 1);
+}
+
+#[test]
+fn pairing_ticket_encodes_bare_endpoint_id_for_public_relay() {
+    let endpoint_id = "a".repeat(64);
+    let ticket = PairingTicket {
+        v: 1,
+        kind: PairingTicket::KIND.to_string(),
+        endpoint_id: endpoint_id.clone(),
+        relay_url: Some("https://aps1-1.relay.n0.iroh.link./".to_string()),
+    };
+    let encoded = ticket.encode().expect("encode");
+    assert_eq!(encoded, endpoint_id);
 }
 
 #[test]
 fn pairing_ticket_accepts_bare_endpoint_id() {
     let endpoint_id = "b".repeat(64);
     let decoded = PairingTicket::decode(&endpoint_id).expect("bare id decode");
+    assert_eq!(decoded.endpoint_id, endpoint_id);
+    assert!(decoded.relay_url.is_none());
+}
+
+#[test]
+fn pairing_ticket_accepts_legacy_json_with_v_and_null_relay() {
+    let endpoint_id = "c".repeat(64);
+    let legacy = format!(
+        "{{\"v\":1,\"kind\":\"pair\",\"endpoint_id\":\"{}\",\"relay_url\":null}}",
+        endpoint_id
+    );
+    let decoded = PairingTicket::decode(&legacy).expect("legacy decode");
     assert_eq!(decoded.endpoint_id, endpoint_id);
     assert!(decoded.relay_url.is_none());
 }

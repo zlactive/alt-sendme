@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, Loader2, Pencil, Plus, QrCode, Trash2 } from 'lucide-react'
+import { Copy, Eye, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { useTranslation } from '../../../i18n'
 import { usePairing } from '../../../hooks/usePairing'
 import { Button } from '../../ui/button'
@@ -45,14 +45,13 @@ function PairHostModal({
 	onCancelPairing: () => void
 }) {
 	const { t } = useTranslation()
+	const [copied, setCopied] = useState(false)
 
 	const copyTicket = async () => {
 		if (!ticket) return
 		await navigator.clipboard.writeText(ticket)
-		toastManager.add({
-			title: t('common:settings.devices.copied'),
-			type: 'success',
-		})
+		setCopied(true)
+		window.setTimeout(() => setCopied(false), 2000)
 	}
 
 	return (
@@ -81,7 +80,7 @@ function PairHostModal({
 						) : null}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
-				<div className="space-y-3 px-6">
+				<div className="space-y-3 px-6 pb-4">
 					<Label>{t('common:settings.devices.pairingCode')}</Label>
 					<Textarea
 						readOnly
@@ -95,7 +94,9 @@ function PairHostModal({
 						onClick={copyTicket}
 					>
 						<Copy className="w-4 h-4 mr-2" />
-						{t('common:sender.copyToClipboard')}
+						{copied
+							? t('common:settings.devices.copied')
+							: t('common:sender.copyToClipboard')}
 					</Button>
 				</div>
 				<AlertDialogFooter>
@@ -407,7 +408,7 @@ export function DevicesSettings() {
 	return (
 		<>
 			{thisDevice ? (
-				<Frame className="mb-4">
+				<Frame className="mb-2">
 					<FramePanel className="flex flex-col gap-4">
 						<div className="space-y-1">
 							<FrameTitle>{t('common:settings.devices.thisDevice')}</FrameTitle>
@@ -459,7 +460,7 @@ export function DevicesSettings() {
 								disabled={isLoading && hostOpen}
 								onClick={openHost}
 							>
-								<QrCode className="w-4 h-4 mr-2" />
+								<Eye className="w-4 h-4 mr-2" />
 								{t('common:settings.devices.showQrCode')}
 							</Button>
 							<Button

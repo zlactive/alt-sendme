@@ -54,19 +54,56 @@ pub enum InviteResponse {
 }
 
 /// Pairing join payload encoded in QR / paste code.
+///
+/// Encoded as a bare 64-char endpoint id when no relay hint is needed; JSON
+/// with `relay_url` when the host uses a custom relay.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct PairingTicket {
+    #[serde(default = "default_v", skip_serializing_if = "is_v1")]
     pub v: u32,
     pub kind: String,
     pub endpoint_id: String,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub relay_url: Option<String>,
+}
+
+const fn default_v() -> u32 {
+    1
+}
+
+const fn is_v1(v: &u32) -> bool {
+    *v == 1
+}
+
+fn is_endpoint_id_hex(s: &str) -> bool {
+    s.len() == 64 && s.chars().all(|c| c.is_ascii_hexdigit())
+}
+
+/// Relay URL to embed in a pairing ticket. Public/default relays are omitted
+/// because joiners discover them via Pkarr/DNS.
+pub fn pairing_ticket_relay_hint(relay_url: Option<String>) -> Option<String> {
+    relay_url.filter(|url| !crate::relay::is_public_relay_url(url))
 }
 
 impl PairingTicket {
     pub const KIND: &'static str = "pair";
 
     pub fn encode(&self) -> anyhow::Result<String> {
-        Ok(serde_json::to_string(self)?)
+        let relay_hint = pairing_ticket_relay_hint(self.relay_url.clone());
+        if relay_hint.is_none() {
+            anyhow::ensure!(
+                is_endpoint_id_hex(&self.endpoint_id),
+                "invalid endpoint id"
+            );
+            return Ok(self.endpoint_id.clone());
+        }
+        let ticket = Self {
+            v: self.v,
+            kind: self.kind.clone(),
+            endpoint_id: self.endpoint_id.clone(),
+            relay_url: relay_hint,
+        };
+        Ok(serde_json::to_string(&ticket)?)
     }
 
     pub fn decode(s: &str) -> anyhow::Result<Self> {
@@ -76,7 +113,7 @@ impl PairingTicket {
             return Ok(ticket);
         }
         // Allow bare endpoint id hex for manual entry.
-        if trimmed.len() == 64 && trimmed.chars().all(|c| c.is_ascii_hexdigit()) {
+        if is_endpoint_id_hex(trimmed) {
             return Ok(Self {
                 v: 1,
                 kind: Self::KIND.to_string(),
