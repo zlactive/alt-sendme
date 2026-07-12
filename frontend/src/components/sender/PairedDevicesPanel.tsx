@@ -61,7 +61,7 @@ export function PairedDevicesPanel({
 	}, [sortedDevices, searchQuery, showSearch])
 
 	return (
-		<div className="space-y-3">
+		<div className="space-y-4">
 			{showHeader ? (
 				<div className="space-y-0.5">
 					<p className="text-sm font-medium">
@@ -74,7 +74,7 @@ export function PairedDevicesPanel({
 			) : null}
 
 			{!isNodeReady && (
-				<p className="rounded-md border border-dashed px-3 py-2 text-xs text-muted-foreground">
+				<p className="rounded-md border border-dashed px-3 py-3 text-xs text-muted-foreground">
 					{t('common:sender.sharingActive.devices.nodeUnavailable')}
 				</p>
 			)}
@@ -83,12 +83,12 @@ export function PairedDevicesPanel({
 				<PairedDevicesSearchField
 					value={searchQuery}
 					onChange={setSearchQuery}
-					className="sticky top-0 z-10 -mx-1 bg-popover px-1 pb-1"
+					className="sticky top-0 z-10 -mx-1 bg-popover px-1 pb-3"
 				/>
 			) : null}
 
 			{sortedDevices.length === 0 ? (
-				<div className="space-y-2 rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
+				<div className="space-y-2 rounded-md border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
 					<p className="font-medium text-foreground">
 						{t('common:sender.sharingActive.devices.emptyTitle')}
 					</p>
@@ -101,11 +101,11 @@ export function PairedDevicesPanel({
 					</Link>
 				</div>
 			) : filteredDevices.length === 0 ? (
-				<p className="rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
+				<p className="rounded-md border border-dashed px-3 py-6 text-center text-xs text-muted-foreground">
 					{t('common:sender.sharingActive.devices.searchNoResults')}
 				</p>
 			) : (
-				<ul className="space-y-1">
+				<ul className="divide-y divide-border">
 					{filteredDevices.map((device) => {
 						const Icon = deviceTypeIcon(device.device_type)
 						const inviteStatus = pairedInviteStatus[device.endpoint_id]
@@ -118,10 +118,12 @@ export function PairedDevicesPanel({
 						return (
 							<li
 								key={device.endpoint_id}
-								className="flex items-center justify-between gap-2 rounded-lg px-1 py-1.5 text-sm"
+								className="flex items-center justify-between gap-3 py-3 text-sm"
 							>
-								<div className="flex min-w-0 items-center gap-2">
-									<Icon className="h-4 w-4 shrink-0 text-muted-foreground" />
+								<div className="flex min-w-0 items-center gap-3">
+									<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+										<Icon className="h-4 w-4" />
+									</div>
 									<div className="min-w-0">
 										<span className="block truncate">
 											{device.display_name}

@@ -64,7 +64,7 @@ export function SharingActiveCard({
 								{t('common:sender.sharingActive.devices.hint')}
 							</SheetDescription>
 						</SheetHeader>
-						<SheetPanel className="min-h-0 flex-1">
+						<SheetPanel className="min-h-0 flex-1 pt-4">
 							<PairedDevicesPanel
 								pairedDevices={pairedDevices}
 								pairedInviteStatus={pairedInviteStatus}
