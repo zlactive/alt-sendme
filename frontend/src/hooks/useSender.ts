@@ -13,12 +13,17 @@ import { useSenderStore } from '../store/sender-store'
 import { IS_DESKTOP } from '@/lib/platform'
 import {
 	invitePairedDevice,
+	isPairedDeviceActive,
 	listPairedDevices,
 	startPairingHost,
 	stopPairingHost,
 	type PairedDevice,
 } from '@/lib/pairing-api'
 import { useNodeCapability } from '@/hooks/useNodeCapability'
+import {
+	applyPresencePatch,
+	usePairedDeviceEvents,
+} from '@/hooks/usePairedDeviceEvents'
 import { toastManager } from '../components/ui/toast'
 
 export type PairedInviteStatus = 'sending' | 'sent' | 'failed'
@@ -157,6 +162,17 @@ export function useSender(): UseSenderReturn {
 	useEffect(() => {
 		void refreshPairedDevices()
 	}, [refreshPairedDevices])
+
+	usePairedDeviceEvents({
+		onPresence: useCallback(
+			(payload) => {
+				applyPresencePatch(setPairedDevices, payload)
+			},
+			[]
+		),
+		onUnpaired: useCallback(() => {}, []),
+		onRefresh: refreshPairedDevices,
+	})
 
 	// Refs for event listeners
 	const latestProgressRef = useRef<TransferProgress | null>(null)
@@ -922,9 +938,13 @@ export function useSender(): UseSenderReturn {
 		}
 		if (pairedInviteStatus[endpointId] === 'sending') return
 
+		const device =
+			pairedDevices.find((d) => d.endpoint_id === endpointId) ?? null
 		const deviceName =
-			pairedDevices.find((device) => device.endpoint_id === endpointId)
-				?.display_name ?? t('common:sender.pairedDevices.unknownPeer')
+			device?.display_name ?? t('common:sender.pairedDevices.unknownPeer')
+		if (device && !isPairedDeviceActive(device)) {
+			return
+		}
 		const fileCount = Math.max(selectedPaths.length, 1)
 		setInviteStatus(endpointId, 'sending')
 		try {
@@ -949,7 +969,10 @@ export function useSender(): UseSenderReturn {
 				setInviteStatus(endpointId, 'failed')
 				toastManager.add({
 					title: t('common:sender.pairedDevices.inviteFailed'),
-					description: t('common:sender.pairedDevices.deviceUnreachable'),
+					description:
+						device && !device.online
+							? t('common:sender.pairedDevices.deviceOffline')
+							: t('common:sender.pairedDevices.deviceUnreachable'),
 					type: 'error',
 				})
 				setTimeout(() => setInviteStatus(endpointId, null), 4000)

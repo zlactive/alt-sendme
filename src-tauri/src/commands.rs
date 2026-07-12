@@ -4,7 +4,8 @@ use engine::{
     download, fetch_metadata, get_relay_status as engine_get_relay_status,
     pairing_dev, pairing_dev_warn, resolve_relay_mode_with_fallback,
     start_share_items, verify_relays as engine_verify_relays, DeviceInfo, NodeService,
-    PairedDevice, AddrInfoOptions, AppHandle, EventEmitter, FileMetadata, FilePreviewItem,
+    PairedDevice, PairedDeviceInfo, AddrInfoOptions, AppHandle, EventEmitter, FileMetadata,
+    FilePreviewItem,
     ReceiveOptions, SendOptions,
 };
 use std::collections::BTreeMap;
@@ -66,7 +67,11 @@ impl EventEmitter for TauriEventEmitter {
 fn is_pairing_dev_event(event_name: &str) -> bool {
     matches!(
         event_name,
-        "device-paired" | "pairing-host-expired" | "paired-invite-received"
+        "device-paired"
+            | "pairing-host-expired"
+            | "paired-invite-received"
+            | "paired-device-presence"
+            | "device-unpaired"
     )
 }
 
@@ -891,7 +896,7 @@ pub async fn join_pairing(
 #[tauri::command]
 pub async fn list_paired_devices(
     state: State<'_, AppStateMutex>,
-) -> Result<Vec<PairedDevice>, String> {
+) -> Result<Vec<PairedDeviceInfo>, String> {
     pairing_dev!("cmd.list_paired_devices");
     let guard = state.lock().await;
     let node = require_node(&guard)?;

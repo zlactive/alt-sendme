@@ -47,6 +47,21 @@ impl DeviceMetaFile {
     }
 }
 
+/// Pairing relationship status for a stored remote device.
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq, Default)]
+#[serde(rename_all = "kebab-case")]
+pub enum PairingStatus {
+    #[default]
+    Active,
+    UnpairedRemotely,
+}
+
+impl PairingStatus {
+    pub fn is_active(self) -> bool {
+        matches!(self, Self::Active)
+    }
+}
+
 /// Paired remote device record (persisted).
 #[derive(Debug, Clone, Serialize, Deserialize, PartialEq, Eq)]
 pub struct PairedDevice {
@@ -60,6 +75,8 @@ pub struct PairedDevice {
     /// Relay URL last known for this peer (from pairing ticket or discovery).
     #[serde(default)]
     pub relay_url: Option<String>,
+    #[serde(default)]
+    pub pairing_status: PairingStatus,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize, Default)]

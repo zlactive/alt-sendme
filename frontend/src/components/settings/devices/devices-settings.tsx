@@ -22,8 +22,9 @@ import {
 	FrameTitle,
 } from '../../ui/frame'
 import { IS_DESKTOP } from '@/lib/platform'
-import { deviceSubtitle } from '@/lib/pairing-api'
+import { deviceSubtitle, isPairedDeviceActive } from '@/lib/pairing-api'
 import { deviceTypeIcon } from '@/lib/device-icon'
+import { DevicePairingStatus } from '../../pairing/DevicePairingStatus'
 
 function PairHostModal({
 	open,
@@ -494,6 +495,7 @@ export function DevicesSettings() {
 						<ul className="divide-y border-t">
 							{devices.map((device) => {
 								const Icon = deviceTypeIcon(device.device_type)
+								const isActive = isPairedDeviceActive(device)
 								return (
 									<li
 										key={device.endpoint_id}
@@ -510,18 +512,29 @@ export function DevicesSettings() {
 												<p className="text-xs text-muted-foreground truncate">
 													{deviceSubtitle(device)}
 												</p>
+												{!isActive ? (
+													<p className="mt-1 text-xs text-muted-foreground">
+														{t('common:settings.devices.unpairedHint')}
+													</p>
+												) : null}
 											</div>
 										</div>
-										<div className="flex shrink-0 items-center gap-1">
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon-sm"
-												aria-label={t('common:settings.devices.rename')}
-												onClick={() => setRenamePeerId(device.endpoint_id)}
-											>
-												<Pencil className="w-4 h-4" />
-											</Button>
+										<div className="flex shrink-0 items-center gap-2">
+											<DevicePairingStatus
+												device={device}
+												namespace="settings"
+											/>
+											{isActive ? (
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon-sm"
+													aria-label={t('common:settings.devices.rename')}
+													onClick={() => setRenamePeerId(device.endpoint_id)}
+												>
+													<Pencil className="w-4 h-4" />
+												</Button>
+											) : null}
 											<Button
 												type="button"
 												variant="ghost"

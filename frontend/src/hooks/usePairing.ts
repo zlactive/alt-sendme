@@ -11,14 +11,22 @@ import {
 	startPairingHost,
 	stopPairingHost,
 	type DeviceInfo,
+	type DeviceUnpairedPayload,
 	type PairedDevice,
 } from '@/lib/pairing-api'
+import { useTranslation } from '../i18n/react-i18next-compat'
+import { toastManager } from '../components/ui/toast'
 import { useNodeCapability } from './useNodeCapability'
+import {
+	applyPresencePatch,
+	usePairedDeviceEvents,
+} from './usePairedDeviceEvents'
 
 // Must match engine/protocol pairing::PAIRING_VOTE_TIMEOUT_SECS
 const PAIRING_HOST_TTL_SECS = 120
 
 export function usePairing() {
+	const { t } = useTranslation()
 	const [devices, setDevices] = useState<PairedDevice[]>([])
 	const [thisDevice, setThisDevice] = useState<DeviceInfo | null>(null)
 	const [pairingTicket, setPairingTicket] = useState<string | null>(null)
@@ -107,6 +115,31 @@ export function usePairing() {
 			unlistenExpired?.()
 		}
 	}, [refreshDevices])
+
+	usePairedDeviceEvents({
+		onPresence: useCallback(
+			(payload) => {
+				applyPresencePatch(setDevices, payload)
+			},
+			[]
+		),
+		onUnpaired: useCallback(
+			(payload: DeviceUnpairedPayload) => {
+				if (payload.reason === 'remote') {
+					toastManager.add({
+						title: t('common:settings.devices.deviceUnpairedToast', {
+							name:
+								payload.display_name ??
+								t('common:sender.pairedDevices.unknownPeer'),
+						}),
+						type: 'warning',
+					})
+				}
+			},
+			[t]
+		),
+		onRefresh: refreshDevices,
+	})
 
 	useEffect(() => {
 		if (hostExpiresIn == null || hostExpiresIn <= 0) return

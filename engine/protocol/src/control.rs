@@ -34,6 +34,9 @@ pub enum ControlMessage {
     Recognition {
         signature: String,
     },
+    Forget {
+        signature: String,
+    },
 }
 
 #[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq, Eq)]

@@ -1,4 +1,4 @@
-use std::collections::HashSet;
+use std::collections::{HashMap, HashSet};
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -14,13 +14,15 @@ use iroh::{address_lookup::pkarr::PkarrPublisher, EndpointAddr, EndpointId, Tran
 use protocol::{
     apply_options, export_connection_keying_material, read_message, sign_challenge,
     verify_challenge, write_message, AddrInfoOptions, AppHandle, ControlMessage, PairedDevice,
-    RememberVote, CONTROL_ALPN,
+    PairingStatus, RememberVote, CONTROL_ALPN, PRESENCE_CONNECT_TIMEOUT_SECS, PRESENCE_INTERVAL_SECS,
 };
 use tokio::sync::{Mutex, RwLock};
 use tokio::task::JoinHandle;
 use tracing::debug;
 
-use crate::device_identity::{load_or_create_identity, DeviceIdentity, DeviceInfo, PairedDeviceStore};
+use crate::device_identity::{
+    load_or_create_identity, DeviceIdentity, DeviceInfo, PairedDeviceInfo, PairedDeviceStore,
+};
 use crate::pairing_dev_log::{elapsed_ms, format_connect_addr, log_pairing_error};
 use crate::{pairing_dev, pairing_dev_warn};
 
@@ -83,6 +85,7 @@ struct ControlCtx {
     pairing_host_persistent: Arc<AtomicBool>,
     app_handle: AppHandle,
     home_relay_url: Option<String>,
+    presence: Arc<std::sync::RwLock<HashMap<String, bool>>>,
 }
 
 #[derive(Clone)]
@@ -206,6 +209,9 @@ impl ControlProtocol {
                 ControlMessage::Recognition { .. } => {
                     pairing_dev!("control.session.msg", remote = %remote, kind = "Recognition");
                 }
+                ControlMessage::Forget { .. } => {
+                    pairing_dev!("control.session.msg", remote = %remote, kind = "Forget");
+                }
             }
             match msg {
                 ControlMessage::PairingInfo {
@@ -324,12 +330,52 @@ impl ControlProtocol {
                 ControlMessage::Recognition { signature } => {
                     if verify_challenge(&remote, &keying, &signature) {
                         pairing_dev!("control.session.recognition_ok", remote = %remote);
-                        let _ = self.ctx.paired_store.touch(
+                        let now = protocol::identity::unix_now_ms();
+                        let _ = self.ctx.paired_store.touch(&remote.to_string(), now);
+                        set_presence(
+                            &self.ctx.presence,
+                            &self.ctx.app_handle,
+                            &self.ctx.paired_store,
                             &remote.to_string(),
-                            protocol::identity::unix_now_ms(),
+                            true,
                         );
                     } else {
                         pairing_dev_warn!("control.session.recognition_bad_sig", remote = %remote);
+                    }
+                }
+                ControlMessage::Forget { signature } => {
+                    if verify_challenge(&remote, &keying, &signature) {
+                        pairing_dev!("control.session.forget_ok", remote = %remote);
+                        if let Ok(Some(device)) = self
+                            .ctx
+                            .paired_store
+                            .mark_unpaired_remotely(&remote.to_string())
+                        {
+                            {
+                                let mut access = self.ctx.access.write().await;
+                                access.allowed.remove(&remote);
+                            }
+                            set_presence(
+                                &self.ctx.presence,
+                                &self.ctx.app_handle,
+                                &self.ctx.paired_store,
+                                &remote.to_string(),
+                                false,
+                            );
+                            let payload = serde_json::json!({
+                                "endpoint_id": device.endpoint_id,
+                                "display_name": device.display_name,
+                                "reason": "remote",
+                            });
+                            if let Some(handle) = &self.ctx.app_handle {
+                                let _ = handle.emit_event_with_payload(
+                                    "device-unpaired",
+                                    &payload.to_string(),
+                                );
+                            }
+                        }
+                    } else {
+                        pairing_dev_warn!("control.session.forget_bad_sig", remote = %remote);
                     }
                 }
             }
@@ -357,6 +403,7 @@ impl ControlProtocol {
                         paired_at: now,
                         last_seen_at: now,
                         relay_url: self.ctx.home_relay_url.clone(),
+                        pairing_status: PairingStatus::Active,
                     };
                     let _ = self.ctx.paired_store.remember(device);
                     self.allow_peer(remote).await;
@@ -507,13 +554,15 @@ struct NodeRuntime {
 }
 
 pub struct NodeService {
-    runtime: Mutex<NodeRuntime>,
+    runtime: Arc<Mutex<NodeRuntime>>,
     identity: Arc<DeviceIdentity>,
     paired_store: Arc<PairedDeviceStore>,
     access: Arc<RwLock<AccessState>>,
     pairing_host_open: Arc<AtomicBool>,
     pairing_host_persistent: Arc<AtomicBool>,
     pairing_expire_task: Mutex<Option<JoinHandle<()>>>,
+    presence_task: Mutex<Option<JoinHandle<()>>>,
+    presence: Arc<std::sync::RwLock<HashMap<String, bool>>>,
     app_handle: AppHandle,
     relay_mode: Mutex<RelayMode>,
 }
@@ -552,6 +601,7 @@ impl NodeService {
         }));
         let pairing_host_open = Arc::new(AtomicBool::new(false));
         let pairing_host_persistent = Arc::new(AtomicBool::new(false));
+        let presence = Arc::new(std::sync::RwLock::new(HashMap::new()));
 
         let runtime = build_runtime(
             identity.clone(),
@@ -559,9 +609,19 @@ impl NodeService {
             access.clone(),
             pairing_host_persistent.clone(),
             app_handle.clone(),
+            presence.clone(),
             relay_mode.clone(),
         )
         .await?;
+        let runtime = Arc::new(Mutex::new(runtime));
+
+        let presence_task = spawn_presence_monitor(
+            runtime.clone(),
+            identity.clone(),
+            paired_store.clone(),
+            presence.clone(),
+            app_handle.clone(),
+        );
 
         pairing_dev!(
             "node.init.ready",
@@ -570,13 +630,15 @@ impl NodeService {
         );
 
         Ok(Self {
-            runtime: Mutex::new(runtime),
+            runtime,
             identity,
             paired_store,
             access,
             pairing_host_open,
             pairing_host_persistent,
             pairing_expire_task: Mutex::new(None),
+            presence_task: Mutex::new(Some(presence_task)),
+            presence,
             app_handle,
             relay_mode: Mutex::new(relay_mode),
         })
@@ -585,6 +647,10 @@ impl NodeService {
     pub async fn shutdown(&self) -> anyhow::Result<()> {
         pairing_dev!("node.shutdown.start", local_endpoint = %self.identity.endpoint_id());
         self.stop_pairing_host().await;
+        if let Some(handle) = self.presence_task.lock().await.take() {
+            handle.abort();
+            pairing_dev!("presence.monitor_aborted", local_endpoint = %self.identity.endpoint_id());
+        }
         let runtime = self.runtime.lock().await;
         runtime.router.shutdown().await?;
         runtime.endpoint.close().await;
@@ -623,6 +689,7 @@ impl NodeService {
             self.access.clone(),
             self.pairing_host_persistent.clone(),
             self.app_handle.clone(),
+            self.presence.clone(),
             relay_mode.clone(),
         )
         .await?;
@@ -661,18 +728,34 @@ impl NodeService {
         Ok(device)
     }
 
-    pub fn list_paired(&self) -> anyhow::Result<Vec<PairedDevice>> {
+    pub fn list_paired(&self) -> anyhow::Result<Vec<PairedDeviceInfo>> {
         let devices = self.paired_store.list()?;
+        let presence = self.presence.read().expect("presence lock");
+        let infos: Vec<PairedDeviceInfo> = devices
+            .into_iter()
+            .map(|device| {
+                let online = presence
+                    .get(&device.endpoint_id.to_lowercase())
+                    .or_else(|| presence.get(&device.endpoint_id))
+                    .copied()
+                    .unwrap_or(false);
+                PairedDeviceInfo::from_device(device, online)
+            })
+            .collect();
         pairing_dev!(
             "store.list",
-            count = devices.len(),
-            endpoint_ids = ?devices.iter().map(|d| d.endpoint_id.as_str()).collect::<Vec<_>>()
+            count = infos.len(),
+            endpoint_ids = ?infos.iter().map(|d| d.endpoint_id.as_str()).collect::<Vec<_>>()
         );
-        Ok(devices)
+        Ok(infos)
     }
 
     pub async fn forget_paired(&self, endpoint_id: &str) -> anyhow::Result<()> {
         pairing_dev!("store.forget.start", endpoint_id = %endpoint_id);
+        let stored_relay = self
+            .paired_store
+            .get(endpoint_id)?
+            .and_then(|d| d.relay_url);
         if let Ok(id) = EndpointId::from_str(endpoint_id) {
             self.access.write().await.allowed.remove(&id);
             let allowlist_size = self.access.read().await.allowed.len();
@@ -683,7 +766,37 @@ impl NodeService {
             );
         }
         self.paired_store.forget(endpoint_id)?;
+        set_presence(
+            &self.presence,
+            &self.app_handle,
+            &self.paired_store,
+            endpoint_id,
+            false,
+        );
+        if let Some(handle) = &self.app_handle {
+            let payload = serde_json::json!({
+                "endpoint_id": endpoint_id,
+                "reason": "local",
+            });
+            let _ = handle.emit_event_with_payload("device-unpaired", &payload.to_string());
+        }
         pairing_dev!("store.forget.done", endpoint_id = %endpoint_id);
+
+        let runtime = self.runtime.clone();
+        let identity = self.identity.clone();
+        let endpoint_id = endpoint_id.to_string();
+        tokio::spawn(async move {
+            if let Err(err) = send_forget_to_peer(
+                &runtime,
+                &identity,
+                &endpoint_id,
+                stored_relay.as_deref(),
+            )
+            .await
+            {
+                log_pairing_error("store.forget.notify_failed", &err);
+            }
+        });
         Ok(())
     }
 
@@ -913,6 +1026,7 @@ impl NodeService {
             paired_at: now,
             last_seen_at: now,
             relay_url: host_relay_url.clone(),
+            pairing_status: PairingStatus::Active,
         })?;
         self.access.write().await.allowed.insert(peer_id);
         pairing_dev!(
@@ -1014,6 +1128,15 @@ impl NodeService {
                     remote_conn = %conn.remote_id(),
                     conn_side = ?conn.side(),
                     connect_ms = elapsed_ms(connect_start)
+                );
+                let now = protocol::identity::unix_now_ms();
+                let _ = self.paired_store.touch(remote_endpoint_id, now);
+                set_presence(
+                    &self.presence,
+                    &self.app_handle,
+                    &self.paired_store,
+                    remote_endpoint_id,
+                    true,
                 );
                 conn
             }
@@ -1178,6 +1301,14 @@ fn build_control_connect_addr(
 fn load_allowed_from_store(paired_store: &PairedDeviceStore) -> anyhow::Result<HashSet<EndpointId>> {
     let mut allowed = HashSet::new();
     for device in paired_store.list()? {
+        if !device.pairing_status.is_active() {
+            pairing_dev!(
+                "store.allowlist_skip",
+                endpoint_id = %device.endpoint_id,
+                reason = "unpaired_remotely"
+            );
+            continue;
+        }
         if let Ok(id) = EndpointId::from_str(&device.endpoint_id) {
             allowed.insert(id);
         } else {
@@ -1195,12 +1326,169 @@ fn load_allowed_from_store(paired_store: &PairedDeviceStore) -> anyhow::Result<H
     Ok(allowed)
 }
 
+fn set_presence(
+    presence: &Arc<std::sync::RwLock<HashMap<String, bool>>>,
+    app_handle: &AppHandle,
+    paired_store: &PairedDeviceStore,
+    endpoint_id: &str,
+    online: bool,
+) {
+    let changed = {
+        let mut map = presence.write().expect("presence lock");
+        let key = endpoint_id.to_lowercase();
+        let prev = map.get(&key).copied();
+        if prev == Some(online) {
+            false
+        } else {
+            map.insert(key, online);
+            true
+        }
+    };
+    if !changed {
+        return;
+    }
+    let last_seen_at = paired_store
+        .get(endpoint_id)
+        .ok()
+        .flatten()
+        .map(|d| d.last_seen_at)
+        .unwrap_or(0);
+    let payload = serde_json::json!({
+        "endpoint_id": endpoint_id,
+        "online": online,
+        "last_seen_at": last_seen_at,
+    });
+    if let Some(handle) = app_handle {
+        let _ = handle.emit_event_with_payload("paired-device-presence", &payload.to_string());
+    }
+}
+
+fn spawn_presence_monitor(
+    runtime: Arc<Mutex<NodeRuntime>>,
+    identity: Arc<DeviceIdentity>,
+    paired_store: Arc<PairedDeviceStore>,
+    presence: Arc<std::sync::RwLock<HashMap<String, bool>>>,
+    app_handle: AppHandle,
+) -> JoinHandle<()> {
+    tokio::spawn(async move {
+        loop {
+            tokio::time::sleep(Duration::from_secs(PRESENCE_INTERVAL_SECS)).await;
+            let devices = match paired_store.list() {
+                Ok(devices) => devices,
+                Err(err) => {
+                    log_pairing_error("presence.list_failed", &err);
+                    continue;
+                }
+            };
+            for device in devices {
+                if !device.pairing_status.is_active() {
+                    set_presence(
+                        &presence,
+                        &app_handle,
+                        &paired_store,
+                        &device.endpoint_id,
+                        false,
+                    );
+                    continue;
+                }
+                let online = probe_peer_presence(
+                    &runtime,
+                    &identity,
+                    &device.endpoint_id,
+                    device.relay_url.as_deref(),
+                )
+                .await;
+                if online {
+                    let now = protocol::identity::unix_now_ms();
+                    let _ = paired_store.touch(&device.endpoint_id, now);
+                }
+                set_presence(
+                    &presence,
+                    &app_handle,
+                    &paired_store,
+                    &device.endpoint_id,
+                    online,
+                );
+            }
+        }
+    })
+}
+
+async fn probe_peer_presence(
+    runtime: &Arc<Mutex<NodeRuntime>>,
+    identity: &DeviceIdentity,
+    endpoint_id: &str,
+    stored_relay: Option<&str>,
+) -> bool {
+    let remote = match EndpointId::from_str(endpoint_id) {
+        Ok(id) => id,
+        Err(_) => return false,
+    };
+    let runtime_guard = runtime.lock().await;
+    let addr = build_control_connect_addr(&runtime_guard.endpoint, remote, stored_relay);
+    let connect = tokio::time::timeout(
+        Duration::from_secs(PRESENCE_CONNECT_TIMEOUT_SECS),
+        runtime_guard.endpoint.connect(addr, CONTROL_ALPN),
+    )
+    .await;
+    drop(runtime_guard);
+
+    let conn = match connect {
+        Ok(Ok(conn)) => conn,
+        _ => return false,
+    };
+
+    let keying = match export_connection_keying_material(&conn) {
+        Ok(keying) => keying,
+        Err(_) => return false,
+    };
+    let (mut send, _recv) = match conn.open_bi().await {
+        Ok(streams) => streams,
+        Err(_) => return false,
+    };
+    let recognition = ControlMessage::Recognition {
+        signature: sign_challenge(&identity.secret_key, &keying),
+    };
+    write_message(&mut send, &recognition).await.is_ok()
+}
+
+async fn send_forget_to_peer(
+    runtime: &Arc<Mutex<NodeRuntime>>,
+    identity: &DeviceIdentity,
+    endpoint_id: &str,
+    stored_relay: Option<&str>,
+) -> anyhow::Result<()> {
+    let remote = EndpointId::from_str(endpoint_id)?;
+    let runtime_guard = runtime.lock().await;
+    let addr = build_control_connect_addr(&runtime_guard.endpoint, remote, stored_relay);
+    let connect = tokio::time::timeout(
+        Duration::from_secs(PRESENCE_CONNECT_TIMEOUT_SECS),
+        runtime_guard.endpoint.connect(addr, CONTROL_ALPN),
+    )
+    .await;
+    drop(runtime_guard);
+
+    let conn = connect
+        .context("forget connect timeout")?
+        .context("forget connect failed")?;
+    let keying = export_connection_keying_material(&conn)?;
+    let (mut send, _recv) = conn.open_bi().await.context("forget open bi")?;
+    let forget = ControlMessage::Forget {
+        signature: sign_challenge(&identity.secret_key, &keying),
+    };
+    write_message(&mut send, &forget)
+        .await
+        .context("forget write message")?;
+    Ok(())
+}
+
 async fn build_runtime(
     identity: Arc<DeviceIdentity>,
     paired_store: Arc<PairedDeviceStore>,
     access: Arc<RwLock<AccessState>>,
     pairing_host_persistent: Arc<AtomicBool>,
     app_handle: AppHandle,
+    presence: Arc<std::sync::RwLock<HashMap<String, bool>>>,
     relay_mode: RelayMode,
 ) -> anyhow::Result<NodeRuntime> {
     pairing_dev!(
@@ -1245,6 +1533,7 @@ async fn build_runtime(
             pairing_host_persistent,
             app_handle,
             home_relay_url,
+            presence,
         },
     };
 

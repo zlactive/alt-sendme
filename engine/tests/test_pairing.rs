@@ -1,5 +1,51 @@
-use engine::{sign_challenge, verify_challenge, PairingTicket};
+use engine::{sign_challenge, verify_challenge, ControlMessage, PairingTicket, PairedDevice, PairingStatus};
 use iroh::SecretKey;
+
+#[test]
+fn forget_control_message_roundtrip() {
+    let msg = ControlMessage::Forget {
+        signature: "abc123".to_string(),
+    };
+    let json = serde_json::to_string(&msg).expect("serialize");
+    assert!(json.contains("\"type\":\"forget\""));
+    let decoded: ControlMessage = serde_json::from_str(&json).expect("deserialize");
+    match decoded {
+        ControlMessage::Forget { signature } => assert_eq!(signature, "abc123"),
+        other => panic!("expected Forget, got {other:?}"),
+    }
+}
+
+#[test]
+fn paired_device_defaults_to_active_pairing_status() {
+    let json = r#"{
+        "endpoint_id": "aa",
+        "display_name": "Test",
+        "device_type": "laptop",
+        "os": "macos",
+        "paired_at": 1,
+        "last_seen_at": 2
+    }"#;
+    let device: PairedDevice = serde_json::from_str(json).expect("deserialize");
+    assert_eq!(device.pairing_status, PairingStatus::Active);
+    assert!(device.pairing_status.is_active());
+}
+
+#[test]
+fn unpaired_remotely_devices_are_not_active() {
+    let device = PairedDevice {
+        endpoint_id: "bb".to_string(),
+        display_name: "Remote".to_string(),
+        device_type: "desktop".to_string(),
+        os: "linux".to_string(),
+        paired_at: 1,
+        last_seen_at: 2,
+        relay_url: None,
+        pairing_status: PairingStatus::UnpairedRemotely,
+    };
+    assert!(!device.pairing_status.is_active());
+    let json = serde_json::to_string(&device).expect("serialize");
+    assert!(json.contains("unpaired-remotely"));
+}
 
 #[test]
 fn pairing_ticket_roundtrip_json() {

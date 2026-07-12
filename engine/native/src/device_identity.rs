@@ -6,7 +6,7 @@ use data_encoding::HEXLOWER;
 use iroh::SecretKey;
 use protocol::{
     default_device_type, default_display_name, detect_os, normalize_display_name, DeviceMetaFile,
-    PairedDevice, PairedDeviceList,
+    PairedDevice, PairedDeviceList, PairingStatus,
 };
 use serde::{Deserialize, Serialize};
 
@@ -106,6 +106,7 @@ impl PairedDeviceStore {
             if device.relay_url.is_some() {
                 existing.relay_url = device.relay_url;
             }
+            existing.pairing_status = PairingStatus::Active;
             let saved = existing.clone();
             self.write_file(&file)?;
             tracing::info!(
@@ -177,6 +178,31 @@ impl PairedDeviceStore {
             self.write_file(&file)?;
         }
         Ok(())
+    }
+
+    pub fn mark_unpaired_remotely(&self, endpoint_id: &str) -> anyhow::Result<Option<PairedDevice>> {
+        tracing::info!(
+            target: "pairing-dev",
+            step = "store.mark_unpaired_remotely",
+            endpoint_id = %endpoint_id,
+            "pairing-dev"
+        );
+        let mut file = self.read_file()?;
+        let id = endpoint_id.to_lowercase();
+        let saved = if let Some(existing) = file
+            .devices
+            .iter_mut()
+            .find(|d| d.endpoint_id.to_lowercase() == id)
+        {
+            existing.pairing_status = PairingStatus::UnpairedRemotely;
+            Some(existing.clone())
+        } else {
+            None
+        };
+        if saved.is_some() {
+            self.write_file(&file)?;
+        }
+        Ok(saved)
     }
 
     fn read_file(&self) -> anyhow::Result<PairedDeviceList> {
@@ -285,6 +311,38 @@ fn parse_secret_hex(hex: &str) -> anyhow::Result<SecretKey> {
     let mut arr = [0u8; 32];
     arr.copy_from_slice(&bytes);
     Ok(SecretKey::from_bytes(&arr))
+}
+
+/// Serializable paired device for the frontend, including ephemeral presence.
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct PairedDeviceInfo {
+    pub endpoint_id: String,
+    pub display_name: String,
+    pub device_type: String,
+    pub os: String,
+    pub paired_at: u64,
+    pub last_seen_at: u64,
+    #[serde(default)]
+    pub relay_url: Option<String>,
+    #[serde(default)]
+    pub pairing_status: PairingStatus,
+    pub online: bool,
+}
+
+impl PairedDeviceInfo {
+    pub fn from_device(device: PairedDevice, online: bool) -> Self {
+        Self {
+            endpoint_id: device.endpoint_id,
+            display_name: device.display_name,
+            device_type: device.device_type,
+            os: device.os,
+            paired_at: device.paired_at,
+            last_seen_at: device.last_seen_at,
+            relay_url: device.relay_url,
+            pairing_status: device.pairing_status,
+            online,
+        }
+    }
 }
 
 /// Serializable device info for the frontend.

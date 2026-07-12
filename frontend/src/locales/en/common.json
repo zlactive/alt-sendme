@@ -91,6 +91,9 @@
 			"inviteFailed": "Could not reach device",
 			"deviceOffline": "Device is offline — use the manual ticket instead.",
 			"deviceUnreachable": "This device is still paired. Try again when it is online, or use the manual ticket. Both devices may need compatible relay settings.",
+			"statusOnline": "Online",
+			"statusOffline": "Offline",
+			"statusUnpaired": "Unpaired",
 			"unknownPeer": "Unknown device"
 		},
 		"sharingActive": {
@@ -307,6 +310,11 @@
 			"deviceRemoved": "Device removed",
 			"removeFailed": "Could not remove device",
 			"removeDevice": "Remove device",
+			"statusOnline": "Online",
+			"statusOffline": "Offline",
+			"statusUnpaired": "Unpaired",
+			"unpairedHint": "This device removed the pairing. Remove it from your list.",
+			"deviceUnpairedToast": "{{name}} unpaired this device",
 			"copied": "Pairing code copied"
 		},
 		"network": {

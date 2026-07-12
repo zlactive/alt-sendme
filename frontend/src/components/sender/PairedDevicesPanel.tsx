@@ -3,8 +3,9 @@ import { Link } from 'react-router-dom'
 import { Check, ChevronDown, Copy, CheckCircle, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { PairedDevice } from '@/lib/pairing-api'
-import { deviceSubtitle } from '@/lib/pairing-api'
+import { deviceSubtitle, isPairedDeviceActive } from '@/lib/pairing-api'
 import { deviceTypeIcon } from '@/lib/device-icon'
+import { DevicePairingStatus } from '../pairing/DevicePairingStatus'
 import { Button } from '../ui/button'
 import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
 import {
@@ -143,8 +144,12 @@ export function PairedDevicesPanel({
 						{sortedDevices.map((device) => {
 							const Icon = deviceTypeIcon(device.device_type)
 							const inviteStatus = pairedInviteStatus[device.endpoint_id]
+							const isActive = isPairedDeviceActive(device)
 							const disabled =
-								!isNodeReady || !hasTicket || inviteStatus === 'sending'
+								!isNodeReady ||
+								!hasTicket ||
+								inviteStatus === 'sending' ||
+								!isActive
 							return (
 								<li
 									key={device.endpoint_id}
@@ -161,31 +166,37 @@ export function PairedDevicesPanel({
 											</span>
 										</div>
 									</div>
-									<Button
-										type="button"
-										size="sm"
-										variant="outline"
-										disabled={disabled}
-										onClick={() =>
-											onInvitePairedDevice?.(device.endpoint_id)
-										}
-									>
-										{inviteStatus === 'sending' ? (
-											<>
-												<Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
-												{t('common:sender.pairedDevices.sending')}
-											</>
-										) : inviteStatus === 'sent' ? (
-											<>
-												<Check className="w-3.5 h-3.5 mr-1.5" />
-												{t('common:sender.pairedDevices.sent')}
-											</>
-										) : inviteStatus === 'failed' ? (
-											t('common:sender.pairedDevices.failed')
-										) : (
-											t('common:sender.pairedDevices.send')
-										)}
-									</Button>
+									<div className="flex shrink-0 items-center gap-2">
+										<DevicePairingStatus
+											device={device}
+											namespace="sender"
+										/>
+										<Button
+											type="button"
+											size="sm"
+											variant="outline"
+											disabled={disabled}
+											onClick={() =>
+												onInvitePairedDevice?.(device.endpoint_id)
+											}
+										>
+											{inviteStatus === 'sending' ? (
+												<>
+													<Loader2 className="w-3.5 h-3.5 mr-1.5 animate-spin" />
+													{t('common:sender.pairedDevices.sending')}
+												</>
+											) : inviteStatus === 'sent' ? (
+												<>
+													<Check className="w-3.5 h-3.5 mr-1.5" />
+													{t('common:sender.pairedDevices.sent')}
+												</>
+											) : inviteStatus === 'failed' ? (
+												t('common:sender.pairedDevices.failed')
+											) : (
+												t('common:sender.pairedDevices.send')
+											)}
+										</Button>
+									</div>
 								</li>
 							)
 						})}

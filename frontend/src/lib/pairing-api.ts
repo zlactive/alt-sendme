@@ -9,6 +9,8 @@ export interface DeviceInfo {
 	os: string
 }
 
+export type PairingStatus = 'active' | 'unpaired-remotely'
+
 export interface PairedDevice {
 	endpoint_id: string
 	display_name: string
@@ -16,6 +18,20 @@ export interface PairedDevice {
 	os: string
 	paired_at: number
 	last_seen_at: number
+	pairing_status: PairingStatus
+	online: boolean
+}
+
+export interface DevicePresencePayload {
+	endpoint_id: string
+	online: boolean
+	last_seen_at: number
+}
+
+export interface DeviceUnpairedPayload {
+	endpoint_id: string
+	display_name?: string
+	reason: 'local' | 'remote'
 }
 
 export interface PairedInvitePayload {
@@ -175,4 +191,26 @@ export function deviceSubtitle(
 	const typeLabel = formatDeviceTypeLabel(device.device_type)
 	const osLabel = formatOsLabel(device.os)
 	return osLabel ? `${typeLabel} · ${osLabel}` : typeLabel
+}
+
+export function isPairedDeviceActive(
+	device: Pick<PairedDevice, 'pairing_status'>
+): boolean {
+	return (device.pairing_status ?? 'active') === 'active'
+}
+
+export function patchDevicePresence(
+	devices: PairedDevice[],
+	payload: DevicePresencePayload
+): PairedDevice[] {
+	const id = payload.endpoint_id.toLowerCase()
+	return devices.map((device) =>
+		device.endpoint_id.toLowerCase() === id
+			? {
+					...device,
+					online: payload.online,
+					last_seen_at: payload.last_seen_at,
+				}
+			: device
+	)
 }
