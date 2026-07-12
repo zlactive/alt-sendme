@@ -17,6 +17,9 @@ pub struct DeviceIdentity {
     pub secret_key: SecretKey,
     meta: RwLock<DeviceMetaFile>,
     meta_path: PathBuf,
+    /// Set when keychain identity differed from device.json on load.
+    pub identity_rotated: bool,
+    pub previous_endpoint_id: Option<String>,
 }
 
 impl DeviceIdentity {
@@ -244,17 +247,29 @@ pub fn load_or_create_identity(data_dir: &Path) -> anyhow::Result<DeviceIdentity
     let secret = load_secret_key()?;
     let endpoint_id = HEXLOWER.encode(secret.public().as_bytes());
 
+    let mut identity_rotated = false;
+    let mut previous_endpoint_id = None;
     let mut meta = if meta_path.exists() {
         let raw = std::fs::read_to_string(&meta_path)?;
         let mut meta: DeviceMetaFile =
             serde_json::from_str(&raw).context("invalid device.json")?;
         if meta.endpoint_id.to_lowercase() != endpoint_id {
+            identity_rotated = true;
+            previous_endpoint_id = Some(meta.endpoint_id.clone());
             tracing::warn!("device.json endpoint_id mismatch; updating to keychain identity");
             tracing::info!(
                 target: "pairing-dev",
                 step = "identity.endpoint_mismatch",
                 old = %meta.endpoint_id,
                 new = %endpoint_id,
+                "pairing-dev"
+            );
+            tracing::warn!(
+                target: "pairing-dev",
+                step = "identity.endpoint_changed",
+                old = %meta.endpoint_id,
+                new = %endpoint_id,
+                impact = "remote peers still paired with the old endpoint_id will fail connect/presence until re-paired",
                 "pairing-dev"
             );
             meta.endpoint_id = endpoint_id;
@@ -287,6 +302,8 @@ pub fn load_or_create_identity(data_dir: &Path) -> anyhow::Result<DeviceIdentity
         secret_key: secret,
         meta: RwLock::new(meta),
         meta_path,
+        identity_rotated,
+        previous_endpoint_id,
     })
 }
 

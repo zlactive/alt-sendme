@@ -68,7 +68,9 @@ impl EndpointHooks for PairedOnlyHook {
             "hook.reject",
             remote = %remote,
             pairing_host_open = access.pairing_host_open,
-            allowlist_size = access.allowed.len()
+            allowlist_size = access.allowed.len(),
+            allowlist = ?access.allowed.iter().map(|id| id.to_string()).collect::<Vec<_>>(),
+            hint = "peer may be using a new endpoint_id after identity rotation; re-pair required"
         );
         AfterHandshakeOutcome::Reject {
             error_code: 403u32.into(),
@@ -594,6 +596,21 @@ impl NodeService {
                 display_name = %device.display_name
             );
         }
+        if identity.identity_rotated {
+            pairing_dev_warn!(
+                "node.init.identity_rotated",
+                previous_endpoint = ?identity.previous_endpoint_id,
+                current_endpoint = %identity.endpoint_id(),
+                paired_device_count = paired_list.len(),
+                hint = "peers paired with the previous endpoint_id cannot reach this device until re-paired"
+            );
+        }
+        let allowlist_ids: Vec<String> = allowed.iter().map(|id| id.to_string()).collect();
+        pairing_dev!(
+            "node.init.allowlist",
+            local_endpoint = %identity.endpoint_id(),
+            allowlist = ?allowlist_ids
+        );
 
         let access = Arc::new(RwLock::new(AccessState {
             allowed: allowed.clone(),
@@ -1147,7 +1164,8 @@ impl NodeService {
                     remote_endpoint = %remote,
                     delivered = false,
                     reason = "connect_failed",
-                    total_ms = elapsed_ms(invite_start)
+                    total_ms = elapsed_ms(invite_start),
+                    hint = "target endpoint may be stale after identity rotation; re-pair required"
                 );
                 return Ok(false);
             }
@@ -1156,7 +1174,8 @@ impl NodeService {
                     "invite.connect_timeout",
                     remote_endpoint = %remote,
                     timeout_secs = 30,
-                    elapsed_ms = elapsed_ms(connect_start)
+                    elapsed_ms = elapsed_ms(connect_start),
+                    hint = "target endpoint may be offline or stale after identity rotation; verify paired device endpoint_id matches peer's current identity"
                 );
                 pairing_dev!(
                     "invite.done",
@@ -1382,6 +1401,12 @@ fn spawn_presence_monitor(
             };
             for device in devices {
                 if !device.pairing_status.is_active() {
+                    pairing_dev!(
+                        "presence.probe.skip",
+                        remote = %device.endpoint_id,
+                        display_name = %device.display_name,
+                        reason = "unpaired_remotely"
+                    );
                     set_presence(
                         &presence,
                         &app_handle,
@@ -1391,6 +1416,12 @@ fn spawn_presence_monitor(
                     );
                     continue;
                 }
+                pairing_dev!(
+                    "presence.probe.start",
+                    remote = %device.endpoint_id,
+                    display_name = %device.display_name,
+                    stored_relay = ?device.relay_url
+                );
                 let online = probe_peer_presence(
                     &runtime,
                     &identity,
@@ -1398,6 +1429,11 @@ fn spawn_presence_monitor(
                     device.relay_url.as_deref(),
                 )
                 .await;
+                pairing_dev!(
+                    "presence.probe.done",
+                    remote = %device.endpoint_id,
+                    online
+                );
                 if online {
                     let now = protocol::identity::unix_now_ms();
                     let _ = paired_store.touch(&device.endpoint_id, now);
@@ -1422,10 +1458,17 @@ async fn probe_peer_presence(
 ) -> bool {
     let remote = match EndpointId::from_str(endpoint_id) {
         Ok(id) => id,
-        Err(_) => return false,
+        Err(_) => {
+            pairing_dev_warn!(
+                "presence.probe.invalid_endpoint",
+                remote = %endpoint_id
+            );
+            return false;
+        }
     };
     let runtime_guard = runtime.lock().await;
     let addr = build_control_connect_addr(&runtime_guard.endpoint, remote, stored_relay);
+    let connect_start = Instant::now();
     let connect = tokio::time::timeout(
         Duration::from_secs(PRESENCE_CONNECT_TIMEOUT_SECS),
         runtime_guard.endpoint.connect(addr, CONTROL_ALPN),
@@ -1434,22 +1477,62 @@ async fn probe_peer_presence(
     drop(runtime_guard);
 
     let conn = match connect {
-        Ok(Ok(conn)) => conn,
-        _ => return false,
+        Ok(Ok(conn)) => {
+            pairing_dev!(
+                "presence.probe.connected",
+                remote = %endpoint_id,
+                connect_ms = elapsed_ms(connect_start)
+            );
+            conn
+        }
+        Ok(Err(err)) => {
+            log_pairing_error("presence.probe.connect_failed", &err);
+            pairing_dev!(
+                "presence.probe.connect_failed",
+                remote = %endpoint_id,
+                connect_ms = elapsed_ms(connect_start)
+            );
+            return false;
+        }
+        Err(_) => {
+            pairing_dev!(
+                "presence.probe.connect_timeout",
+                remote = %endpoint_id,
+                timeout_secs = PRESENCE_CONNECT_TIMEOUT_SECS,
+                connect_ms = elapsed_ms(connect_start),
+                hint = "endpoint may be offline or stale after identity rotation"
+            );
+            return false;
+        }
     };
 
     let keying = match export_connection_keying_material(&conn) {
         Ok(keying) => keying,
-        Err(_) => return false,
+        Err(err) => {
+            log_pairing_error("presence.probe.keying_failed", &err);
+            return false;
+        }
     };
     let (mut send, _recv) = match conn.open_bi().await {
         Ok(streams) => streams,
-        Err(_) => return false,
+        Err(err) => {
+            log_pairing_error("presence.probe.open_bi_failed", &err);
+            return false;
+        }
     };
     let recognition = ControlMessage::Recognition {
         signature: sign_challenge(&identity.secret_key, &keying),
     };
-    write_message(&mut send, &recognition).await.is_ok()
+    if write_message(&mut send, &recognition).await.is_ok() {
+        pairing_dev!("presence.probe.recognition_sent", remote = %endpoint_id);
+        true
+    } else {
+        pairing_dev_warn!(
+            "presence.probe.recognition_failed",
+            remote = %endpoint_id
+        );
+        false
+    }
 }
 
 async fn send_forget_to_peer(

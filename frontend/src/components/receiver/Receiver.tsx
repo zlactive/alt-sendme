@@ -1,6 +1,6 @@
 import { Info } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useReceiver } from '../../hooks/useReceiver'
+import { useReceiverContext } from './ReceiverProvider'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import { PulseAnimation } from '../common/PulseAnimation'
 import { TransferSuccessScreen } from '../common/TransferSuccessScreen'
@@ -46,7 +46,7 @@ export function Receiver({ onTransferStateChange }: ReceiverProps) {
 		handleOpenFolder,
 		closeAlert,
 		resetForNewTransfer,
-	} = useReceiver()
+	} = useReceiverContext()
 
 	useEffect(() => {
 		onTransferStateChange(isReceiving)

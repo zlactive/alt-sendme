@@ -6,6 +6,7 @@ import { useTranslation } from '@/i18n'
 import { AppUpdater } from '../common/AppUpdater'
 import { DeviceNodeSync } from '../pairing/DeviceNodeSync'
 import { PairedInviteDialog } from '../pairing/PairedInviteDialog'
+import { ReceiverProvider } from '../receiver/ReceiverProvider'
 import {
 	IS_ANDROID,
 	IS_DESKTOP,
@@ -18,7 +19,7 @@ import {
 export function RootLayout() {
 	const { t } = useTranslation('common')
 	return (
-		<>
+		<ReceiverProvider>
 			{IS_TAURI && !IS_ANDROID && <AppUpdater />}
 			{IS_DESKTOP && <DeviceNodeSync />}
 			{IS_DESKTOP && <PairedInviteDialog />}
@@ -37,6 +38,6 @@ export function RootLayout() {
 				<Outlet />
 				<AppFooter />
 			</main>
-		</>
+		</ReceiverProvider>
 	)
 }

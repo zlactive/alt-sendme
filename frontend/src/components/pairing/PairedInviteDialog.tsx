@@ -1,3 +1,4 @@
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from '@/i18n'
 import { IS_DESKTOP, IS_WEB } from '@/lib/platform'
 import { formatReceiveSavePath } from '@/lib/receive-save-path'
@@ -19,6 +20,8 @@ import { toastManager } from '../ui/toast'
 
 export function PairedInviteDialog() {
 	const { t } = useTranslation()
+	const navigate = useNavigate()
+	const location = useLocation()
 	const invite = usePairedInviteStore((s) => s.invite)
 	const setInvite = usePairedInviteStore((s) => s.setInvite)
 	const acceptPairedInvite = useReceiverActionsStore(
@@ -51,6 +54,9 @@ export function PairedInviteDialog() {
 
 		const payload = invite
 		setInvite(null)
+		if (location.pathname !== '/') {
+			navigate('/')
+		}
 		try {
 			await acceptPairedInvite(payload)
 			console.log('[paired-invite] receiver: accept handler completed')
