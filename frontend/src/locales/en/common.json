@@ -39,6 +39,7 @@
 		"startSharing": "Start Sharing",
 		"startingShare": "Starting Share...",
 		"stopSharing": "Stop Sharing",
+		"exitSharing": "Exit sharing",
 		"shareThisTicket": "Share this ticket:",
 		"sendThisTicket": "Send this ticket to the person who wants to receive your file",
 		"keepAppOpen": "Keep this app open while others download your files",
@@ -58,6 +59,7 @@
 		"multipleFilesSelected": "{{name}} ... and {{count}} more",
 		"browseFile": "Browse File",
 		"browseFolder": "Browse Folder",
+		"pairDevice": "Pair Device",
 		"addMoreFiles": "Add more files",
 		"addMoreFolders": "Add more folders",
 		"multipleItemsSelected": "{{firstName}} and {{count}} more",
@@ -82,6 +84,7 @@
 			"send": "Send",
 			"sending": "Sending…",
 			"sent": "Sent",
+			"failed": "Retry",
 			"inviteSent": "Invite sent",
 			"inviteSentTo": "Invite sent to {{name}}",
 			"inviteSentDesc": "They can accept it to start downloading.",
@@ -89,6 +92,25 @@
 			"deviceOffline": "Device is offline — use the manual ticket instead.",
 			"deviceUnreachable": "This device is still paired. Try again when it is online, or use the manual ticket. Both devices may need compatible relay settings.",
 			"unknownPeer": "Unknown device"
+		},
+		"sharingActive": {
+			"tabs": {
+				"devices": "My devices",
+				"link": "One-time transfer"
+			},
+			"devices": {
+				"title": "Send to a paired device",
+				"hint": "Choose a device — the transfer starts when they accept.",
+				"emptyTitle": "No paired devices yet",
+				"emptyHint": "Pair a phone or computer to send files without sharing a link each time.",
+				"pairDevice": "Pair device",
+				"nodeUnavailable": "Device sending is unavailable right now. You can still use One-time transfer from the other tab."
+			},
+			"link": {
+				"waiting": "Waiting for someone to use your link",
+				"hint": "Anyone with this link can receive your files.",
+				"transferInProgress": "Transfer in progress — open One-time transfer to see details."
+			}
 		}
 	},
 	"receiver": {

@@ -48,12 +48,6 @@ export interface SharingControlsProps {
 	onSetBroadcast: (broadcast: boolean) => void
 }
 
-export interface TicketDisplayProps {
-	ticket: string
-	copySuccess: boolean
-	onCopyTicket: () => Promise<void>
-}
-
 export interface DragDropState {
 	isDragActive: boolean
 	pathType: 'file' | 'directory' | null

@@ -7,6 +7,7 @@ interface PulseAnimationProps {
 	isTransporting: boolean
 	hasActiveConnections?: boolean
 	className?: string
+	size?: number
 }
 
 function modifyAnimationColor(animationData: any, color: number[]) {
@@ -35,6 +36,7 @@ export function PulseAnimation({
 	isTransporting,
 	hasActiveConnections = false,
 	className = '',
+	size = 180,
 }: PulseAnimationProps) {
 	const animationData = useMemo(() => {
 		let color: number[]
@@ -54,7 +56,7 @@ export function PulseAnimation({
 		animationData,
 		loop: true,
 		autoplay: true,
-		style: { width: 180, height: 180 },
+		style: { width: size, height: size },
 	})
 
 	return (

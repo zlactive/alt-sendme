@@ -3,7 +3,6 @@ import { StopCircleIcon } from 'lucide-react'
 import { DragDrop } from './DragDrop'
 import { ShareActionCard } from './ShareActionCard'
 import { SharingActiveCard } from './SharingActiveCard'
-import { PulseAnimation } from '../common/PulseAnimation'
 import { TransferSuccessScreen } from '../common/TransferSuccessScreen'
 import {
 	AlertDialog,
@@ -69,7 +68,7 @@ export function Sender({ onTransferStateChange }: SenderProps) {
 	}, [viewState, isBroadcastMode, setIsBroadcastMode])
 
 	return (
-		<div className="p-0 sm:p-6 space-y-6 relative h-[65dvh] sm:h-112 overflow-y-auto flex flex-col">
+		<div className="p-0 sm:p-6 space-y-6 relative h-[65dvh] sm:h-120 overflow-y-auto flex flex-col">
 			{/* IDLE state: Show file selection UI */}
 			{viewState === 'IDLE' && (
 				<>
@@ -117,41 +116,30 @@ export function Sender({ onTransferStateChange }: SenderProps) {
 			{(((viewState === 'SHARING' || viewState === 'TRANSPORTING') &&
 				!isBroadcastMode) ||
 				(viewState === 'SHARING' && isBroadcastMode)) && (
-				<>
-					<div className="text-center mt-18 sm:mt-0">
-						<PulseAnimation
-							isTransporting={isTransporting && !isBroadcastMode}
-							hasActiveConnections={
-								isBroadcastMode && activeConnectionCount > 0
-							}
-							className="mx-auto my-4 flex items-center justify-center"
-						/>
-					</div>
-					<div className="flex-1 flex flex-col">
-						<SharingActiveCard
-							isSharing={isSharing}
-							isLoading={isLoading}
-							isTransporting={isTransporting && !isBroadcastMode}
-							isCompleted={false}
-							selectedPaths={selectedPaths}
-							selectedPath={selectedPath}
-							pathType={pathType}
-							ticket={ticket}
-							copySuccess={copySuccess}
-							transferProgress={transferProgress}
-							isBroadcastMode={isBroadcastMode}
-							activeConnectionCount={activeConnectionCount}
-							pairedDevices={pairedDevices}
-							isNodeReady={isNodeReady}
-							pairedInviteStatus={pairedInviteStatus}
-							onInvitePairedDevice={onInvitePairedDevice}
-							onStartSharing={startSharing}
-							onStopSharing={stopSharing}
-							onCopyTicket={copyTicket}
-							onSetBroadcast={setIsBroadcastMode}
-						/>
-					</div>
-				</>
+				<div className="flex-1 flex flex-col">
+					<SharingActiveCard
+						isSharing={isSharing}
+						isLoading={isLoading}
+						isTransporting={isTransporting && !isBroadcastMode}
+						isCompleted={false}
+						selectedPaths={selectedPaths}
+						selectedPath={selectedPath}
+						pathType={pathType}
+						ticket={ticket}
+						copySuccess={copySuccess}
+						transferProgress={transferProgress}
+						isBroadcastMode={isBroadcastMode}
+						activeConnectionCount={activeConnectionCount}
+						pairedDevices={pairedDevices}
+						isNodeReady={isNodeReady}
+						pairedInviteStatus={pairedInviteStatus}
+						onInvitePairedDevice={onInvitePairedDevice}
+						onStartSharing={startSharing}
+						onStopSharing={stopSharing}
+						onCopyTicket={copyTicket}
+						onSetBroadcast={setIsBroadcastMode}
+					/>
+				</div>
 			)}
 
 			{/* Fallback: Show debug info if no view matches */}
