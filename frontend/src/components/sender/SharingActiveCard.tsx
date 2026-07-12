@@ -1,9 +1,7 @@
 import { useState } from 'react'
-import { MonitorSmartphone } from 'lucide-react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { SharingControlsProps } from '../../types/sender'
 import { IS_DESKTOP } from '@/lib/platform'
-import { Button } from '../ui/button'
 import {
 	Sheet,
 	SheetContent,
@@ -38,36 +36,22 @@ export function SharingActiveCard({
 
 	return (
 		<>
-			<div className="flex h-full flex-col">
-				<ShareLinkPanel
-					selectedPaths={selectedPaths}
-					selectedPath={selectedPath}
-					ticket={ticket}
-					copySuccess={copySuccess}
-					isTransporting={isTransporting}
-					isCompleted={isCompleted}
-					isBroadcastMode={isBroadcastMode}
-					activeConnectionCount={activeConnectionCount}
-					transferProgress={transferProgress}
-					onCopyTicket={onCopyTicket}
-					onSetBroadcast={onSetBroadcast}
-					onStopSharing={onStopSharing}
-				/>
-
-				{IS_DESKTOP ? (
-					<div className="mt-auto flex justify-center pt-4">
-						<Button
-							type="button"
-							variant="outline"
-							size="sm"
-							onClick={() => setDevicesOpen(true)}
-						>
-							<MonitorSmartphone className="h-4 w-4" />
-							{t('common:sender.sharingActive.devicesButton')}
-						</Button>
-					</div>
-				) : null}
-			</div>
+			<ShareLinkPanel
+				selectedPaths={selectedPaths}
+				selectedPath={selectedPath}
+				ticket={ticket}
+				copySuccess={copySuccess}
+				isTransporting={isTransporting}
+				isCompleted={isCompleted}
+				isBroadcastMode={isBroadcastMode}
+				activeConnectionCount={activeConnectionCount}
+				transferProgress={transferProgress}
+				onCopyTicket={onCopyTicket}
+				onSetBroadcast={onSetBroadcast}
+				onStopSharing={onStopSharing}
+				showPairedDevicesOption={IS_DESKTOP}
+				onOpenPairedDevices={() => setDevicesOpen(true)}
+			/>
 
 			{IS_DESKTOP ? (
 				<Sheet open={devicesOpen} onOpenChange={setDevicesOpen}>
@@ -80,7 +64,7 @@ export function SharingActiveCard({
 								{t('common:sender.sharingActive.devices.hint')}
 							</SheetDescription>
 						</SheetHeader>
-						<SheetPanel>
+						<SheetPanel className="min-h-0 flex-1">
 							<PairedDevicesPanel
 								pairedDevices={pairedDevices}
 								pairedInviteStatus={pairedInviteStatus}
@@ -88,6 +72,8 @@ export function SharingActiveCard({
 								hasTicket={Boolean(ticket)}
 								onInvitePairedDevice={onInvitePairedDevice}
 								showHeader={false}
+								showSearch
+								isOpen={devicesOpen}
 							/>
 						</SheetPanel>
 					</SheetContent>

@@ -1,5 +1,5 @@
 import { buttonVariants } from './ui/button'
-import { CoffeeIcon, GithubIcon, GlobeIcon, SettingsIcon } from 'lucide-react'
+import { CoffeeIcon, GithubIcon, GlobeIcon, MonitorSmartphone, SettingsIcon } from 'lucide-react'
 import { useTranslation } from '@/i18n'
 import {
 	DONATE_LINK,
@@ -10,6 +10,7 @@ import {
 import { Separator } from './ui/separator'
 import { Link } from 'react-router-dom'
 import { handleExternalLinkClick } from '@/lib/openExternalUrl'
+import { IS_DESKTOP } from '@/lib/platform'
 import { RelayStatusButton } from './RelayStatusButton'
 
 const CONTACTS = [
@@ -66,6 +67,18 @@ export function AppFooter() {
 				))}
 			</div>
 			<div className="flex flex-1 items-center justify-end gap-2">
+				{IS_DESKTOP ? (
+					<Link
+						to="/settings/devices"
+						className={buttonVariants({
+							variant: 'outline',
+							size: 'sm',
+						})}
+					>
+						<MonitorSmartphone />
+						{t('common:sender.pairDevice')}
+					</Link>
+				) : null}
 				<RelayStatusButton />
 				<Link
 					to="/settings"

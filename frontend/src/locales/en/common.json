@@ -97,14 +97,17 @@
 			"unknownPeer": "Unknown device"
 		},
 		"sharingActive": {
-			"devicesButton": "Paired Devices",
+			"devicesButton": "Send to a paired device",
+			"or": "or",
 			"devices": {
 				"title": "Send to a paired device",
 				"hint": "Choose a device — the transfer starts when they accept.",
 				"emptyTitle": "No paired devices yet",
 				"emptyHint": "Pair devices in Settings, then return here to send without a link.",
 				"nodeUnavailable": "Device sending is unavailable right now. You can still use One-time transfer from the other tab.",
-				"manageInSettings": "Pair devices in Settings"
+				"manageInSettings": "Pair devices in Settings",
+				"searchPlaceholder": "Search paired devices",
+				"searchNoResults": "No paired devices match your search."
 			},
 			"link": {
 				"waiting": "Waiting for someone to use your link",
@@ -284,6 +287,8 @@
 			"pairing": "Pairing…",
 			"noPairedDevices": "No paired devices yet",
 			"noPairedDevicesHint": "Pair another phone or computer to send files without sharing tickets each time.",
+			"searchPlaceholder": "Search paired devices",
+			"searchNoResults": "No paired devices match your search.",
 			"devicePaired": "Device paired",
 			"pairFailed": "Pairing failed",
 			"deviceRemoved": "Device removed",

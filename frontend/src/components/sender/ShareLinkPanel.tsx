@@ -1,4 +1,4 @@
-import { CheckCircle, Copy } from 'lucide-react'
+import { CheckCircle, Copy, MonitorSmartphone } from 'lucide-react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { TransferProgress } from '../../types/transfer'
 import { PulseAnimation } from '../common/PulseAnimation'
@@ -24,6 +24,8 @@ interface ShareLinkPanelProps {
 	onCopyTicket: () => Promise<void>
 	onSetBroadcast: (broadcast: boolean) => void
 	onStopSharing: () => Promise<void>
+	showPairedDevicesOption?: boolean
+	onOpenPairedDevices?: () => void
 }
 
 export function ShareLinkPanel({
@@ -39,6 +41,8 @@ export function ShareLinkPanel({
 	onCopyTicket,
 	onSetBroadcast,
 	onStopSharing,
+	showPairedDevicesOption = false,
+	onOpenPairedDevices,
 }: ShareLinkPanelProps) {
 	const { t } = useTranslation()
 
@@ -96,13 +100,34 @@ export function ShareLinkPanel({
 				</p>
 
 				{!isTransporting && ticket && (
-					<TicketDisplay
-						ticket={ticket}
-						copySuccess={copySuccess}
-						onCopyTicket={onCopyTicket}
-						isBroadcastMode={isBroadcastMode}
-						onSetBroadcast={onSetBroadcast}
-					/>
+					<div className="w-full space-y-3">
+						<TicketDisplay
+							ticket={ticket}
+							copySuccess={copySuccess}
+							onCopyTicket={onCopyTicket}
+							isBroadcastMode={isBroadcastMode}
+							onSetBroadcast={onSetBroadcast}
+						/>
+						<p className="text-xs text-left text-muted-foreground">
+							{t('common:sender.sendThisTicket')}
+						</p>
+						{showPairedDevicesOption && onOpenPairedDevices ? (
+							<div className="flex flex-col items-center gap-3">
+								<p className="text-xs text-center text-muted-foreground">
+									{t('common:sender.sharingActive.or')}
+								</p>
+								<Button
+									type="button"
+									variant="outline"
+									size="sm"
+									onClick={onOpenPairedDevices}
+								>
+									<MonitorSmartphone className="h-4 w-4" />
+									{t('common:sender.sharingActive.devicesButton')}
+								</Button>
+							</div>
+						) : null}
+					</div>
 				)}
 
 				{progressToDisplay && (
@@ -205,9 +230,6 @@ function TicketDisplay({
 					</Button>
 				</InputGroupAddon>
 			</InputGroup>
-			<p className="text-xs text-muted-foreground">
-				{t('common:sender.sendThisTicket')}
-			</p>
 		</div>
 	)
 }

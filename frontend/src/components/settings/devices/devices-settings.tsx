@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { Copy, Loader2, Pencil, Plus, QrCode, Trash2 } from 'lucide-react'
 import { useTranslation } from '../../../i18n'
 import { usePairing } from '../../../hooks/usePairing'
@@ -22,9 +22,10 @@ import {
 	FrameTitle,
 } from '../../ui/frame'
 import { IS_DESKTOP } from '@/lib/platform'
-import { deviceSubtitle, isPairedDeviceActive } from '@/lib/pairing-api'
+import { deviceSubtitle, isPairedDeviceActive, matchesPairedDeviceSearch } from '@/lib/pairing-api'
 import { deviceTypeIcon } from '@/lib/device-icon'
 import { DevicePairingStatus } from '../../pairing/DevicePairingStatus'
+import { PairedDevicesSearchField } from '../../pairing/PairedDevicesSearchField'
 
 function PairHostModal({
 	open,
@@ -313,6 +314,23 @@ export function DevicesSettings() {
 	const [joinOpen, setJoinOpen] = useState(false)
 	const [renameThisOpen, setRenameThisOpen] = useState(false)
 	const [renamePeerId, setRenamePeerId] = useState<string | null>(null)
+	const [searchQuery, setSearchQuery] = useState('')
+
+	const sortedDevices = useMemo(
+		() =>
+			[...devices].sort((a, b) =>
+				a.display_name.localeCompare(b.display_name)
+			),
+		[devices]
+	)
+
+	const filteredDevices = useMemo(
+		() =>
+			sortedDevices.filter((device) =>
+				matchesPairedDeviceSearch(device, searchQuery)
+			),
+		[sortedDevices, searchQuery]
+	)
 
 	// When a peer joins our open pairing window, close the QR dialog and
 	// confirm success instead of leaving the stale code on screen.
@@ -492,81 +510,95 @@ export function DevicesSettings() {
 							<p>{t('common:settings.devices.noPairedDevicesHint')}</p>
 						</div>
 					) : (
-						<ul className="divide-y border-t">
-							{devices.map((device) => {
-								const Icon = deviceTypeIcon(device.device_type)
-								const isActive = isPairedDeviceActive(device)
-								return (
-									<li
-										key={device.endpoint_id}
-										className="flex items-center justify-between gap-3 py-3 first:pt-4"
-									>
-										<div className="flex min-w-0 items-center gap-3">
-											<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-												<Icon className="h-4 w-4" />
-											</div>
-											<div className="min-w-0">
-												<p className="font-medium truncate">
-													{device.display_name}
-												</p>
-												<p className="text-xs text-muted-foreground truncate">
-													{deviceSubtitle(device)}
-												</p>
-												{!isActive ? (
-													<p className="mt-1 text-xs text-muted-foreground">
-														{t('common:settings.devices.unpairedHint')}
-													</p>
-												) : null}
-											</div>
-										</div>
-										<div className="flex shrink-0 items-center gap-2">
-											<DevicePairingStatus
-												device={device}
-												namespace="settings"
-											/>
-											{isActive ? (
-												<Button
-													type="button"
-													variant="ghost"
-													size="icon-sm"
-													aria-label={t('common:settings.devices.rename')}
-													onClick={() => setRenamePeerId(device.endpoint_id)}
-												>
-													<Pencil className="w-4 h-4" />
-												</Button>
-											) : null}
-											<Button
-												type="button"
-												variant="ghost"
-												size="icon-sm"
-												aria-label={t('common:settings.devices.removeDevice')}
-												onClick={async () => {
-													try {
-														await forget(device.endpoint_id)
-														toastManager.add({
-															title: t(
-																'common:settings.devices.deviceRemoved'
-															),
-															type: 'success',
-														})
-													} catch (error) {
-														console.error(error)
-														toastManager.add({
-															title: t(
-																'common:settings.devices.removeFailed'
-															),
-															type: 'error',
-														})
-													}
-												}}
+						<div className="space-y-3 border-t pt-4">
+							<PairedDevicesSearchField
+								value={searchQuery}
+								onChange={setSearchQuery}
+								namespace="settings"
+							/>
+
+							{filteredDevices.length === 0 ? (
+								<p className="py-8 text-center text-sm text-muted-foreground">
+									{t('common:settings.devices.searchNoResults')}
+								</p>
+							) : (
+								<ul className="divide-y">
+									{filteredDevices.map((device) => {
+										const Icon = deviceTypeIcon(device.device_type)
+										const isActive = isPairedDeviceActive(device)
+										return (
+											<li
+												key={device.endpoint_id}
+												className="flex items-center justify-between gap-3 py-3 first:pt-4"
 											>
-												<Trash2 className="w-4 h-4" />
-											</Button>
-										</div>
-									</li>
-								)
-							})}
-						</ul>
+												<div className="flex min-w-0 items-center gap-3">
+													<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+														<Icon className="h-4 w-4" />
+													</div>
+													<div className="min-w-0">
+														<p className="font-medium truncate">
+															{device.display_name}
+														</p>
+														<p className="text-xs text-muted-foreground truncate">
+															{deviceSubtitle(device)}
+														</p>
+														{!isActive ? (
+															<p className="mt-1 text-xs text-muted-foreground">
+																{t('common:settings.devices.unpairedHint')}
+															</p>
+														) : null}
+													</div>
+												</div>
+												<div className="flex shrink-0 items-center gap-2">
+													<DevicePairingStatus
+														device={device}
+														namespace="settings"
+													/>
+													{isActive ? (
+														<Button
+															type="button"
+															variant="ghost"
+															size="icon-sm"
+															aria-label={t('common:settings.devices.rename')}
+															onClick={() => setRenamePeerId(device.endpoint_id)}
+														>
+															<Pencil className="w-4 h-4" />
+														</Button>
+													) : null}
+													<Button
+														type="button"
+														variant="ghost"
+														size="icon-sm"
+														aria-label={t('common:settings.devices.removeDevice')}
+														onClick={async () => {
+															try {
+																await forget(device.endpoint_id)
+																toastManager.add({
+																	title: t(
+																		'common:settings.devices.deviceRemoved'
+																	),
+																	type: 'success',
+																})
+															} catch (error) {
+																console.error(error)
+																toastManager.add({
+																	title: t(
+																		'common:settings.devices.removeFailed'
+																	),
+																	type: 'error',
+																})
+															}
+														}}
+													>
+														<Trash2 className="w-4 h-4" />
+													</Button>
+												</div>
+											</li>
+										)
+									})}
+								</ul>
+							)}
+						</div>
 					)}
 				</FramePanel>
 			</Frame>

@@ -1,10 +1,16 @@
 import { Link } from 'react-router-dom'
+import { useEffect, useMemo, useState } from 'react'
 import { Check, Loader2 } from 'lucide-react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { PairedDevice } from '@/lib/pairing-api'
-import { deviceSubtitle, isPairedDeviceActive } from '@/lib/pairing-api'
+import {
+	deviceSubtitle,
+	isPairedDeviceActive,
+	matchesPairedDeviceSearch,
+} from '@/lib/pairing-api'
 import { deviceTypeIcon } from '@/lib/device-icon'
 import { DevicePairingStatus } from '../pairing/DevicePairingStatus'
+import { PairedDevicesSearchField } from '../pairing/PairedDevicesSearchField'
 import { Button } from '../ui/button'
 
 type PairedInviteStatus = 'sending' | 'sent' | 'failed'
@@ -16,6 +22,8 @@ interface PairedDevicesPanelProps {
 	hasTicket: boolean
 	onInvitePairedDevice?: (endpointId: string) => Promise<void>
 	showHeader?: boolean
+	showSearch?: boolean
+	isOpen?: boolean
 }
 
 export function PairedDevicesPanel({
@@ -25,12 +33,32 @@ export function PairedDevicesPanel({
 	hasTicket,
 	onInvitePairedDevice,
 	showHeader = true,
+	showSearch = false,
+	isOpen = false,
 }: PairedDevicesPanelProps) {
 	const { t } = useTranslation()
+	const [searchQuery, setSearchQuery] = useState('')
 
-	const sortedDevices = [...pairedDevices].sort((a, b) =>
-		a.display_name.localeCompare(b.display_name)
+	useEffect(() => {
+		if (isOpen) {
+			setSearchQuery('')
+		}
+	}, [isOpen])
+
+	const sortedDevices = useMemo(
+		() =>
+			[...pairedDevices].sort((a, b) =>
+				a.display_name.localeCompare(b.display_name)
+			),
+		[pairedDevices]
 	)
+
+	const filteredDevices = useMemo(() => {
+		if (!showSearch) return sortedDevices
+		return sortedDevices.filter((device) =>
+			matchesPairedDeviceSearch(device, searchQuery)
+		)
+	}, [sortedDevices, searchQuery, showSearch])
 
 	return (
 		<div className="space-y-3">
@@ -51,6 +79,14 @@ export function PairedDevicesPanel({
 				</p>
 			)}
 
+			{showSearch && sortedDevices.length > 0 ? (
+				<PairedDevicesSearchField
+					value={searchQuery}
+					onChange={setSearchQuery}
+					className="sticky top-0 z-10 -mx-1 bg-popover px-1 pb-1"
+				/>
+			) : null}
+
 			{sortedDevices.length === 0 ? (
 				<div className="space-y-2 rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
 					<p className="font-medium text-foreground">
@@ -64,9 +100,13 @@ export function PairedDevicesPanel({
 						{t('common:sender.sharingActive.devices.manageInSettings')}
 					</Link>
 				</div>
+			) : filteredDevices.length === 0 ? (
+				<p className="rounded-md border border-dashed px-3 py-4 text-center text-xs text-muted-foreground">
+					{t('common:sender.sharingActive.devices.searchNoResults')}
+				</p>
 			) : (
-				<ul className="space-y-1 max-h-48 sm:max-h-56 overflow-y-auto -mx-1 px-1">
-					{sortedDevices.map((device) => {
+				<ul className="space-y-1">
+					{filteredDevices.map((device) => {
 						const Icon = deviceTypeIcon(device.device_type)
 						const inviteStatus = pairedInviteStatus[device.endpoint_id]
 						const isActive = isPairedDeviceActive(device)

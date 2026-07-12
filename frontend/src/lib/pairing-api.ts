@@ -190,7 +190,30 @@ export function deviceSubtitle(
 ): string {
 	const typeLabel = formatDeviceTypeLabel(device.device_type)
 	const osLabel = formatOsLabel(device.os)
-	return osLabel ? `${typeLabel} · ${osLabel}` : typeLabel
+	return osLabel ? `${typeLabel} ${osLabel}` : typeLabel
+}
+
+export function matchesPairedDeviceSearch(
+	device: PairedDevice,
+	query: string
+): boolean {
+	const normalizedQuery = query.trim().toLowerCase()
+	if (!normalizedQuery) return true
+
+	const searchable = [
+		device.display_name,
+		device.device_type,
+		device.os,
+		formatDeviceTypeLabel(device.device_type),
+		formatOsLabel(device.os),
+		deviceSubtitle(device),
+		device.online ? 'online' : 'offline',
+		isPairedDeviceActive(device) ? 'active' : 'unpaired',
+	]
+		.join(' ')
+		.toLowerCase()
+
+	return searchable.includes(normalizedQuery)
 }
 
 export function isPairedDeviceActive(

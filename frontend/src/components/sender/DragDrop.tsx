@@ -1,14 +1,9 @@
 import { useEffect } from 'react'
-import { Link } from 'react-router-dom'
-import { MonitorSmartphoneIcon } from 'lucide-react'
 import { Dropzone } from './Dropzone'
 import { BrowseButtons } from './BrowseButtons'
 import { AppAlertDialog } from '../AppAlertDialog'
 import { FileCopyProgressDialog } from '../common/FileCopyProgressDialog'
 import { useDragDrop } from '../../hooks/useDragDrop'
-import { useTranslation } from '../../i18n/react-i18next-compat'
-import { IS_DESKTOP } from '@/lib/platform'
-import { buttonVariants } from '../ui/button'
 
 interface DragDropProps {
 	onFileSelect: (path: string, pathType?: 'file' | 'directory') => Promise<void>
@@ -32,7 +27,6 @@ export function DragDrop({
 	isLoading,
 	onClearSelection,
 }: DragDropProps) {
-	const { t } = useTranslation()
 	const {
 		isDragActive,
 		pathType,
@@ -77,22 +71,11 @@ export function DragDrop({
 			/>
 
 			{!selectedPath && (
-				<div className="flex flex-col items-center gap-3 mt-2 sm:mt-0">
-					<BrowseButtons
-						isLoading={isLoading || false}
-						onBrowseFile={browseFile}
-						onBrowseFolder={browseFolder}
-					/>
-					{IS_DESKTOP && (
-						<Link
-							to="/settings/devices"
-							className={buttonVariants({ variant: 'outline', size: 'sm' })}
-						>
-							<MonitorSmartphoneIcon />
-							{t('common:sender.pairDevice')}
-						</Link>
-					)}
-				</div>
+				<BrowseButtons
+					isLoading={isLoading || false}
+					onBrowseFile={browseFile}
+					onBrowseFolder={browseFolder}
+				/>
 			)}
 
 			<AppAlertDialog
