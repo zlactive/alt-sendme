@@ -86,6 +86,55 @@ pub fn build_control_connect_addr(
     addr
 }
 
+/// Emit `paired-invite-received` to the frontend (shared by inbound and outbound readers).
+pub fn emit_paired_invite_received(
+    app_handle: &AppHandle,
+    remote_endpoint_id: &str,
+    blob_ticket: &str,
+    file_count: u32,
+    total_size: u64,
+    sender_name: &str,
+) {
+    let payload = serde_json::json!({
+        "blob_ticket": blob_ticket,
+        "file_count": file_count,
+        "total_size": total_size,
+        "sender_name": sender_name,
+        "remote_endpoint_id": remote_endpoint_id,
+    });
+    pairing_flow!(
+        "invite",
+        "outbound",
+        "invite.emit_ui.start",
+        remote = %remote_endpoint_id,
+        event = "paired-invite-received",
+        payload_len = payload.to_string().len(),
+        role = "receiver"
+    );
+    let Some(handle) = app_handle else {
+        pairing_dev_warn!(
+            "invite.emit_ui_skipped",
+            remote = %remote_endpoint_id,
+            reason = "no_app_handle"
+        );
+        return;
+    };
+    match handle.emit_event_with_payload("paired-invite-received", &payload.to_string()) {
+        Ok(()) => pairing_flow!(
+            "invite",
+            "outbound",
+            "invite.emit_ui.ok",
+            remote = %remote_endpoint_id,
+            role = "receiver"
+        ),
+        Err(err) => pairing_dev_warn!(
+            "invite.emit_ui_failed",
+            remote = %remote_endpoint_id,
+            error = %err
+        ),
+    }
+}
+
 pub fn set_presence(
     presence: &Arc<std::sync::RwLock<HashMap<String, bool>>>,
     app_handle: &AppHandle,

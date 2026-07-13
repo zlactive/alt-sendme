@@ -709,53 +709,14 @@ impl ControlProtocol {
                     ticket_len = blob_ticket.len(),
                     role = "receiver"
                 );
-                let payload = serde_json::json!({
-                    "blob_ticket": blob_ticket,
-                    "file_count": file_count,
-                    "total_size": total_size,
-                    "sender_name": sender_name,
-                    "remote_endpoint_id": remote.to_string(),
-                });
-                if let Some(handle) = &self.ctx.app_handle {
-                    pairing_flow!(
-                        "invite",
-                        "inbound",
-                        "invite.emit_ui.start",
-                        remote = %remote,
-                        event = "paired-invite-received",
-                        payload_len = payload.to_string().len(),
-                        role = "receiver"
-                    );
-                    match handle.emit_event_with_payload(
-                        "paired-invite-received",
-                        &payload.to_string(),
-                    ) {
-                        Ok(()) => pairing_flow!(
-                            "invite",
-                            "inbound",
-                            "invite.emit_ui.ok",
-                            remote = %remote,
-                            role = "receiver"
-                        ),
-                        Err(err) => pairing_flow_warn!(
-                            "invite",
-                            "inbound",
-                            "invite.emit_ui.failed",
-                            remote = %remote,
-                            error = %err,
-                            role = "receiver"
-                        ),
-                    }
-                } else {
-                    pairing_flow_warn!(
-                        "invite",
-                        "inbound",
-                        "invite.emit_ui.skipped",
-                        remote = %remote,
-                        reason = "no_app_handle",
-                        role = "receiver"
-                    );
-                }
+                crate::pairing_util::emit_paired_invite_received(
+                    &self.ctx.app_handle,
+                    &remote.to_string(),
+                    &blob_ticket,
+                    file_count,
+                    total_size,
+                    &sender_name,
+                );
             }
             ControlMessage::Recognition { signature } => {
                 pairing_flow!(

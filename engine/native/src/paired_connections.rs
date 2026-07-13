@@ -8,9 +8,9 @@ use anyhow::Context;
 use iroh::endpoint::Connection;
 use iroh::EndpointId;
 use protocol::{
-    export_connection_keying_material, sign_challenge, write_message, ControlMessage,
-    PairedDevice, CONTROL_ALPN, PAIRED_INVITE_WAIT_SECS, PAIRED_RECONNECT_MAX_SECS,
-    PAIRED_RECONNECT_MIN_SECS, PRESENCE_CONNECT_TIMEOUT_SECS,
+    export_connection_keying_material, read_message, sign_challenge, verify_challenge,
+    write_message, ControlMessage, PairedDevice, CONTROL_ALPN, PAIRED_INVITE_WAIT_SECS,
+    PAIRED_RECONNECT_MAX_SECS, PAIRED_RECONNECT_MIN_SECS, PRESENCE_CONNECT_TIMEOUT_SECS,
 };
 use tokio::sync::{Mutex, Notify, OnceCell, RwLock};
 use tokio::task::JoinHandle;
@@ -19,7 +19,9 @@ use crate::device_identity::{DeviceIdentity, PairedDeviceStore};
 use crate::pairing_dev_log::{
     direction_from_side, elapsed_ms, log_pairing_flow_error, peer_role_from_side,
 };
-use crate::pairing_util::{build_control_connect_addr, set_presence};
+use crate::pairing_util::{
+    build_control_connect_addr, control_message_kind, emit_paired_invite_received, set_presence,
+};
 use crate::{pairing_flow, pairing_flow_warn};
 use protocol::AppHandle;
 
@@ -400,15 +402,29 @@ impl PairedConnectionManager {
                         remote = %endpoint_id,
                         attempt
                     );
-                    let close_reason = conn.closed().await;
-                    pairing_flow!(
-                        "connections",
-                        direction_from_side(side),
-                        "loop.connection_closed",
-                        remote = %endpoint_id,
-                        attempt,
-                        close_reason = ?close_reason
-                    );
+                    // Read invites on the outbound (client) connection. The peer opens
+                    // bi streams on this link when they are the QUIC server.
+                    tokio::select! {
+                        close_reason = conn.closed() => {
+                            pairing_flow!(
+                                "connections",
+                                direction_from_side(side),
+                                "loop.connection_closed",
+                                remote = %endpoint_id,
+                                attempt,
+                                close_reason = ?close_reason
+                            );
+                        }
+                        _ = self.read_outbound_control_loop(&conn) => {
+                            pairing_flow!(
+                                "connections",
+                                direction_from_side(side),
+                                "loop.outbound_reader.end",
+                                remote = %endpoint_id,
+                                attempt
+                            );
+                        }
+                    }
                     self.remove_session(&key, "outbound_closed").await;
                 }
                 Err(err) => {
@@ -542,6 +558,156 @@ impl PairedConnectionManager {
             local_endpoint = %self.identity.endpoint_id()
         );
         Ok(conn)
+    }
+
+    /// Accept bi streams on an outbound (client) control connection and handle invites.
+    async fn read_outbound_control_loop(&self, conn: &Connection) {
+        let remote = conn.remote_id();
+        let remote_id = remote.to_string();
+        let side = conn.side();
+        let keying = match export_connection_keying_material(conn) {
+            Ok(keying) => keying,
+            Err(err) => {
+                log_pairing_flow_error(
+                    "connections",
+                    direction_from_side(side),
+                    "loop.outbound_reader.keying_failed",
+                    &err,
+                );
+                return;
+            }
+        };
+        let mut bi_index = 0u32;
+        loop {
+            bi_index += 1;
+            pairing_flow!(
+                "connections",
+                direction_from_side(side),
+                "loop.outbound_reader.accept_bi.wait",
+                remote = %remote_id,
+                bi_index,
+                conn_side = ?side
+            );
+            let (_send, mut recv) = match conn.accept_bi().await {
+                Ok(streams) => streams,
+                Err(err) => {
+                    pairing_flow!(
+                        "connections",
+                        direction_from_side(side),
+                        "loop.outbound_reader.accept_bi.end",
+                        remote = %remote_id,
+                        bi_index,
+                        error = %err
+                    );
+                    break;
+                }
+            };
+            pairing_flow!(
+                "connections",
+                direction_from_side(side),
+                "loop.outbound_reader.read.wait",
+                remote = %remote_id,
+                bi_index
+            );
+            let msg = match read_message(&mut recv).await {
+                Ok(m) => m,
+                Err(err) => {
+                    pairing_flow!(
+                        "connections",
+                        direction_from_side(side),
+                        "loop.outbound_reader.read.failed",
+                        remote = %remote_id,
+                        bi_index,
+                        error = %err
+                    );
+                    continue;
+                }
+            };
+            pairing_flow!(
+                "connections",
+                direction_from_side(side),
+                "loop.outbound_reader.msg.received",
+                remote = %remote_id,
+                bi_index,
+                kind = control_message_kind(&msg)
+            );
+            match msg {
+                ControlMessage::Invite {
+                    blob_ticket,
+                    file_count,
+                    total_size,
+                    sender_name,
+                } => {
+                    pairing_flow!(
+                        "invite",
+                        direction_from_side(side),
+                        "invite.received",
+                        remote = %remote_id,
+                        bi_index,
+                        file_count,
+                        total_size,
+                        sender_name = %sender_name,
+                        ticket_len = blob_ticket.len(),
+                        role = "receiver",
+                        source = "outbound_session"
+                    );
+                    emit_paired_invite_received(
+                        &self.app_handle,
+                        &remote_id,
+                        &blob_ticket,
+                        file_count,
+                        total_size,
+                        &sender_name,
+                    );
+                }
+                ControlMessage::Recognition { signature } => {
+                    if verify_challenge(&remote, &keying, &signature) {
+                        pairing_flow!(
+                            "connections",
+                            direction_from_side(side),
+                            "loop.outbound_reader.recognition.verified",
+                            remote = %remote_id,
+                            bi_index
+                        );
+                        let now = protocol::identity::unix_now_ms();
+                        let _ = self.paired_store.touch(&remote_id, now);
+                        set_presence(
+                            &self.presence,
+                            &self.app_handle,
+                            &self.paired_store,
+                            &remote_id,
+                            true,
+                            "recognition_outbound",
+                        );
+                    } else {
+                        pairing_flow_warn!(
+                            "connections",
+                            direction_from_side(side),
+                            "loop.outbound_reader.recognition.bad_signature",
+                            remote = %remote_id,
+                            bi_index
+                        );
+                    }
+                }
+                other => {
+                    pairing_flow!(
+                        "connections",
+                        direction_from_side(side),
+                        "loop.outbound_reader.msg.ignored",
+                        remote = %remote_id,
+                        bi_index,
+                        kind = control_message_kind(&other)
+                    );
+                }
+            }
+        }
+        pairing_flow!(
+            "connections",
+            direction_from_side(side),
+            "loop.outbound_reader.finish",
+            remote = %remote_id,
+            bi_streams_handled = bi_index
+        );
     }
 
     fn device_still_active(&self, endpoint_id: &str) -> bool {
