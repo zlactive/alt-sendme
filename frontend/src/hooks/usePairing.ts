@@ -3,16 +3,12 @@ import { listen } from '@/lib/platform-api'
 import { IS_DESKTOP } from '@/lib/platform'
 import {
 	forgetPairedDevice,
-	getDeviceInfo,
 	joinPairing,
-	listPairedDevices,
 	renamePairedDevice,
 	setDeviceDisplayName,
 	startPairingHost,
 	stopPairingHost,
-	type DeviceInfo,
 	type DeviceUnpairedPayload,
-	type PairedDevice,
 } from '@/lib/pairing-api'
 import { useTranslation } from '../i18n/react-i18next-compat'
 import { toastManager } from '../components/ui/toast'
@@ -21,14 +17,20 @@ import {
 	applyPresencePatch,
 	usePairedDeviceEvents,
 } from './usePairedDeviceEvents'
+import { usePairingDataStore } from '@/store/pairing-data-store'
 
 // Must match engine/protocol pairing::PAIRING_VOTE_TIMEOUT_SECS
 const PAIRING_HOST_TTL_SECS = 120
 
 export function usePairing() {
 	const { t } = useTranslation()
-	const [devices, setDevices] = useState<PairedDevice[]>([])
-	const [thisDevice, setThisDevice] = useState<DeviceInfo | null>(null)
+	const devices = usePairingDataStore((s) => s.devices)
+	const thisDevice = usePairingDataStore((s) => s.thisDevice)
+	const hasHydrated = usePairingDataStore((s) => s.hasHydrated)
+	const setDevices = usePairingDataStore((s) => s.setDevices)
+	const setThisDevice = usePairingDataStore((s) => s.setThisDevice)
+	const hydrate = usePairingDataStore((s) => s.hydrate)
+
 	const [pairingTicket, setPairingTicket] = useState<string | null>(null)
 	const [hostExpiresIn, setHostExpiresIn] = useState<number | null>(null)
 	const [isJoining, setIsJoining] = useState(false)
@@ -37,40 +39,25 @@ export function usePairing() {
 	// pairing window, so the UI can close the QR dialog and confirm success.
 	const [hostPairedCount, setHostPairedCount] = useState(0)
 	const pairingTicketRef = useRef<string | null>(null)
-	const { isNodeReady, nodeStatus } = useNodeCapability()
+	const { isNodeReady, isNodeStatusPending, nodeStatus, hasResolved } =
+		useNodeCapability()
 
 	useEffect(() => {
 		pairingTicketRef.current = pairingTicket
 	}, [pairingTicket])
 
 	const refreshDevices = useCallback(async () => {
-		if (!IS_DESKTOP || !isNodeReady) {
-			setDevices([])
-			return
-		}
-		try {
-			setDevices(await listPairedDevices())
-		} catch (error) {
-			console.error('Failed to list paired devices:', error)
-		}
-	}, [isNodeReady])
+		await hydrate()
+	}, [hydrate])
 
 	const refreshThisDevice = useCallback(async () => {
-		if (!IS_DESKTOP || !isNodeReady) {
-			setThisDevice(null)
-			return
-		}
-		try {
-			setThisDevice(await getDeviceInfo())
-		} catch (error) {
-			console.error('Failed to load this device:', error)
-		}
-	}, [isNodeReady])
+		await hydrate()
+	}, [hydrate])
 
 	useEffect(() => {
-		void refreshDevices()
-		void refreshThisDevice()
-	}, [refreshDevices, refreshThisDevice])
+		if (!hasResolved) return
+		void hydrate()
+	}, [hasResolved, isNodeReady, hydrate])
 
 	useEffect(() => {
 		if (!IS_DESKTOP) return
@@ -88,7 +75,7 @@ export function usePairing() {
 					setHostExpiresIn(null)
 					setHostPairedCount((count) => count + 1)
 				}
-				void refreshDevices()
+				void hydrate()
 			})
 			if (disposed) {
 				pairedUnlisten()
@@ -114,12 +101,15 @@ export function usePairing() {
 			unlistenPaired?.()
 			unlistenExpired?.()
 		}
-	}, [refreshDevices])
+	}, [hydrate])
 
 	usePairedDeviceEvents({
-		onPresence: useCallback((payload) => {
-			applyPresencePatch(setDevices, payload)
-		}, []),
+		onPresence: useCallback(
+			(payload) => {
+				applyPresencePatch(setDevices, payload)
+			},
+			[setDevices]
+		),
 		onUnpaired: useCallback(
 			(payload: DeviceUnpairedPayload) => {
 				if (payload.reason === 'remote') {
@@ -179,36 +169,42 @@ export function usePairing() {
 			setIsJoining(true)
 			try {
 				await joinPairing(ticket.trim())
-				await refreshDevices()
+				await hydrate()
 			} finally {
 				setIsJoining(false)
 			}
 		},
-		[isNodeReady, refreshDevices]
+		[isNodeReady, hydrate]
 	)
 
 	const forget = useCallback(
 		async (endpointId: string) => {
 			await forgetPairedDevice(endpointId)
-			await refreshDevices()
+			await hydrate()
 		},
-		[refreshDevices]
+		[hydrate]
 	)
 
-	const renameThisDevice = useCallback(async (displayName: string) => {
-		const updated = await setDeviceDisplayName(displayName)
-		if (updated) setThisDevice(updated)
-		return updated
-	}, [])
+	const renameThisDevice = useCallback(
+		async (displayName: string) => {
+			const updated = await setDeviceDisplayName(displayName)
+			if (updated) setThisDevice(updated)
+			return updated
+		},
+		[setThisDevice]
+	)
 
 	const renameDevice = useCallback(
 		async (endpointId: string, displayName: string) => {
 			const updated = await renamePairedDevice(endpointId, displayName)
-			await refreshDevices()
+			await hydrate()
 			return updated
 		},
-		[refreshDevices]
+		[hydrate]
 	)
+
+	const isPairingDataPending =
+		IS_DESKTOP && (isNodeStatusPending || (isNodeReady && !hasHydrated))
 
 	return {
 		devices,
@@ -219,6 +215,9 @@ export function usePairing() {
 		isLoading,
 		hostPairedCount,
 		isNodeReady,
+		isNodeStatusPending,
+		isPairingDataPending,
+		hasHydrated,
 		nodeStatus,
 		refreshDevices,
 		refreshThisDevice,

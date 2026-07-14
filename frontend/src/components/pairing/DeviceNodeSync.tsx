@@ -5,6 +5,7 @@ import { getRelayConfigArg } from '@/lib/relay'
 import { reconfigureNodeRelay } from '@/lib/pairing-api'
 import type { PairedInvitePayload } from '@/lib/pairing-api'
 import { usePairedInviteStore } from '@/store/paired-invite-store'
+import { preloadPairingData } from '@/store/pairing-data-store'
 import { useNodeCapability } from '@/hooks/useNodeCapability'
 
 /** Syncs relay settings to the device node and listens for paired invites globally. */
@@ -12,6 +13,13 @@ export function DeviceNodeSync() {
 	const { isNodeReady, refreshNodeStatus } = useNodeCapability()
 	const setInvite = usePairedInviteStore((s) => s.setInvite)
 	const didSyncRelay = useRef(false)
+
+	// Warm node status + devices/this-device before settings opens, so the
+	// first Devices visit paints complete content instead of loading → ready.
+	useEffect(() => {
+		if (!IS_DESKTOP) return
+		void preloadPairingData()
+	}, [])
 
 	useEffect(() => {
 		if (!IS_DESKTOP || !isNodeReady || didSyncRelay.current) return

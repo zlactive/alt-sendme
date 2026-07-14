@@ -1,4 +1,8 @@
-import { Link, NavLink } from 'react-router-dom'
+import { Link, matchPath, NavLink, useLocation } from 'react-router-dom'
+import {
+	Highlight,
+	HighlightItem,
+} from '@/components/animate-ui/primitives/effects/highlight'
 import { handleExternalLinkClick } from '@/lib/openExternalUrl'
 import { useTranslation } from '../../i18n'
 import { cn } from '../../lib/utils'
@@ -18,6 +22,28 @@ import {
 	useSidebar,
 } from '../ui/sidebar'
 import { settingSidebarConfig } from './config'
+
+const SETTINGS_NAV_TRANSITION = {
+	type: 'spring' as const,
+	stiffness: 200,
+	damping: 25,
+}
+
+function settingsNavValue(to: string) {
+	return to || 'general'
+}
+
+function useActiveSettingsNavValue() {
+	const { pathname } = useLocation()
+	const items = settingSidebarConfig.core
+
+	const active = items.find((item) => {
+		const path = item.to ? `/settings/${item.to}` : '/settings'
+		return matchPath({ path, end: true }, pathname) != null
+	})
+
+	return settingsNavValue(active?.to ?? '')
+}
 
 function SettingSidebarRoot(props: React.ComponentProps<typeof Sidebar>) {
 	return <Sidebar {...props} />
@@ -62,49 +88,71 @@ function SettingSidebarCore() {
 	const items = settingSidebarConfig.core
 	const { t } = useTranslation()
 	const { isMobile, setOpenMobile } = useSidebar()
+	const activeValue = useActiveSettingsNavValue()
+
 	return (
 		<SidebarGroup>
-			<SidebarMenu>
-				{items.map((item) => (
-					<SidebarMenuItem key={item.label}>
-						<NavLink
-							className="flex items-center gap-2 data-disabled:pointer-events-none"
-							to={item.to}
-							data-disabled={item.disable}
-							onClick={(e) => {
-								if (item.disable) {
-									e.preventDefault()
-									e.stopPropagation()
-									return
-								}
-								if (isMobile) {
-									setOpenMobile(false)
-								}
-							}}
-							end
-						>
-							{({ isActive }) => (
-								<SidebarMenuButton isActive={isActive} disabled={item.disable}>
-									{item.icon && (
-										<LazyIcon
-											weight={isActive ? 'duotone' : 'regular'}
-											name={item.icon}
-										/>
+			<Highlight
+				controlledItems
+				value={activeValue}
+				click={false}
+				transition={SETTINGS_NAV_TRANSITION}
+				className="pointer-events-none absolute inset-0 z-0 rounded-lg bg-sidebar-accent"
+			>
+				<SidebarMenu>
+					{items.map((item) => (
+						<SidebarMenuItem key={item.label}>
+							<HighlightItem
+								value={settingsNavValue(item.to)}
+								disabled={item.disable}
+								className="w-full"
+							>
+								<NavLink
+									className="flex items-center gap-2 data-[disabled=true]:pointer-events-none"
+									to={item.to}
+									data-disabled={item.disable === true}
+									onClick={(e) => {
+										if (item.disable) {
+											e.preventDefault()
+											e.stopPropagation()
+											return
+										}
+										if (isMobile) {
+											setOpenMobile(false)
+										}
+									}}
+									end
+								>
+									{({ isActive }) => (
+										<SidebarMenuButton
+											isActive={isActive}
+											disabled={item.disable}
+											className="data-[active=true]:bg-transparent"
+										>
+											{item.icon && (
+												<LazyIcon
+													weight={isActive ? 'duotone' : 'regular'}
+													name={item.icon}
+												/>
+											)}
+											<span>
+												{item.translationNs
+													? t(item.translationNs)
+													: item.label}
+											</span>
+											{item.comingSoon && (
+												<Badge size="sm" variant="info">
+													{t('comingSoon')}
+												</Badge>
+											)}
+										</SidebarMenuButton>
 									)}
-									<span>
-										{item.translationNs ? t(item.translationNs) : item.label}
-									</span>
-									{item.comingSoon && (
-										<Badge size="sm" variant="info">
-											{t('comingSoon')}
-										</Badge>
-									)}
-								</SidebarMenuButton>
-							)}
-						</NavLink>
-					</SidebarMenuItem>
-				))}
-			</SidebarMenu>
+								</NavLink>
+							</HighlightItem>
+						</SidebarMenuItem>
+					))}
+				</SidebarMenu>
+			</Highlight>
 		</SidebarGroup>
 	)
 }

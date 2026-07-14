@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { Copy, Eye, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
+import { motion } from 'motion/react'
 import { useTranslation } from '../../../i18n'
 import { usePairing } from '../../../hooks/usePairing'
 import { Button } from '../../ui/button'
@@ -298,6 +299,7 @@ export function DevicesSettings() {
 		isLoading,
 		hostPairedCount,
 		isNodeReady,
+		isPairingDataPending,
 		nodeStatus,
 		openHostPairing,
 		closeHostPairing,
@@ -352,26 +354,6 @@ export function DevicesSettings() {
 		)
 	}
 
-	if (!isNodeReady) {
-		return (
-			<Frame>
-				<FramePanel>
-					<div className="space-y-2">
-						<FrameTitle>{t('common:settings.devices.title')}</FrameTitle>
-						<FrameDescription>
-							{t('common:settings.devices.nodeUnavailableTitle')}
-						</FrameDescription>
-						<p className="text-sm text-muted-foreground">
-							{nodeStatus.reason
-								? nodeStatus.reason
-								: t('common:settings.devices.nodeUnavailableHint')}
-						</p>
-					</div>
-				</FramePanel>
-			</Frame>
-		)
-	}
-
 	const openHost = async () => {
 		setHostOpen(true)
 		try {
@@ -397,251 +379,300 @@ export function DevicesSettings() {
 
 	const renamePeer = devices.find((d) => d.endpoint_id === renamePeerId)
 	const ThisDeviceIcon = deviceTypeIcon(thisDevice?.device_type)
+	const readyToPaint = !isPairingDataPending
 
 	return (
-		<>
-			{thisDevice ? (
-				<Frame className="mb-2">
-					<FramePanel className="flex flex-col gap-4">
-						<div className="space-y-1">
-							<FrameTitle>{t('common:settings.devices.thisDevice')}</FrameTitle>
-							<FrameDescription>
-								{t('common:settings.devices.thisDeviceHint')}
-							</FrameDescription>
-						</div>
-						<div className="flex items-center justify-between gap-3">
-							<div className="flex min-w-0 items-center gap-3">
-								<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-									<ThisDeviceIcon className="h-5 w-5" />
-								</div>
-								<div className="min-w-0">
-									<p className="font-medium truncate">
-										{thisDevice.display_name}
-									</p>
-									<p className="text-xs text-muted-foreground truncate">
-										{deviceSubtitle(thisDevice)}
-									</p>
-								</div>
+		<motion.div
+			initial={false}
+			animate={{ opacity: readyToPaint ? 1 : 0 }}
+			transition={{ duration: 0.05, ease: 'easeOut' }}
+			className="flex flex-col gap-8"
+		>
+			{!readyToPaint ? (
+				<div
+					aria-busy="true"
+					aria-label={t('common:loading')}
+					className="pointer-events-none"
+				>
+					<Frame>
+						<FramePanel className="flex flex-col gap-6 min-h-48">
+							<div className="space-y-2">
+								<FrameTitle>{t('common:settings.devices.title')}</FrameTitle>
+								<FrameDescription>
+									{t('common:settings.devices.description')}
+								</FrameDescription>
 							</div>
-							<Button
-								type="button"
-								size="sm"
-								variant="outline"
-								onClick={() => setRenameThisOpen(true)}
-							>
-								<Pencil className="w-4 h-4 mr-2" />
-								{t('common:settings.devices.rename')}
-							</Button>
+						</FramePanel>
+					</Frame>
+				</div>
+			) : !isNodeReady ? (
+				<Frame>
+					<FramePanel>
+						<div className="space-y-2">
+							<FrameTitle>{t('common:settings.devices.title')}</FrameTitle>
+							<FrameDescription>
+								{t('common:settings.devices.nodeUnavailableTitle')}
+							</FrameDescription>
+							<p className="text-sm text-muted-foreground">
+								{nodeStatus.reason
+									? nodeStatus.reason
+									: t('common:settings.devices.nodeUnavailableHint')}
+							</p>
 						</div>
 					</FramePanel>
 				</Frame>
-			) : null}
-
-			<Frame>
-				<FramePanel className="flex flex-col gap-6">
-					<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-						<div className="space-y-2 min-w-0">
-							<FrameTitle>{t('common:settings.devices.title')}</FrameTitle>
-							<FrameDescription>
-								{t('common:settings.devices.description')}
-							</FrameDescription>
-						</div>
-						<div className="flex flex-wrap gap-2 shrink-0">
-							<Button
-								type="button"
-								size="sm"
-								disabled={isLoading && hostOpen}
-								onClick={openHost}
-							>
-								<Eye className="w-4 h-4 mr-2" />
-								{t('common:settings.devices.showQrCode')}
-							</Button>
-							<Button
-								type="button"
-								size="sm"
-								variant="outline"
-								onClick={() => setJoinOpen(true)}
-							>
-								<Plus className="w-4 h-4 mr-2" />
-								{t('common:settings.devices.enterCode')}
-							</Button>
-						</div>
-					</div>
-
-					{pairingTicket &&
-					hostExpiresIn != null &&
-					hostExpiresIn > 0 &&
-					!hostOpen ? (
-						<div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm">
-							<p className="text-muted-foreground">
-								{t('common:settings.devices.hostStillOpen', {
-									seconds: hostExpiresIn,
-								})}
-							</p>
-							<div className="flex gap-2">
-								<Button
-									type="button"
-									size="sm"
-									variant="outline"
-									onClick={() => setHostOpen(true)}
-								>
-									{t('common:settings.devices.showQrCode')}
-								</Button>
-								<Button
-									type="button"
-									size="sm"
-									variant="ghost"
-									onClick={cancelHost}
-								>
-									{t('common:settings.devices.cancelPairing')}
-								</Button>
-							</div>
-						</div>
+			) : (
+				<>
+					{thisDevice ? (
+						<Frame>
+							<FramePanel className="flex flex-col gap-4">
+								<div className="space-y-1">
+									<FrameTitle>
+										{t('common:settings.devices.thisDevice')}
+									</FrameTitle>
+									<FrameDescription>
+										{t('common:settings.devices.thisDeviceHint')}
+									</FrameDescription>
+								</div>
+								<div className="flex items-center justify-between gap-3">
+									<div className="flex min-w-0 items-center gap-3">
+										<div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+											<ThisDeviceIcon className="h-5 w-5" />
+										</div>
+										<div className="min-w-0">
+											<p className="font-medium truncate">
+												{thisDevice.display_name}
+											</p>
+											<p className="text-xs text-muted-foreground truncate">
+												{deviceSubtitle(thisDevice)}
+											</p>
+										</div>
+									</div>
+									<Button
+										type="button"
+										size="sm"
+										variant="outline"
+										onClick={() => setRenameThisOpen(true)}
+									>
+										<Pencil className="w-4 h-4 mr-2" />
+										{t('common:settings.devices.rename')}
+									</Button>
+								</div>
+							</FramePanel>
+						</Frame>
 					) : null}
 
-					{devices.length === 0 ? (
-						<div className="py-8 text-center text-sm text-muted-foreground border-t">
-							<p className="font-medium text-foreground mb-2">
-								{t('common:settings.devices.noPairedDevices')}
-							</p>
-							<p>{t('common:settings.devices.noPairedDevicesHint')}</p>
-						</div>
-					) : (
-						<div className="space-y-3 border-t pt-4">
-							<PairedDevicesSearchField
-								value={searchQuery}
-								onChange={setSearchQuery}
-								namespace="settings"
-							/>
+					<Frame>
+						<FramePanel className="flex flex-col gap-6">
+							<div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+								<div className="space-y-2 min-w-0">
+									<FrameTitle>{t('common:settings.devices.title')}</FrameTitle>
+									<FrameDescription>
+										{t('common:settings.devices.description')}
+									</FrameDescription>
+								</div>
+								<div className="flex flex-wrap gap-2 shrink-0">
+									<Button
+										type="button"
+										size="sm"
+										disabled={isLoading && hostOpen}
+										onClick={openHost}
+									>
+										<Eye className="w-4 h-4 mr-2" />
+										{t('common:settings.devices.showQrCode')}
+									</Button>
+									<Button
+										type="button"
+										size="sm"
+										variant="outline"
+										onClick={() => setJoinOpen(true)}
+									>
+										<Plus className="w-4 h-4 mr-2" />
+										{t('common:settings.devices.enterCode')}
+									</Button>
+								</div>
+							</div>
 
-							{filteredDevices.length === 0 ? (
-								<p className="py-8 text-center text-sm text-muted-foreground">
-									{t('common:settings.devices.searchNoResults')}
-								</p>
+							{pairingTicket &&
+							hostExpiresIn != null &&
+							hostExpiresIn > 0 &&
+							!hostOpen ? (
+								<div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm">
+									<p className="text-muted-foreground">
+										{t('common:settings.devices.hostStillOpen', {
+											seconds: hostExpiresIn,
+										})}
+									</p>
+									<div className="flex gap-2">
+										<Button
+											type="button"
+											size="sm"
+											variant="outline"
+											onClick={() => setHostOpen(true)}
+										>
+											{t('common:settings.devices.showQrCode')}
+										</Button>
+										<Button
+											type="button"
+											size="sm"
+											variant="ghost"
+											onClick={cancelHost}
+										>
+											{t('common:settings.devices.cancelPairing')}
+										</Button>
+									</div>
+								</div>
+							) : null}
+
+							{devices.length === 0 ? (
+								<div className="py-8 text-center text-sm text-muted-foreground border-t">
+									<p className="font-medium text-foreground mb-2">
+										{t('common:settings.devices.noPairedDevices')}
+									</p>
+									<p>{t('common:settings.devices.noPairedDevicesHint')}</p>
+								</div>
 							) : (
-								<ul className="divide-y">
-									{filteredDevices.map((device) => {
-										const Icon = deviceTypeIcon(device.device_type)
-										const isActive = isPairedDeviceActive(device)
-										return (
-											<li
-												key={device.endpoint_id}
-												className="flex items-center justify-between gap-3 py-3 first:pt-4"
-											>
-												<div className="flex min-w-0 items-center gap-3">
-													<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
-														<Icon className="h-4 w-4" />
-													</div>
-													<div className="min-w-0">
-														<p className="font-medium truncate">
-															{device.display_name}
-														</p>
-														<p className="text-xs text-muted-foreground truncate">
-															{deviceSubtitle(device)}
-														</p>
-														{!isActive ? (
-															<p className="mt-1 text-xs text-muted-foreground">
-																{t('common:settings.devices.unpairedHint')}
-															</p>
-														) : null}
-													</div>
-												</div>
-												<div className="flex shrink-0 items-center gap-2">
-													<DevicePairingStatus
-														device={device}
-														namespace="settings"
-													/>
-													{isActive ? (
-														<Button
-															type="button"
-															variant="ghost"
-															size="icon-sm"
-															aria-label={t('common:settings.devices.rename')}
-															onClick={() =>
-																setRenamePeerId(device.endpoint_id)
-															}
-														>
-															<Pencil className="w-4 h-4" />
-														</Button>
-													) : null}
-													<Button
-														type="button"
-														variant="ghost"
-														size="icon-sm"
-														aria-label={t(
-															'common:settings.devices.removeDevice'
-														)}
-														onClick={async () => {
-															try {
-																await forget(device.endpoint_id)
-																toastManager.add({
-																	title: t(
-																		'common:settings.devices.deviceRemoved'
-																	),
-																	type: 'success',
-																})
-															} catch (error) {
-																console.error(error)
-																toastManager.add({
-																	title: t(
-																		'common:settings.devices.removeFailed'
-																	),
-																	type: 'error',
-																})
-															}
-														}}
-													>
-														<Trash2 className="w-4 h-4" />
-													</Button>
-												</div>
-											</li>
-										)
-									})}
-								</ul>
-							)}
-						</div>
-					)}
-				</FramePanel>
-			</Frame>
+								<div className="space-y-3 border-t pt-4">
+									<PairedDevicesSearchField
+										value={searchQuery}
+										onChange={setSearchQuery}
+										namespace="settings"
+									/>
 
-			<PairHostModal
-				open={hostOpen}
-				ticket={pairingTicket}
-				isLoading={isLoading}
-				expiresIn={hostExpiresIn}
-				onDismiss={dismissHost}
-				onCancelPairing={cancelHost}
-			/>
-			<PairJoinModal
-				open={joinOpen}
-				isLoading={isJoining}
-				onClose={() => setJoinOpen(false)}
-				onJoin={join}
-			/>
-			{thisDevice ? (
-				<RenameDeviceModal
-					open={renameThisOpen}
-					title={t('common:settings.devices.renameThisDevice')}
-					description={t('common:settings.devices.renameThisDeviceHint')}
-					initialName={thisDevice.display_name}
-					onClose={() => setRenameThisOpen(false)}
-					onSave={async (name) => {
-						await renameThisDevice(name)
-					}}
-				/>
-			) : null}
-			{renamePeer ? (
-				<RenameDeviceModal
-					open
-					title={t('common:settings.devices.renameDevice')}
-					description={t('common:settings.devices.renameDeviceHint')}
-					initialName={renamePeer.display_name}
-					onClose={() => setRenamePeerId(null)}
-					onSave={async (name) => {
-						await renameDevice(renamePeer.endpoint_id, name)
-					}}
-				/>
-			) : null}
-		</>
+									{filteredDevices.length === 0 ? (
+										<p className="py-8 text-center text-sm text-muted-foreground">
+											{t('common:settings.devices.searchNoResults')}
+										</p>
+									) : (
+										<ul className="divide-y">
+											{filteredDevices.map((device) => {
+												const Icon = deviceTypeIcon(device.device_type)
+												const isActive = isPairedDeviceActive(device)
+												return (
+													<li
+														key={device.endpoint_id}
+														className="flex items-center justify-between gap-3 py-3 first:pt-4"
+													>
+														<div className="flex min-w-0 items-center gap-3">
+															<div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-md bg-muted text-muted-foreground">
+																<Icon className="h-4 w-4" />
+															</div>
+															<div className="min-w-0">
+																<p className="font-medium truncate">
+																	{device.display_name}
+																</p>
+																<p className="text-xs text-muted-foreground truncate">
+																	{deviceSubtitle(device)}
+																</p>
+																{!isActive ? (
+																	<p className="mt-1 text-xs text-muted-foreground">
+																		{t(
+																			'common:settings.devices.unpairedHint'
+																		)}
+																	</p>
+																) : null}
+															</div>
+														</div>
+														<div className="flex shrink-0 items-center gap-2">
+															<DevicePairingStatus
+																device={device}
+																namespace="settings"
+															/>
+															{isActive ? (
+																<Button
+																	type="button"
+																	variant="ghost"
+																	size="icon-sm"
+																	aria-label={t(
+																		'common:settings.devices.rename'
+																	)}
+																	onClick={() =>
+																		setRenamePeerId(device.endpoint_id)
+																	}
+																>
+																	<Pencil className="w-4 h-4" />
+																</Button>
+															) : null}
+															<Button
+																type="button"
+																variant="ghost"
+																size="icon-sm"
+																aria-label={t(
+																	'common:settings.devices.removeDevice'
+																)}
+																onClick={async () => {
+																	try {
+																		await forget(device.endpoint_id)
+																		toastManager.add({
+																			title: t(
+																				'common:settings.devices.deviceRemoved'
+																			),
+																			type: 'success',
+																		})
+																	} catch (error) {
+																		console.error(error)
+																		toastManager.add({
+																			title: t(
+																				'common:settings.devices.removeFailed'
+																			),
+																			type: 'error',
+																		})
+																	}
+																}}
+															>
+																<Trash2 className="w-4 h-4" />
+															</Button>
+														</div>
+													</li>
+												)
+											})}
+										</ul>
+									)}
+								</div>
+							)}
+						</FramePanel>
+					</Frame>
+
+					<PairHostModal
+						open={hostOpen}
+						ticket={pairingTicket}
+						isLoading={isLoading}
+						expiresIn={hostExpiresIn}
+						onDismiss={dismissHost}
+						onCancelPairing={cancelHost}
+					/>
+					<PairJoinModal
+						open={joinOpen}
+						isLoading={isJoining}
+						onClose={() => setJoinOpen(false)}
+						onJoin={join}
+					/>
+					{thisDevice ? (
+						<RenameDeviceModal
+							open={renameThisOpen}
+							title={t('common:settings.devices.renameThisDevice')}
+							description={t('common:settings.devices.renameThisDeviceHint')}
+							initialName={thisDevice.display_name}
+							onClose={() => setRenameThisOpen(false)}
+							onSave={async (name) => {
+								await renameThisDevice(name)
+							}}
+						/>
+					) : null}
+					{renamePeer ? (
+						<RenameDeviceModal
+							open
+							title={t('common:settings.devices.renameDevice')}
+							description={t('common:settings.devices.renameDeviceHint')}
+							initialName={renamePeer.display_name}
+							onClose={() => setRenamePeerId(null)}
+							onSave={async (name) => {
+								await renameDevice(renamePeer.endpoint_id, name)
+							}}
+						/>
+					) : null}
+				</>
+			)}
+		</motion.div>
 	)
 }
