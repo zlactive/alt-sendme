@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { IS_DESKTOP } from '@/lib/platform'
 import {
 	getDeviceInfo,
+	getPairingTicket,
 	listPairedDevices,
 	type DeviceInfo,
 	type PairedDevice,
@@ -11,6 +12,8 @@ import { useNodeCapabilityStore } from '@/store/node-capability-store'
 type PairingDataState = {
 	devices: PairedDevice[]
 	thisDevice: DeviceInfo | null
+	/** Stable pairing code for this device (valid across restarts). */
+	pairingCode: string | null
 	/** True after the first hydrate attempt when the node is ready (or not desktop). */
 	hasHydrated: boolean
 	setDevices: (
@@ -23,6 +26,7 @@ type PairingDataState = {
 export const usePairingDataStore = create<PairingDataState>((set) => ({
 	devices: [],
 	thisDevice: null,
+	pairingCode: null,
 	hasHydrated: !IS_DESKTOP,
 	setDevices: (devices) =>
 		set((state) => ({
@@ -32,25 +36,40 @@ export const usePairingDataStore = create<PairingDataState>((set) => ({
 	setThisDevice: (thisDevice) => set({ thisDevice }),
 	hydrate: async () => {
 		if (!IS_DESKTOP) {
-			set({ devices: [], thisDevice: null, hasHydrated: true })
+			set({
+				devices: [],
+				thisDevice: null,
+				pairingCode: null,
+				hasHydrated: true,
+			})
 			return
 		}
 
 		const { nodeStatus, hasResolved } = useNodeCapabilityStore.getState()
 		if (!hasResolved) return
 		if (nodeStatus.status !== 'ready') {
-			set({ devices: [], thisDevice: null, hasHydrated: true })
+			set({
+				devices: [],
+				thisDevice: null,
+				pairingCode: null,
+				hasHydrated: true,
+			})
 			return
 		}
 
 		try {
-			const [devices, thisDevice] = await Promise.all([
+			const [devices, thisDevice, pairingCode] = await Promise.all([
 				listPairedDevices(),
 				getDeviceInfo(),
+				getPairingTicket().catch((error) => {
+					console.error('Failed to load pairing ticket:', error)
+					return null
+				}),
 			])
 			set({
 				devices,
 				thisDevice,
+				pairingCode,
 				hasHydrated: true,
 			})
 		} catch (error) {

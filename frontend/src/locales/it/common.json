@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Invia",
 	"webPreview": {
-		"banner": "Modalità anteprima — i trasferimenti file richiedono l’app desktop.",
+		"banner": "Modalità anteprima - i trasferimenti file richiedono l’app desktop.",
 		"transferUnavailable": "Il trasferimento file non è disponibile nell’anteprima web. Scarica l’app desktop per inviare e ricevere file."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Vedi opzioni di download",
 		"github": "GitHub",
 		"linksLabel": "App desktop e link del progetto",
-		"notice": "La versione web non supporta connessioni dirette — il traffico passa per relay pubblici crittografati e la velocità è limitata. I tuoi file restano comunque crittografati. Usa l’app desktop/CLI o relay personalizzati per un’esperienza migliore.",
+		"notice": "La versione web non supporta connessioni dirette - il traffico passa per relay pubblici crittografati e la velocità è limitata. I tuoi file restano comunque crittografati. Usa l’app desktop/CLI o relay personalizzati per un’esperienza migliore.",
 		"platforms": "AltSendme è disponibile come app desktop, Android, CLI e web.",
 		"website": "Sito web"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Associa dispositivo",
 		"pairedDevices": {
 			"connectedTitle": "Dispositivi connessi",
-			"deviceOffline": "Il dispositivo è offline — usa il ticket manuale.",
+			"deviceOffline": "Il dispositivo è offline - usa il ticket manuale.",
 			"deviceUnreachable": "Questo dispositivo è ancora associato. Riprova quando è online oppure usa il ticket manuale. Entrambi i dispositivi potrebbero richiedere impostazioni relay compatibili.",
 			"failed": "Riprova",
 			"inviteFailed": "Impossibile raggiungere il dispositivo",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Associa i dispositivi nelle Impostazioni, poi torna qui per inviare senza un link.",
 				"emptyTitle": "Nessun dispositivo associato",
-				"hint": "Scegli un dispositivo — il trasferimento inizia quando lo accetta.",
+				"hint": "Scegli un dispositivo - il trasferimento inizia quando lo accetta.",
 				"manageInSettings": "Associa dispositivi nelle Impostazioni",
 				"nodeUnavailable": "L’invio al dispositivo non è disponibile al momento. Puoi comunque usare Trasferimento singolo nell’altra scheda.",
 				"searchNoResults": "Nessun dispositivo associato corrisponde alla ricerca.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Invia a un dispositivo associato",
 			"link": {
 				"hint": "Chiunque abbia questo link può ricevere i tuoi file.",
-				"transferInProgress": "Trasferimento in corso — apri Trasferimento singolo per i dettagli.",
+				"transferInProgress": "Trasferimento in corso - apri Trasferimento singolo per i dettagli.",
 				"waiting": "In attesa che qualcuno usi il tuo link"
 			},
 			"or": "oppure"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} ha annullato l’associazione di questo dispositivo",
 			"enterCode": "Inserisci codice di associazione",
 			"hostExpiresIn": "Scade tra {{seconds}} s.",
-			"hostHint": "Scansiona o copia questo codice sul dispositivo che vuoi associare. Puoi chiudere questa finestra — l’associazione resta aperta fino alla scadenza.",
-			"hostStillOpen": "In attesa che un dispositivo si unisca — associazione aperta per {{seconds}} s.",
+			"hostHint": "Scansiona o copia questo codice sul dispositivo che vuoi associare. Puoi chiudere questa finestra - l’associazione resta aperta fino alla scadenza.",
+			"hostStillOpen": "In attesa che un dispositivo si unisca - associazione aperta per {{seconds}} s.",
 			"joinHint": "Incolla il codice di associazione dal tuo altro dispositivo.",
 			"nameSaveFailed": "Impossibile salvare il nome del dispositivo",
 			"nameSaved": "Nome dispositivo salvato",
@@ -339,7 +339,7 @@
 			"removeFailed": "Impossibile rimuovere il dispositivo",
 			"rename": "Rinomina",
 			"renameDevice": "Rinomina dispositivo associato",
-			"renameDeviceHint": "Modifica solo il nome su questo dispositivo — non sull’altro.",
+			"renameDeviceHint": "Modifica solo il nome su questo dispositivo - non sull’altro.",
 			"renameThisDevice": "Rinomina questo dispositivo",
 			"renameThisDeviceHint": "Scegli un nome che ti aiuti a riconoscere questo computer durante l’associazione.",
 			"saveName": "Salva nome",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay non disponibile",
 			"fellBackToPublic": "Relay personalizzato irraggiungibile, viene usato un relay pubblico.",
 			"fellBackToastTitle": "Uso del relay pubblico",
-			"fellBackToastSend": "Il tuo relay personalizzato era irraggiungibile — questo trasferimento usa un relay pubblico.",
-			"fellBackToastReceive": "Il tuo relay personalizzato era irraggiungibile — questo download usa un relay pubblico.",
+			"fellBackToastSend": "Il tuo relay personalizzato era irraggiungibile - questo trasferimento usa un relay pubblico.",
+			"fellBackToastReceive": "Il tuo relay personalizzato era irraggiungibile - questo download usa un relay pubblico.",
 			"dialogDescription": "Mostra quale server relay l’app sta usando attualmente per le connessioni.",
 			"connectedRelay": "Relay connesso",
 			"checking": "Verifica connessione…",

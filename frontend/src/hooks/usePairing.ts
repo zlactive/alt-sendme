@@ -19,13 +19,13 @@ import {
 } from './usePairedDeviceEvents'
 import { usePairingDataStore } from '@/store/pairing-data-store'
 
-// Must match engine/protocol pairing::PAIRING_VOTE_TIMEOUT_SECS
-const PAIRING_HOST_TTL_SECS = 120
+const PAIRING_HOST_TTL_SECS = 180
 
 export function usePairing() {
 	const { t } = useTranslation()
 	const devices = usePairingDataStore((s) => s.devices)
 	const thisDevice = usePairingDataStore((s) => s.thisDevice)
+	const pairingCode = usePairingDataStore((s) => s.pairingCode)
 	const hasHydrated = usePairingDataStore((s) => s.hasHydrated)
 	const setDevices = usePairingDataStore((s) => s.setDevices)
 	const setThisDevice = usePairingDataStore((s) => s.setThisDevice)
@@ -86,6 +86,10 @@ export function usePairing() {
 			const expiredUnlisten = await listen('pairing-host-expired', () => {
 				setPairingTicket(null)
 				setHostExpiresIn(null)
+				toastManager.add({
+					title: t('common:settings.devices.hostClosedToast'),
+					type: 'default',
+				})
 			})
 			if (disposed) {
 				expiredUnlisten()
@@ -101,7 +105,7 @@ export function usePairing() {
 			unlistenPaired?.()
 			unlistenExpired?.()
 		}
-	}, [hydrate])
+	}, [hydrate, t])
 
 	usePairedDeviceEvents({
 		onPresence: useCallback(
@@ -148,14 +152,20 @@ export function usePairing() {
 		if (!IS_DESKTOP || !isNodeReady) return null
 		setIsLoading(true)
 		try {
-			const ticket = await startPairingHost({ ttlSecs: 120 })
+			const ticket = await startPairingHost({ ttlSecs: PAIRING_HOST_TTL_SECS })
 			setPairingTicket(ticket)
 			setHostExpiresIn(PAIRING_HOST_TTL_SECS)
+			toastManager.add({
+				title: t('common:settings.devices.hostOpenedToast', {
+					seconds: PAIRING_HOST_TTL_SECS,
+				}),
+				type: 'default',
+			})
 			return ticket
 		} finally {
 			setIsLoading(false)
 		}
-	}, [isNodeReady])
+	}, [isNodeReady, t])
 
 	const closeHostPairing = useCallback(async () => {
 		setPairingTicket(null)
@@ -209,6 +219,7 @@ export function usePairing() {
 	return {
 		devices,
 		thisDevice,
+		pairingCode,
 		pairingTicket,
 		hostExpiresIn,
 		isJoining,

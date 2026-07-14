@@ -1190,12 +1190,9 @@ impl NodeService {
         Ok(())
     }
 
-    pub fn pairing_ticket(&self) -> anyhow::Result<String> {
+    pub async fn pairing_ticket(&self) -> anyhow::Result<String> {
         pairing_dev!("host.ticket.build", local_endpoint = %self.identity.endpoint_id());
-        let runtime = self
-            .runtime
-            .try_lock()
-            .context("node runtime busy")?;
+        let runtime = self.runtime.lock().await;
         let mut addr = runtime.endpoint.addr();
         apply_options(&mut addr, AddrInfoOptions::Relay);
         let relay_url = addr.relay_urls().next().map(|u| u.to_string());
@@ -1250,7 +1247,7 @@ impl NodeService {
             *self.pairing_expire_task.lock().await = Some(handle);
         }
 
-        let ticket = self.pairing_ticket()?;
+        let ticket = self.pairing_ticket().await?;
         pairing_dev!(
             "host.open.done",
             local_endpoint = %self.identity.endpoint_id(),

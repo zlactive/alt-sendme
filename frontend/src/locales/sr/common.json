@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Пошаљи",
 	"webPreview": {
-		"banner": "Režim pregleda — prenos datoteka zahteva desktop aplikaciju.",
+		"banner": "Režim pregleda - prenos datoteka zahteva desktop aplikaciju.",
 		"transferUnavailable": "Prenos datoteka nije dostupan u web pregledu. Preuzmi desktop aplikaciju za slanje i prijem datoteka."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Pogledaj opcije preuzimanja",
 		"github": "GitHub",
 		"linksLabel": "Desktop aplikacija i linkovi projekta",
-		"notice": "Web verzija ne podržava direktne veze — saobraćaj ide kroz šifrovane javne relay servere, a brzine su ograničene. Tvoje datoteke ipak ostaju šifrovane. Koristi desktop/CLI aplikaciju ili prilagođene relay servere za bolje iskustvo.",
+		"notice": "Web verzija ne podržava direktne veze - saobraćaj ide kroz šifrovane javne relay servere, a brzine su ograničene. Tvoje datoteke ipak ostaju šifrovane. Koristi desktop/CLI aplikaciju ili prilagođene relay servere za bolje iskustvo.",
 		"platforms": "AltSendme je dostupan kao desktop, Android, CLI i web.",
 		"website": "Veb sajt"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Upari uređaj",
 		"pairedDevices": {
 			"connectedTitle": "Povezani uređaji",
-			"deviceOffline": "Uređaj je offline — koristi ručnu kartu umesto toga.",
+			"deviceOffline": "Uređaj je offline - koristi ručnu kartu umesto toga.",
 			"deviceUnreachable": "Ovaj uređaj je i dalje uparen. Pokušaj ponovo kada bude online, ili koristi ručnu kartu. Oba uređaja možda treba da imaju kompatibilna relay podešavanja.",
 			"failed": "Ponovi",
 			"inviteFailed": "Uređaj nije dostupan",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Upari uređaje u Podešavanjima, pa se vrati ovde da šalješ bez linka.",
 				"emptyTitle": "Još nema uparenih uređaja",
-				"hint": "Izaberi uređaj — prenos počinje kada prihvate.",
+				"hint": "Izaberi uređaj - prenos počinje kada prihvate.",
 				"manageInSettings": "Upari uređaje u Podešavanjima",
 				"nodeUnavailable": "Slanje na uređaj trenutno nije dostupno. I dalje možeš koristiti jednokratni prenos sa druge kartice.",
 				"searchNoResults": "Nijedan upareni uređaj ne odgovara pretrazi.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Pošalji na upareni uređaj",
 			"link": {
 				"hint": "Svako sa ovim linkom može da primi tvoje datoteke.",
-				"transferInProgress": "Prenos u toku — otvori jednokratni prenos za detalje.",
+				"transferInProgress": "Prenos u toku - otvori jednokratni prenos za detalje.",
 				"waiting": "Čekanje da neko koristi tvoj link"
 			},
 			"or": "ili"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} je uklonio uparivanje ovog uređaja",
 			"enterCode": "Unesi kod za uparivanje",
 			"hostExpiresIn": "Ističe za {{seconds}} s.",
-			"hostHint": "Skeniraj ili kopiraj ovaj kod na uređaju koji želiš da upariš. Možeš zatvoriti ovaj dijalog — uparivanje ostaje otvoreno do isteka.",
-			"hostStillOpen": "Čekanje da se uređaj priključi — uparivanje otvoreno {{seconds}} s.",
+			"hostHint": "Skeniraj ili kopiraj ovaj kod na uređaju koji želiš da upariš. Možeš zatvoriti ovaj dijalog - uparivanje ostaje otvoreno do isteka.",
+			"hostStillOpen": "Čekanje da se uređaj priključi - uparivanje otvoreno {{seconds}} s.",
 			"joinHint": "Nalepi kod za uparivanje sa drugog uređaja.",
 			"nameSaveFailed": "Nije moguće sačuvati naziv uređaja",
 			"nameSaved": "Naziv uređaja sačuvan",
@@ -339,7 +339,7 @@
 			"removeFailed": "Nije moguće ukloniti uređaj",
 			"rename": "Preimenuj",
 			"renameDevice": "Preimenuj upareni uređaj",
-			"renameDeviceHint": "Ovo menja naziv samo na ovom uređaju — ne preimenuje drugu stranu.",
+			"renameDeviceHint": "Ovo menja naziv samo na ovom uređaju - ne preimenuje drugu stranu.",
 			"renameThisDevice": "Preimenuj ovaj uređaj",
 			"renameThisDeviceHint": "Izaberi naziv koji ti pomaže da prepoznaš ovaj računar pri uparivanju.",
 			"saveName": "Sačuvaj naziv",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Ново ажурирање!",
 		"newVersionAvailable": "Верзија {{version}} је доступна.",
-		"newVersionAvailableInline": "Доступна је нова верзија — {{version}}",
+		"newVersionAvailableInline": "Доступна је нова верзија - {{version}}",
 		"updateNow": "Ажурирај сада",
 		"later": "Касније",
 		"checkForUpdates": "Провери ажурирања",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay nedostupan",
 			"fellBackToPublic": "Prilagođeni relay nedostupan, umesto njega se koristi javni relay.",
 			"fellBackToastTitle": "Koristi se javni relay",
-			"fellBackToastSend": "Vaš prilagođeni relay nije bio dostupan — ovaj transfer koristi javni relay.",
-			"fellBackToastReceive": "Vaš prilagođeni relay nije bio dostupan — ovo preuzimanje koristi javni relay.",
+			"fellBackToastSend": "Vaš prilagođeni relay nije bio dostupan - ovaj transfer koristi javni relay.",
+			"fellBackToastReceive": "Vaš prilagođeni relay nije bio dostupan - ovo preuzimanje koristi javni relay.",
 			"dialogDescription": "Prikazuje koji relay server aplikacija trenutno koristi za veze.",
 			"connectedRelay": "Povezan relay",
 			"checking": "Provera veze…",

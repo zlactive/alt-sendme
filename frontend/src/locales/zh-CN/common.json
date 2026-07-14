@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "发送",
 	"webPreview": {
-		"banner": "预览模式 — 文件传输需要桌面应用。",
+		"banner": "预览模式 - 文件传输需要桌面应用。",
 		"transferUnavailable": "Web 预览不支持文件传输。请下载桌面应用以发送和接收文件。"
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "查看下载选项",
 		"github": "GitHub",
 		"linksLabel": "获取桌面应用和项目链接",
-		"notice": "Web 版不支持直连 — 流量经由加密的公共中继转发，速度受限。无论如何，您的文件始终保持加密。建议使用桌面/CLI 应用或自定义中继以获得更好体验。",
+		"notice": "Web 版不支持直连 - 流量经由加密的公共中继转发，速度受限。无论如何，您的文件始终保持加密。建议使用桌面/CLI 应用或自定义中继以获得更好体验。",
 		"platforms": "AltSendme 提供桌面版、Android 版、CLI 版和 Web 版。",
 		"website": "网站"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "配对设备",
 		"pairedDevices": {
 			"connectedTitle": "已连接的设备",
-			"deviceOffline": "设备已离线 — 请改用手动票据。",
+			"deviceOffline": "设备已离线 - 请改用手动票据。",
 			"deviceUnreachable": "此设备仍处于配对状态。请在其上线后重试，或使用手动票据。两台设备可能需要兼容的中继设置。",
 			"failed": "重试",
 			"inviteFailed": "无法连接设备",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "在设置中配对设备后，返回此处即可无需链接发送。",
 				"emptyTitle": "尚无配对设备",
-				"hint": "选择一台设备 — 对方接受后开始传输。",
+				"hint": "选择一台设备 - 对方接受后开始传输。",
 				"manageInSettings": "在设置中配对设备",
 				"nodeUnavailable": "设备发送当前不可用。您仍可在另一标签页使用一次性传输。",
 				"searchNoResults": "没有与搜索匹配的配对设备。",
@@ -114,7 +114,7 @@
 			"devicesButton": "发送到配对设备",
 			"link": {
 				"hint": "拥有此链接的任何人都可以接收您的文件。",
-				"transferInProgress": "传输进行中 — 打开「一次性传输」查看详情。",
+				"transferInProgress": "传输进行中 - 打开「一次性传输」查看详情。",
 				"waiting": "等待有人使用您的链接"
 			},
 			"or": "或"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} 已取消与此设备的配对",
 			"enterCode": "输入配对码",
 			"hostExpiresIn": "{{seconds}} 秒后过期。",
-			"hostHint": "在您要配对的设备上扫描或复制此码。您可以关闭此对话框 — 配对将保持有效直至过期。",
-			"hostStillOpen": "等待设备加入 — 配对将在 {{seconds}} 秒内保持开放。",
+			"hostHint": "在您要配对的设备上扫描或复制此码。您可以关闭此对话框 - 配对将保持有效直至过期。",
+			"hostStillOpen": "等待设备加入 - 配对将在 {{seconds}} 秒内保持开放。",
 			"joinHint": "粘贴您其他设备上的配对码。",
 			"nameSaveFailed": "无法保存设备名称",
 			"nameSaved": "设备名称已保存",
@@ -339,7 +339,7 @@
 			"removeFailed": "无法移除设备",
 			"rename": "重命名",
 			"renameDevice": "重命名配对设备",
-			"renameDeviceHint": "这只会更改本设备上的名称 — 不会更改对方设备的名称。",
+			"renameDeviceHint": "这只会更改本设备上的名称 - 不会更改对方设备的名称。",
 			"renameThisDevice": "重命名此设备",
 			"renameThisDeviceHint": "选择一个便于在配对时识别此电脑的名称。",
 			"saveName": "保存名称",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "有新更新！",
 		"newVersionAvailable": "新版本 {{version}} 可用。",
-		"newVersionAvailableInline": "有新版本可用 — {{version}}",
+		"newVersionAvailableInline": "有新版本可用 - {{version}}",
 		"updateNow": "立即更新",
 		"later": "稍后",
 		"checkForUpdates": "检查更新",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "中继不可用",
 			"fellBackToPublic": "自定义中继不可达，改用公共中继。",
 			"fellBackToastTitle": "正在使用公共中继",
-			"fellBackToastSend": "您的自定义中继不可达 — 此次传输正在使用公共中继。",
-			"fellBackToastReceive": "您的自定义中继不可达 — 此次下载正在使用公共中继。",
+			"fellBackToastSend": "您的自定义中继不可达 - 此次传输正在使用公共中继。",
+			"fellBackToastReceive": "您的自定义中继不可达 - 此次下载正在使用公共中继。",
 			"dialogDescription": "显示应用当前用于连接的中继服务器。",
 			"connectedRelay": "已连接的中继",
 			"checking": "正在检查连接…",

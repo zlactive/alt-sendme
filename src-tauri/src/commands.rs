@@ -832,6 +832,20 @@ fn require_node(guard: &crate::state::AppState) -> Result<&NodeService, String> 
 
 #[cfg(desktop)]
 #[tauri::command]
+pub async fn get_pairing_ticket(state: State<'_, AppStateMutex>) -> Result<String, String> {
+    pairing_dev!("cmd.get_pairing_ticket");
+    let guard = state.lock().await;
+    let node = require_node(&guard)?;
+    let ticket = node.pairing_ticket().await.map_err(|e| {
+        pairing_dev_warn!("cmd.get_pairing_ticket.failed", error = %e);
+        e.to_string()
+    })?;
+    pairing_dev!("cmd.get_pairing_ticket.done", ticket_len = ticket.len());
+    Ok(ticket)
+}
+
+#[cfg(desktop)]
+#[tauri::command]
 pub async fn start_pairing_host(
     ttl_secs: Option<u64>,
     state: State<'_, AppStateMutex>,

@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Yuborish",
 	"webPreview": {
-		"banner": "Ko'rib chiqish rejimi — fayl uzatish desktop ilovasini talab qiladi.",
+		"banner": "Ko'rib chiqish rejimi - fayl uzatish desktop ilovasini talab qiladi.",
 		"transferUnavailable": "Veb ko'rib chiqishda fayl uzatish mavjud emas. Fayl yuborish va qabul qilish uchun desktop ilovasini yuklab oling."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Yuklab olish variantlarini ko'rish",
 		"github": "GitHub",
 		"linksLabel": "Desktop ilova va loyiha havolalari",
-		"notice": "Veb versiyasi to'g'ridan-to'g'ri ulanishlarni qo'llab-quvvatlamaydi — trafik shifrlangan ommaviy relay'lar orqali o'tadi va tezlik cheklangan. Fayllaringiz har qanday holatda shifrlangan qoladi. Yaxshiroq tajriba uchun desktop/CLI ilova yoki maxsus relay'lardan foydalaning.",
+		"notice": "Veb versiyasi to'g'ridan-to'g'ri ulanishlarni qo'llab-quvvatlamaydi - trafik shifrlangan ommaviy relay'lar orqali o'tadi va tezlik cheklangan. Fayllaringiz har qanday holatda shifrlangan qoladi. Yaxshiroq tajriba uchun desktop/CLI ilova yoki maxsus relay'lardan foydalaning.",
 		"platforms": "AltSendme desktop, Android, CLI va veb sifatida mavjud.",
 		"website": "Veb-sayt"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Qurilmani juftlash",
 		"pairedDevices": {
 			"connectedTitle": "Ulangan qurilmalar",
-			"deviceOffline": "Qurilma oflayn — o'rniga qo'lda ticketdan foydalaning.",
+			"deviceOffline": "Qurilma oflayn - o'rniga qo'lda ticketdan foydalaning.",
 			"deviceUnreachable": "Bu qurilma hali juftlangan. Onlayn bo'lganda qayta urinib ko'ring yoki qo'lda ticketdan foydalaning. Ikkala qurilma ham mos relay sozlamalariga muhtoj bo'lishi mumkin.",
 			"failed": "Qayta urinish",
 			"inviteFailed": "Qurilmaga ulanib bo'lmadi",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Sozlamalarda qurilmalarni juftlang, keyin havolasiz yuborish uchun bu yerga qayting.",
 				"emptyTitle": "Hali juftlangan qurilmalar yo'q",
-				"hint": "Qurilma tanlang — qabul qilinganda uzatish boshlanadi.",
+				"hint": "Qurilma tanlang - qabul qilinganda uzatish boshlanadi.",
 				"manageInSettings": "Sozlamalarda qurilmalarni juftlash",
 				"nodeUnavailable": "Qurilmaga yuborish hozir mavjud emas. Boshqa tabdagi bir martalik uzatishdan foydalanishingiz mumkin.",
 				"searchNoResults": "Qidiruvga mos juftlangan qurilmalar topilmadi.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Juftlangan qurilmaga yuborish",
 			"link": {
 				"hint": "Bu havolaga ega bo'lgan har kim fayllaringizni qabul qilishi mumkin.",
-				"transferInProgress": "Uzatish davom etmoqda — tafsilotlar uchun bir martalik uzatishni oching.",
+				"transferInProgress": "Uzatish davom etmoqda - tafsilotlar uchun bir martalik uzatishni oching.",
 				"waiting": "Kimdir havolangizdan foydalanishini kutmoqda"
 			},
 			"or": "yoki"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} bu qurilmaning juftligini bekor qildi",
 			"enterCode": "Juftlash kodini kiriting",
 			"hostExpiresIn": "{{seconds}} soniyada muddati tugaydi.",
-			"hostHint": "Juftlamoqchi bo'lgan qurilmada bu kodni skanerlang yoki nusxalang. Bu oynani yopishingiz mumkin — muddati tugaguncha juftlash ochiq qoladi.",
-			"hostStillOpen": "Qurilma qo'shilishini kutmoqda — juftlash {{seconds}} soniya ochiq.",
+			"hostHint": "Juftlamoqchi bo'lgan qurilmada bu kodni skanerlang yoki nusxalang. Bu oynani yopishingiz mumkin - muddati tugaguncha juftlash ochiq qoladi.",
+			"hostStillOpen": "Qurilma qo'shilishini kutmoqda - juftlash {{seconds}} soniya ochiq.",
 			"joinHint": "Boshqa qurilmangizdan juftlash kodini qo'ying.",
 			"nameSaveFailed": "Qurilma nomi saqlanmadi",
 			"nameSaved": "Qurilma nomi saqlandi",
@@ -339,7 +339,7 @@
 			"removeFailed": "Qurilma olib tashlanmadi",
 			"rename": "Nomini o'zgartirish",
 			"renameDevice": "Juftlangan qurilma nomini o'zgartirish",
-			"renameDeviceHint": "Bu faqat shu qurilmadagi nomni o'zgartiradi — boshqa tomondagi nom o'zgarmaydi.",
+			"renameDeviceHint": "Bu faqat shu qurilmadagi nomni o'zgartiradi - boshqa tomondagi nom o'zgarmaydi.",
 			"renameThisDevice": "Bu qurilma nomini o'zgartirish",
 			"renameThisDeviceHint": "Juftlashda bu kompyuterni tanib olishga yordam beradigan nom tanlang.",
 			"saveName": "Nomni saqlash",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay mavjud emas",
 			"fellBackToPublic": "Maxsus relay'ga ulanib bo'lmadi, buning o'rniga ommaviy relay ishlatilmoqda.",
 			"fellBackToastTitle": "Ommaviy relay ishlatilmoqda",
-			"fellBackToastSend": "Maxsus relay'ingizga ulanib bo'lmadi — bu uzatish ommaviy relay ishlatmoqda.",
-			"fellBackToastReceive": "Maxsus relay'ingizga ulanib bo'lmadi — bu yuklab olish ommaviy relay ishlatmoqda.",
+			"fellBackToastSend": "Maxsus relay'ingizga ulanib bo'lmadi - bu uzatish ommaviy relay ishlatmoqda.",
+			"fellBackToastReceive": "Maxsus relay'ingizga ulanib bo'lmadi - bu yuklab olish ommaviy relay ishlatmoqda.",
 			"dialogDescription": "Ilova hozir ulanishlar uchun qaysi relay serverdan foydalanayotganini ko'rsatadi.",
 			"connectedRelay": "Ulangan relay",
 			"checking": "Ulanish tekshirilmoqda…",

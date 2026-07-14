@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "傳送",
 	"webPreview": {
-		"banner": "預覽模式 — 檔案傳輸需要桌面應用程式。",
+		"banner": "預覽模式 - 檔案傳輸需要桌面應用程式。",
 		"transferUnavailable": "Web 預覽不支援檔案傳輸。請下載桌面應用程式以傳送和接收檔案。"
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "查看下載選項",
 		"github": "GitHub",
 		"linksLabel": "取得桌面應用程式與專案連結",
-		"notice": "Web 版不支援直連 — 流量經由加密的公共中繼轉送，速度受限。無論如何，您的檔案始終保持加密。建議使用桌面/CLI 應用程式或自訂中繼以獲得更好體驗。",
+		"notice": "Web 版不支援直連 - 流量經由加密的公共中繼轉送，速度受限。無論如何，您的檔案始終保持加密。建議使用桌面/CLI 應用程式或自訂中繼以獲得更好體驗。",
 		"platforms": "AltSendme 提供桌面版、Android 版、CLI 版與 Web 版。",
 		"website": "網站"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "配對裝置",
 		"pairedDevices": {
 			"connectedTitle": "已連線的裝置",
-			"deviceOffline": "裝置已離線 — 請改用手動票券。",
+			"deviceOffline": "裝置已離線 - 請改用手動票券。",
 			"deviceUnreachable": "此裝置仍處於配對狀態。請在其上線後重試，或使用手動票券。兩台裝置可能需要相容的中繼設定。",
 			"failed": "重試",
 			"inviteFailed": "無法連線至裝置",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "在設定中配對裝置後，返回此處即可無需連結傳送。",
 				"emptyTitle": "尚無配對裝置",
-				"hint": "選擇一台裝置 — 對方接受後即開始傳輸。",
+				"hint": "選擇一台裝置 - 對方接受後即開始傳輸。",
 				"manageInSettings": "在設定中配對裝置",
 				"nodeUnavailable": "裝置傳送目前無法使用。您仍可在其他分頁使用一次性傳輸。",
 				"searchNoResults": "沒有與搜尋相符的配對裝置。",
@@ -114,7 +114,7 @@
 			"devicesButton": "傳送至配對裝置",
 			"link": {
 				"hint": "擁有此連結的任何人都可以接收您的檔案。",
-				"transferInProgress": "傳輸進行中 — 開啟「一次性傳輸」查看詳情。",
+				"transferInProgress": "傳輸進行中 - 開啟「一次性傳輸」查看詳情。",
 				"waiting": "等待有人使用您的連結"
 			},
 			"or": "或"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} 已取消與此裝置的配對",
 			"enterCode": "輸入配對碼",
 			"hostExpiresIn": "{{seconds}} 秒後過期。",
-			"hostHint": "在您要配對的裝置上掃描或複製此碼。您可以關閉此對話方塊 — 配對將保持有效直至過期。",
-			"hostStillOpen": "等待裝置加入 — 配對將在 {{seconds}} 秒內保持開放。",
+			"hostHint": "在您要配對的裝置上掃描或複製此碼。您可以關閉此對話方塊 - 配對將保持有效直至過期。",
+			"hostStillOpen": "等待裝置加入 - 配對將在 {{seconds}} 秒內保持開放。",
 			"joinHint": "貼上您其他裝置上的配對碼。",
 			"nameSaveFailed": "無法儲存裝置名稱",
 			"nameSaved": "裝置名稱已儲存",
@@ -339,7 +339,7 @@
 			"removeFailed": "無法移除裝置",
 			"rename": "重新命名",
 			"renameDevice": "重新命名配對裝置",
-			"renameDeviceHint": "這只會變更本裝置上的名稱 — 不會變更對方裝置的名稱。",
+			"renameDeviceHint": "這只會變更本裝置上的名稱 - 不會變更對方裝置的名稱。",
 			"renameThisDevice": "重新命名此裝置",
 			"renameThisDeviceHint": "選擇一個便於在配對時辨識此電腦的名稱。",
 			"saveName": "儲存名稱",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "有新更新！",
 		"newVersionAvailable": "已有新版本 {{version}}。",
-		"newVersionAvailableInline": "有新版本可用 — {{version}}",
+		"newVersionAvailableInline": "有新版本可用 - {{version}}",
 		"updateNow": "立即更新",
 		"later": "稍後",
 		"checkForUpdates": "檢查更新",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "中繼不可用",
 			"fellBackToPublic": "自訂中繼無法連線，改用公共中繼。",
 			"fellBackToastTitle": "正在使用公共中繼",
-			"fellBackToastSend": "您的自訂中繼無法連線 — 此次傳輸正在使用公共中繼。",
-			"fellBackToastReceive": "您的自訂中繼無法連線 — 此次下載正在使用公共中繼。",
+			"fellBackToastSend": "您的自訂中繼無法連線 - 此次傳輸正在使用公共中繼。",
+			"fellBackToastReceive": "您的自訂中繼無法連線 - 此次下載正在使用公共中繼。",
 			"dialogDescription": "顯示應用程式目前用於連線的中繼伺服器。",
 			"connectedRelay": "已連線的中繼",
 			"checking": "正在檢查連線…",

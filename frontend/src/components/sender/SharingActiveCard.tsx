@@ -64,7 +64,10 @@ export function SharingActiveCard({
 								{t('common:sender.sharingActive.devices.hint')}
 							</SheetDescription>
 						</SheetHeader>
-						<SheetPanel className="min-h-0 flex-1 pt-4">
+						<SheetPanel
+							scrollFade={false}
+							className="flex h-full min-h-0 flex-col overflow-hidden !pt-0 !pb-4"
+						>
 							<PairedDevicesPanel
 								pairedDevices={pairedDevices}
 								pairedInviteStatus={pairedInviteStatus}

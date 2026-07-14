@@ -17,6 +17,7 @@ import {
 	listPairedDevices,
 	type PairedDevice,
 } from '@/lib/pairing-api'
+import { incrementPairedSendCount } from '@/lib/paired-send-counts'
 import { useNodeCapability } from '@/hooks/useNodeCapability'
 import {
 	applyPresencePatch,
@@ -905,6 +906,7 @@ export function useSender(): UseSenderReturn {
 		if (device && !isPairedDeviceActive(device)) {
 			return false
 		}
+		incrementPairedSendCount(endpointId)
 		const fileCount = Math.max(selectedPaths.length, 1)
 		setInviteStatus(endpointId, 'sending')
 		try {

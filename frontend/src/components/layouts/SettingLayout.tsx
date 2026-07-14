@@ -14,7 +14,7 @@ export function SettingLayout() {
 			<SidebarInset className="px-4 pb-12 pt-2 overflow-y-auto">
 				<motion.div
 					key={location.pathname}
-					className="flex flex-col gap-8 outline-none"
+					className="flex flex-col gap-4 outline-none"
 					initial={{ opacity: 0 }}
 					animate={{ opacity: 1 }}
 					transition={{ duration: 0.3, ease: 'easeOut' }}

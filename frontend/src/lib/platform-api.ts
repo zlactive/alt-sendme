@@ -231,6 +231,8 @@ function invokeWebStub<T>(cmd: string, args?: Record<string, unknown>): T {
 			return null as T
 		case 'set_device_display_name':
 			return null as T
+		case 'get_pairing_ticket':
+			return null as T
 		case 'list_paired_devices':
 			return [] as T
 		case 'start_pairing_host':

@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "보내기",
 	"webPreview": {
-		"banner": "미리보기 모드 — 파일 전송에는 데스크톱 앱이 필요합니다.",
+		"banner": "미리보기 모드 - 파일 전송에는 데스크톱 앱이 필요합니다.",
 		"transferUnavailable": "웹 미리보기에서는 파일 전송을 사용할 수 없습니다. 데스크톱 앱을 다운로드하여 파일을 보내고 받으세요."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "다운로드 옵션 보기",
 		"github": "GitHub",
 		"linksLabel": "데스크톱 앱 및 프로젝트 링크",
-		"notice": "웹 버전은 직접 연결을 지원하지 않습니다 — 트래픽은 암호화된 공용 릴레이를 경유하며 속도가 제한됩니다. 어느 경우든 파일은 암호화된 상태로 유지됩니다. 더 나은 경험을 위해 데스크톱/CLI 앱 또는 사용자 지정 릴레이를 사용하세요.",
+		"notice": "웹 버전은 직접 연결을 지원하지 않습니다 - 트래픽은 암호화된 공용 릴레이를 경유하며 속도가 제한됩니다. 어느 경우든 파일은 암호화된 상태로 유지됩니다. 더 나은 경험을 위해 데스크톱/CLI 앱 또는 사용자 지정 릴레이를 사용하세요.",
 		"platforms": "AltSendme는 데스크톱, Android, CLI, 웹으로 제공됩니다.",
 		"website": "웹사이트"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "기기 페어링",
 		"pairedDevices": {
 			"connectedTitle": "연결된 기기",
-			"deviceOffline": "기기가 오프라인 상태입니다 — 수동 티켓을 사용하세요.",
+			"deviceOffline": "기기가 오프라인 상태입니다 - 수동 티켓을 사용하세요.",
 			"deviceUnreachable": "이 기기는 아직 페어링되어 있습니다. 온라인 상태가 되면 다시 시도하거나 수동 티켓을 사용하세요. 두 기기 모두 호환되는 릴레이 설정이 필요할 수 있습니다.",
 			"failed": "다시 시도",
 			"inviteFailed": "기기에 연결할 수 없습니다",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "설정에서 기기를 페어링한 후 여기로 돌아와 링크 없이 보내세요.",
 				"emptyTitle": "아직 페어링된 기기가 없습니다",
-				"hint": "기기를 선택하세요 — 상대방이 수락하면 전송이 시작됩니다.",
+				"hint": "기기를 선택하세요 - 상대방이 수락하면 전송이 시작됩니다.",
 				"manageInSettings": "설정에서 기기 페어링",
 				"nodeUnavailable": "지금은 기기 전송을 사용할 수 없습니다. 다른 탭의 일회성 전송은 계속 사용할 수 있습니다.",
 				"searchNoResults": "검색어와 일치하는 페어링된 기기가 없습니다.",
@@ -114,7 +114,7 @@
 			"devicesButton": "페어링된 기기로 보내기",
 			"link": {
 				"hint": "이 링크를 아는 사람은 누구나 파일을 받을 수 있습니다.",
-				"transferInProgress": "전송 진행 중 — 자세한 내용은 일회성 전송 탭을 여세요.",
+				"transferInProgress": "전송 진행 중 - 자세한 내용은 일회성 전송 탭을 여세요.",
 				"waiting": "링크 사용을 기다리는 중"
 			},
 			"or": "또는"
@@ -321,7 +321,7 @@
 			"enterCode": "페어링 코드 입력",
 			"hostExpiresIn": "{{seconds}}초 후 만료됩니다.",
 			"hostHint": "페어링할 기기에서 이 코드를 스캔하거나 복사하세요. 이 대화상자를 닫아도 만료될 때까지 페어링은 유지됩니다.",
-			"hostStillOpen": "기기 참가를 기다리는 중 — 페어링이 {{seconds}}초 동안 열려 있습니다.",
+			"hostStillOpen": "기기 참가를 기다리는 중 - 페어링이 {{seconds}}초 동안 열려 있습니다.",
 			"joinHint": "다른 기기의 페어링 코드를 붙여넣으세요.",
 			"nameSaveFailed": "기기 이름을 저장할 수 없습니다",
 			"nameSaved": "기기 이름이 저장되었습니다",
@@ -339,7 +339,7 @@
 			"removeFailed": "기기를 제거할 수 없습니다",
 			"rename": "이름 변경",
 			"renameDevice": "페어링된 기기 이름 변경",
-			"renameDeviceHint": "이 기기에서 표시되는 이름만 변경됩니다 — 상대방의 이름은 변경되지 않습니다.",
+			"renameDeviceHint": "이 기기에서 표시되는 이름만 변경됩니다 - 상대방의 이름은 변경되지 않습니다.",
 			"renameThisDevice": "이 기기 이름 변경",
 			"renameThisDeviceHint": "페어링할 때 이 컴퓨터를 쉽게 알아볼 수 있는 이름을 선택하세요.",
 			"saveName": "이름 저장",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "새 업데이트!",
 		"newVersionAvailable": "{{version}} 버전을 사용할 수 있습니다.",
-		"newVersionAvailableInline": "새 버전이 있습니다 — {{version}}",
+		"newVersionAvailableInline": "새 버전이 있습니다 - {{version}}",
 		"updateNow": "지금 업데이트",
 		"later": "나중에",
 		"checkForUpdates": "업데이트 확인",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "릴레이 사용 불가",
 			"fellBackToPublic": "사용자 지정 릴레이에 연결할 수 없어 공개 릴레이를 대신 사용합니다.",
 			"fellBackToastTitle": "공개 릴레이 사용 중",
-			"fellBackToastSend": "사용자 지정 릴레이에 연결할 수 없었습니다 — 이 전송은 공개 릴레이를 사용합니다.",
-			"fellBackToastReceive": "사용자 지정 릴레이에 연결할 수 없었습니다 — 이 다운로드는 공개 릴레이를 사용합니다.",
+			"fellBackToastSend": "사용자 지정 릴레이에 연결할 수 없었습니다 - 이 전송은 공개 릴레이를 사용합니다.",
+			"fellBackToastReceive": "사용자 지정 릴레이에 연결할 수 없었습니다 - 이 다운로드는 공개 릴레이를 사용합니다.",
 			"dialogDescription": "이 앱이 현재 연결에 사용하는 릴레이 서버를 표시합니다.",
 			"connectedRelay": "연결된 릴레이",
 			"checking": "연결 확인 중…",

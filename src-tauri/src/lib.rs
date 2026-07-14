@@ -102,6 +102,8 @@ pub fn run() {
             #[cfg(desktop)]
             set_device_display_name,
             #[cfg(desktop)]
+            get_pairing_ticket,
+            #[cfg(desktop)]
             start_pairing_host,
             #[cfg(desktop)]
             stop_pairing_host,

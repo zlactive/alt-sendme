@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Odeslat",
 	"webPreview": {
-		"banner": "Režim náhledu — přenos souborů vyžaduje desktopovou aplikaci.",
+		"banner": "Režim náhledu - přenos souborů vyžaduje desktopovou aplikaci.",
 		"transferUnavailable": "Přenos souborů není v webovém náhledu k dispozici. Stáhněte si desktopovou aplikaci pro odesílání a přijímání souborů."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Zobrazit možnosti stažení",
 		"github": "GitHub",
 		"linksLabel": "Desktopová aplikace a odkazy na projekt",
-		"notice": "Webová verze nepodporuje přímá spojení — provoz jde přes šifrované veřejné relay a rychlost je omezená. Vaše soubory zůstávají šifrované v každém případě. Pro lepší zážitek použijte desktop/CLI aplikaci nebo vlastní relay.",
+		"notice": "Webová verze nepodporuje přímá spojení - provoz jde přes šifrované veřejné relay a rychlost je omezená. Vaše soubory zůstávají šifrované v každém případě. Pro lepší zážitek použijte desktop/CLI aplikaci nebo vlastní relay.",
 		"platforms": "AltSendme je k dispozici jako desktop, Android, CLI a web.",
 		"website": "Web"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Spárovat zařízení",
 		"pairedDevices": {
 			"connectedTitle": "Připojená zařízení",
-			"deviceOffline": "Zařízení je offline — použijte místo toho ruční ticket.",
+			"deviceOffline": "Zařízení je offline - použijte místo toho ruční ticket.",
 			"deviceUnreachable": "Toto zařízení je stále spárované. Zkuste to znovu, až bude online, nebo použijte ruční ticket. Oba počítače mohou vyžadovat kompatibilní nastavení relay.",
 			"failed": "Opakovat",
 			"inviteFailed": "Zařízení se nepodařilo kontaktovat",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Spárujte zařízení v Nastavení a pak se sem vraťte pro odesílání bez odkazu.",
 				"emptyTitle": "Zatím žádná spárovaná zařízení",
-				"hint": "Vyberte zařízení — přenos začne po přijetí.",
+				"hint": "Vyberte zařízení - přenos začne po přijetí.",
 				"manageInSettings": "Spárovat zařízení v Nastavení",
 				"nodeUnavailable": "Odesílání na zařízení není právě k dispozici. Stále můžete použít jednorázový přenos z jiné karty.",
 				"searchNoResults": "Žádná spárovaná zařízení neodpovídají hledání.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Odeslat na spárované zařízení",
 			"link": {
 				"hint": "Kdokoli s tímto odkazem může přijmout vaše soubory.",
-				"transferInProgress": "Probíhá přenos — otevřete jednorázový přenos pro podrobnosti.",
+				"transferInProgress": "Probíhá přenos - otevřete jednorázový přenos pro podrobnosti.",
 				"waiting": "Čekání, až někdo použije váš odkaz"
 			},
 			"or": "nebo"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} zrušil(a) párování tohoto zařízení",
 			"enterCode": "Zadejte párovací kód",
 			"hostExpiresIn": "Vyprší za {{seconds}} s.",
-			"hostHint": "Naskenujte nebo zkopírujte tento kód na zařízení, které chcete spárovat. Toto okno můžete zavřít — párování zůstane otevřené do vypršení.",
-			"hostStillOpen": "Čekání na připojení zařízení — párování otevřené {{seconds}} s.",
+			"hostHint": "Naskenujte nebo zkopírujte tento kód na zařízení, které chcete spárovat. Toto okno můžete zavřít - párování zůstane otevřené do vypršení.",
+			"hostStillOpen": "Čekání na připojení zařízení - párování otevřené {{seconds}} s.",
 			"joinHint": "Vložte párovací kód z druhého zařízení.",
 			"nameSaveFailed": "Nepodařilo se uložit název zařízení",
 			"nameSaved": "Název zařízení uložen",
@@ -339,7 +339,7 @@
 			"removeFailed": "Nepodařilo se odebrat zařízení",
 			"rename": "Přejmenovat",
 			"renameDevice": "Přejmenovat spárované zařízení",
-			"renameDeviceHint": "Mění se jen název na tomto zařízení — druhá strana se nepřejmenuje.",
+			"renameDeviceHint": "Mění se jen název na tomto zařízení - druhá strana se nepřejmenuje.",
 			"renameThisDevice": "Přejmenovat toto zařízení",
 			"renameThisDeviceHint": "Zvolte název, podle kterého poznáte tento počítač při párování.",
 			"saveName": "Uložit název",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Nová aktualizace!",
 		"newVersionAvailable": "Je k dispozici verze {{version}}.",
-		"newVersionAvailableInline": "Je k dispozici nová verze — {{version}}",
+		"newVersionAvailableInline": "Je k dispozici nová verze - {{version}}",
 		"updateNow": "Aktualizovat nyní",
 		"later": "Později",
 		"checkForUpdates": "Zkontrolovat aktualizace",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay nedostupné",
 			"fellBackToPublic": "Vlastní relay nedostupné, místo něj se používá veřejné relay.",
 			"fellBackToastTitle": "Používá se veřejné relay",
-			"fellBackToastSend": "Váš vlastní relay byl nedostupný — tento přenos používá veřejné relay.",
-			"fellBackToastReceive": "Váš vlastní relay byl nedostupný — toto stahování používá veřejné relay.",
+			"fellBackToastSend": "Váš vlastní relay byl nedostupný - tento přenos používá veřejné relay.",
+			"fellBackToastReceive": "Váš vlastní relay byl nedostupný - toto stahování používá veřejné relay.",
 			"dialogDescription": "Zobrazuje, který relay server aplikace aktuálně používá pro připojení.",
 			"connectedRelay": "Připojené relay",
 			"checking": "Kontrola připojení…",

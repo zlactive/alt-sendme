@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Küldés",
 	"webPreview": {
-		"banner": "Előnézeti mód — fájlátvitelhez asztali alkalmazás szükséges.",
+		"banner": "Előnézeti mód - fájlátvitelhez asztali alkalmazás szükséges.",
 		"transferUnavailable": "A fájlátvitel nem érhető el a webes előnézetben. Töltsd le az asztali alkalmazást fájlok küldéséhez és fogadásához."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Letöltési lehetőségek",
 		"github": "GitHub",
 		"linksLabel": "Asztali alkalmazás és projektlinkek",
-		"notice": "A webes verzió nem támogat közvetlen kapcsolatokat — a forgalom titkosított nyilvános relay-ken keresztül megy, és a sebesség korlátozott. A fájljaid mindenesetre titkosítva maradnak. Jobb élményért használd az asztali/CLI alkalmazást vagy egyéni relay-ket.",
+		"notice": "A webes verzió nem támogat közvetlen kapcsolatokat - a forgalom titkosított nyilvános relay-ken keresztül megy, és a sebesség korlátozott. A fájljaid mindenesetre titkosítva maradnak. Jobb élményért használd az asztali/CLI alkalmazást vagy egyéni relay-ket.",
 		"platforms": "Az AltSendme elérhető asztali, Android, CLI és webes formában.",
 		"website": "Weboldal"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Eszköz párosítása",
 		"pairedDevices": {
 			"connectedTitle": "Csatlakoztatott eszközök",
-			"deviceOffline": "Az eszköz offline — használj helyette kézi jegyet.",
+			"deviceOffline": "Az eszköz offline - használj helyette kézi jegyet.",
 			"deviceUnreachable": "Ez az eszköz továbbra is párosítva van. Próbáld újra, amikor online, vagy használj kézi jegyet. Mindkét eszközön kompatibilis relay-beállítások lehetnek szükségesek.",
 			"failed": "Újra",
 			"inviteFailed": "Az eszköz elérhetetlen",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Párosíts eszközöket a Beállításokban, majd térj vissza ide link nélküli küldéshez.",
 				"emptyTitle": "Még nincs párosított eszköz",
-				"hint": "Válassz eszközt — az átvitel elfogadáskor indul.",
+				"hint": "Válassz eszközt - az átvitel elfogadáskor indul.",
 				"manageInSettings": "Eszközök párosítása a Beállításokban",
 				"nodeUnavailable": "Az eszközre küldés jelenleg nem elérhető. A másik lapon továbbra is használhatod az egyszeri átvitelt.",
 				"searchNoResults": "Egy párosított eszköz sem felel meg a keresésnek.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Küldés párosított eszközre",
 			"link": {
 				"hint": "Bárki, aki rendelkezik ezzel a linkkel, fogadhatja a fájljaidat.",
-				"transferInProgress": "Átvitel folyamatban — nyisd meg az egyszeri átvitelt a részletekért.",
+				"transferInProgress": "Átvitel folyamatban - nyisd meg az egyszeri átvitelt a részletekért.",
 				"waiting": "Várakozás, hogy valaki használja a linkedet"
 			},
 			"or": "vagy"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} megszüntette ennek az eszköznek a párosítását",
 			"enterCode": "Párosítási kód megadása",
 			"hostExpiresIn": "Lejár {{seconds}} mp múlva.",
-			"hostHint": "Olvasd be vagy másold ezt a kódot a párosítani kívánt eszközön. Bezárhatod ezt az ablakot — a párosítás a lejáratig nyitva marad.",
-			"hostStillOpen": "Várakozás eszköz csatlakozására — párosítás nyitva {{seconds}} mp-ig.",
+			"hostHint": "Olvasd be vagy másold ezt a kódot a párosítani kívánt eszközön. Bezárhatod ezt az ablakot - a párosítás a lejáratig nyitva marad.",
+			"hostStillOpen": "Várakozás eszköz csatlakozására - párosítás nyitva {{seconds}} mp-ig.",
 			"joinHint": "Illeszd be a párosítási kódot a másik eszközről.",
 			"nameSaveFailed": "Nem sikerült menteni az eszköz nevét",
 			"nameSaved": "Eszköz neve mentve",
@@ -339,7 +339,7 @@
 			"removeFailed": "Nem sikerült eltávolítani az eszközt",
 			"rename": "Átnevezés",
 			"renameDevice": "Párosított eszköz átnevezése",
-			"renameDeviceHint": "Ez csak ezen az eszközön változtatja meg a nevet — a másik oldalon nem.",
+			"renameDeviceHint": "Ez csak ezen az eszközön változtatja meg a nevet - a másik oldalon nem.",
 			"renameThisDevice": "Ennek az eszköznek az átnevezése",
 			"renameThisDeviceHint": "Válassz olyan nevet, amellyel felismered ezt a számítógépet párosításkor.",
 			"saveName": "Név mentése",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Új frissítés!",
 		"newVersionAvailable": "Elérhető a(z) {{version}} verzió.",
-		"newVersionAvailableInline": "Új verzió érhető el — {{version}}",
+		"newVersionAvailableInline": "Új verzió érhető el - {{version}}",
 		"updateNow": "Frissítés most",
 		"later": "Később",
 		"checkForUpdates": "Frissítések keresése",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay nem elérhető",
 			"fellBackToPublic": "Egyéni relay nem elérhető, helyette nyilvános relay használata.",
 			"fellBackToastTitle": "Nyilvános relay használata",
-			"fellBackToastSend": "Az egyéni relay nem volt elérhető — ez az átvitel nyilvános relay-t használ.",
-			"fellBackToastReceive": "Az egyéni relay nem volt elérhető — ez a letöltés nyilvános relay-t használ.",
+			"fellBackToastSend": "Az egyéni relay nem volt elérhető - ez az átvitel nyilvános relay-t használ.",
+			"fellBackToastReceive": "Az egyéni relay nem volt elérhető - ez a letöltés nyilvános relay-t használ.",
 			"dialogDescription": "Megmutatja, mely relay szervert használja jelenleg az alkalmazás a kapcsolatokhoz.",
 			"connectedRelay": "Csatlakoztatott relay",
 			"checking": "Kapcsolat ellenőrzése…",

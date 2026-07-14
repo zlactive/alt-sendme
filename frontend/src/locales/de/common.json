@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Senden",
 	"webPreview": {
-		"banner": "Vorschaumodus — Dateiübertragungen erfordern die Desktop-App.",
+		"banner": "Vorschaumodus - Dateiübertragungen erfordern die Desktop-App.",
 		"transferUnavailable": "Dateiübertragung ist in der Web-Vorschau nicht verfügbar. Laden Sie die Desktop-App herunter, um Dateien zu senden und zu empfangen."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Download-Optionen ansehen",
 		"github": "GitHub",
 		"linksLabel": "Desktop-App und Projektlinks",
-		"notice": "Die Webversion unterstützt keine direkten Verbindungen — der Datenverkehr wird über verschlüsselte öffentliche Relays geleitet und die Geschwindigkeit ist gedrosselt. Ihre Dateien bleiben in jedem Fall verschlüsselt. Für ein besseres Erlebnis nutzen Sie die Desktop-/CLI-App oder eigene Relays.",
+		"notice": "Die Webversion unterstützt keine direkten Verbindungen - der Datenverkehr wird über verschlüsselte öffentliche Relays geleitet und die Geschwindigkeit ist gedrosselt. Ihre Dateien bleiben in jedem Fall verschlüsselt. Für ein besseres Erlebnis nutzen Sie die Desktop-/CLI-App oder eigene Relays.",
 		"platforms": "AltSendme ist als Desktop-, Android-, CLI- und Web-App verfügbar.",
 		"website": "Website"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Gerät koppeln",
 		"pairedDevices": {
 			"connectedTitle": "Verbundene Geräte",
-			"deviceOffline": "Gerät ist offline — verwenden Sie stattdessen das manuelle Ticket.",
+			"deviceOffline": "Gerät ist offline - verwenden Sie stattdessen das manuelle Ticket.",
 			"deviceUnreachable": "Dieses Gerät ist weiterhin gekoppelt. Versuchen Sie es erneut, wenn es online ist, oder verwenden Sie das manuelle Ticket. Beide Geräte benötigen möglicherweise kompatible Relay-Einstellungen.",
 			"failed": "Erneut versuchen",
 			"inviteFailed": "Gerät nicht erreichbar",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Koppeln Sie Geräte in den Einstellungen und kehren Sie hierher zurück, um ohne Link zu senden.",
 				"emptyTitle": "Noch keine gekoppelten Geräte",
-				"hint": "Wählen Sie ein Gerät — die Übertragung startet, sobald es angenommen wird.",
+				"hint": "Wählen Sie ein Gerät - die Übertragung startet, sobald es angenommen wird.",
 				"manageInSettings": "Geräte in Einstellungen koppeln",
 				"nodeUnavailable": "Senden an Geräte ist derzeit nicht verfügbar. Sie können weiterhin „Einmalige Übertragung“ im anderen Tab verwenden.",
 				"searchNoResults": "Keine gekoppelten Geräte entsprechen Ihrer Suche.",
@@ -114,7 +114,7 @@
 			"devicesButton": "An gekoppeltes Gerät senden",
 			"link": {
 				"hint": "Jeder mit diesem Link kann Ihre Dateien empfangen.",
-				"transferInProgress": "Übertragung läuft — öffnen Sie „Einmalige Übertragung“, um Details anzuzeigen.",
+				"transferInProgress": "Übertragung läuft - öffnen Sie „Einmalige Übertragung“, um Details anzuzeigen.",
 				"waiting": "Warten auf jemanden, der Ihren Link verwendet"
 			},
 			"or": "oder"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} hat die Kopplung dieses Geräts aufgehoben",
 			"enterCode": "Kopplungscode eingeben",
 			"hostExpiresIn": "Läuft ab in {{seconds}} s.",
-			"hostHint": "Scannen oder kopieren Sie diesen Code auf dem Gerät, das Sie koppeln möchten. Sie können diesen Dialog schließen — die Kopplung bleibt bis zum Ablauf offen.",
-			"hostStillOpen": "Warten auf ein Gerät — Kopplung noch {{seconds}} s offen.",
+			"hostHint": "Scannen oder kopieren Sie diesen Code auf dem Gerät, das Sie koppeln möchten. Sie können diesen Dialog schließen - die Kopplung bleibt bis zum Ablauf offen.",
+			"hostStillOpen": "Warten auf ein Gerät - Kopplung noch {{seconds}} s offen.",
 			"joinHint": "Fügen Sie den Kopplungscode von Ihrem anderen Gerät ein.",
 			"nameSaveFailed": "Gerätename konnte nicht gespeichert werden",
 			"nameSaved": "Gerätename gespeichert",
@@ -339,7 +339,7 @@
 			"removeFailed": "Gerät konnte nicht entfernt werden",
 			"rename": "Umbenennen",
 			"renameDevice": "Gekoppeltes Gerät umbenennen",
-			"renameDeviceHint": "Dies ändert nur den Namen auf diesem Gerät — nicht auf der anderen Seite.",
+			"renameDeviceHint": "Dies ändert nur den Namen auf diesem Gerät - nicht auf der anderen Seite.",
 			"renameThisDevice": "Dieses Gerät umbenennen",
 			"renameThisDeviceHint": "Wählen Sie einen Namen, der Ihnen hilft, diesen Computer beim Koppeln wiederzuerkennen.",
 			"saveName": "Name speichern",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Neues Update!",
 		"newVersionAvailable": "Version {{version}} ist verfügbar.",
-		"newVersionAvailableInline": "Eine neue Version ist verfügbar – {{version}}",
+		"newVersionAvailableInline": "Eine neue Version ist verfügbar - {{version}}",
 		"updateNow": "Jetzt aktualisieren",
 		"later": "Später",
 		"checkForUpdates": "Nach Updates suchen",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay nicht verfügbar",
 			"fellBackToPublic": "Benutzerdefiniertes Relay nicht erreichbar, öffentliches Relay wird stattdessen verwendet.",
 			"fellBackToastTitle": "Öffentliches Relay wird verwendet",
-			"fellBackToastSend": "Ihr benutzerdefiniertes Relay war nicht erreichbar — diese Übertragung nutzt stattdessen ein öffentliches Relay.",
-			"fellBackToastReceive": "Ihr benutzerdefiniertes Relay war nicht erreichbar — dieser Download nutzt stattdessen ein öffentliches Relay.",
+			"fellBackToastSend": "Ihr benutzerdefiniertes Relay war nicht erreichbar - diese Übertragung nutzt stattdessen ein öffentliches Relay.",
+			"fellBackToastReceive": "Ihr benutzerdefiniertes Relay war nicht erreichbar - dieser Download nutzt stattdessen ein öffentliches Relay.",
 			"dialogDescription": "Zeigt, welchen Relay-Server diese App derzeit für Verbindungen verwendet.",
 			"connectedRelay": "Verbundenes Relay",
 			"checking": "Verbindung wird geprüft…",

@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Send",
 	"webPreview": {
-		"banner": "Forhåndsvisningsmodus — filoverføringer krever skrivebordsappen.",
+		"banner": "Forhåndsvisningsmodus - filoverføringer krever skrivebordsappen.",
 		"transferUnavailable": "Filoverføring er ikke tilgjengelig i nettforhåndsvisningen. Last ned skrivebordsappen for å sende og motta filer."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Se nedlastingsalternativer",
 		"github": "GitHub",
 		"linksLabel": "Skrivebordsapp og prosjektlenker",
-		"notice": "Nettversjonen støtter ikke direkte tilkoblinger — trafikk sendes via krypterte offentlige relays, og hastigheten er begrenset. Filene dine forblir kryptert uansett. Bruk skrivebords-/CLI-appen eller tilpassede relays for en bedre opplevelse.",
+		"notice": "Nettversjonen støtter ikke direkte tilkoblinger - trafikk sendes via krypterte offentlige relays, og hastigheten er begrenset. Filene dine forblir kryptert uansett. Bruk skrivebords-/CLI-appen eller tilpassede relays for en bedre opplevelse.",
 		"platforms": "AltSendme er tilgjengelig som skrivebordsapp, Android, CLI og web.",
 		"website": "Nettsted"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Koble sammen enhet",
 		"pairedDevices": {
 			"connectedTitle": "Tilkoblede enheter",
-			"deviceOffline": "Enheten er frakoblet — bruk den manuelle nøkkelen i stedet.",
+			"deviceOffline": "Enheten er frakoblet - bruk den manuelle nøkkelen i stedet.",
 			"deviceUnreachable": "Denne enheten er fortsatt sammenkoblet. Prøv igjen når den er tilkoblet, eller bruk den manuelle nøkkelen. Begge enheter kan trenge kompatible relay-innstillinger.",
 			"failed": "Prøv igjen",
 			"inviteFailed": "Kunne ikke nå enheten",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Koble sammen enheter i Innstillinger, og kom tilbake hit for å sende uten en lenke.",
 				"emptyTitle": "Ingen sammenkoblede enheter ennå",
-				"hint": "Velg en enhet — overføringen starter når den godtas.",
+				"hint": "Velg en enhet - overføringen starter når den godtas.",
 				"manageInSettings": "Koble sammen enheter i Innstillinger",
 				"nodeUnavailable": "Sending til enheter er ikke tilgjengelig akkurat nå. Du kan fortsatt bruke Engangsoverføring i den andre fanen.",
 				"searchNoResults": "Ingen sammenkoblede enheter samsvarer med søket.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Send til sammenkoblet enhet",
 			"link": {
 				"hint": "Alle med denne lenken kan motta filene dine.",
-				"transferInProgress": "Overføring pågår — åpne Engangsoverføring for detaljer.",
+				"transferInProgress": "Overføring pågår - åpne Engangsoverføring for detaljer.",
 				"waiting": "Venter på at noen bruker lenken din"
 			},
 			"or": "eller"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} brøt sammenkoblingen med denne enheten",
 			"enterCode": "Skriv inn sammenkoblingskode",
 			"hostExpiresIn": "Utløper om {{seconds}} s.",
-			"hostHint": "Skann eller kopier denne koden på enheten du vil koble sammen. Du kan lukke denne dialogen — sammenkoblingen forblir åpen til den utløper.",
-			"hostStillOpen": "Venter på at en enhet kobler til — sammenkobling åpen i {{seconds}} s.",
+			"hostHint": "Skann eller kopier denne koden på enheten du vil koble sammen. Du kan lukke denne dialogen - sammenkoblingen forblir åpen til den utløper.",
+			"hostStillOpen": "Venter på at en enhet kobler til - sammenkobling åpen i {{seconds}} s.",
 			"joinHint": "Lim inn sammenkoblingskoden fra den andre enheten din.",
 			"nameSaveFailed": "Kunne ikke lagre enhetsnavn",
 			"nameSaved": "Enhetsnavn lagret",
@@ -339,7 +339,7 @@
 			"removeFailed": "Kunne ikke fjerne enhet",
 			"rename": "Gi nytt navn",
 			"renameDevice": "Gi nytt navn til sammenkoblet enhet",
-			"renameDeviceHint": "Dette endrer bare navnet på denne enheten — ikke på den andre siden.",
+			"renameDeviceHint": "Dette endrer bare navnet på denne enheten - ikke på den andre siden.",
 			"renameThisDevice": "Gi nytt navn til denne enheten",
 			"renameThisDeviceHint": "Velg et navn som hjelper deg å gjenkjenne denne datamaskinen ved sammenkobling.",
 			"saveName": "Lagre navn",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Ny oppdatering!",
 		"newVersionAvailable": "Versjon {{version}} er tilgjengelig.",
-		"newVersionAvailableInline": "En ny versjon er tilgjengelig — {{version}}",
+		"newVersionAvailableInline": "En ny versjon er tilgjengelig - {{version}}",
 		"updateNow": "Oppdater nå",
 		"later": "Senere",
 		"checkForUpdates": "Se etter oppdateringer",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay utilgjengelig",
 			"fellBackToPublic": "Tilpasset relay utilgjengelig, bruker offentlig relay i stedet.",
 			"fellBackToastTitle": "Bruker offentlig relay",
-			"fellBackToastSend": "Din tilpassede relay var utilgjengelig — denne overføringen bruker offentlig relay.",
-			"fellBackToastReceive": "Din tilpassede relay var utilgjengelig — denne nedlastingen bruker offentlig relay.",
+			"fellBackToastSend": "Din tilpassede relay var utilgjengelig - denne overføringen bruker offentlig relay.",
+			"fellBackToastReceive": "Din tilpassede relay var utilgjengelig - denne nedlastingen bruker offentlig relay.",
 			"dialogDescription": "Viser hvilken relay-server appen bruker for tilkoblinger.",
 			"connectedRelay": "Tilkoblet relay",
 			"checking": "Sjekker tilkobling…",

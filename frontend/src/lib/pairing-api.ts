@@ -88,6 +88,11 @@ export async function setDeviceDisplayName(
 	})
 }
 
+export async function getPairingTicket(): Promise<string | null> {
+	if (!desktopOnly()) return null
+	return invoke<string>('get_pairing_ticket')
+}
+
 export async function startPairingHost(options?: {
 	ttlSecs?: number | null
 }): Promise<string> {
@@ -225,6 +230,61 @@ export function isPairedDeviceActive(
 	device: Pick<PairedDevice, 'pairing_status'>
 ): boolean {
 	return (device.pairing_status ?? 'active') === 'active'
+}
+
+/** 0 = online+active, 1 = offline+active, 2 = unpaired */
+export function pairedDeviceListRank(
+	device: Pick<PairedDevice, 'online' | 'pairing_status'>
+): number {
+	if (!isPairedDeviceActive(device)) return 2
+	if (!device.online) return 1
+	return 0
+}
+
+export function comparePairedDevicesForList(
+	a: PairedDevice,
+	b: PairedDevice,
+	sendCounts: Record<string, number> = {}
+): number {
+	const rankA = pairedDeviceListRank(a)
+	const rankB = pairedDeviceListRank(b)
+	if (rankA !== rankB) return rankA - rankB
+
+	// Online devices: most-sent first, then name.
+	if (rankA === 0) {
+		const countA = sendCounts[a.endpoint_id.toLowerCase()] ?? 0
+		const countB = sendCounts[b.endpoint_id.toLowerCase()] ?? 0
+		if (countA !== countB) return countB - countA
+		return a.display_name.localeCompare(b.display_name)
+	}
+
+	// Offline / unpaired: most recently seen first so a device that just went
+	// offline lands immediately after the last online device.
+	const seenDiff = (b.last_seen_at ?? 0) - (a.last_seen_at ?? 0)
+	if (seenDiff !== 0) return seenDiff
+	return a.display_name.localeCompare(b.display_name)
+}
+
+export function sortPairedDevicesForList(
+	devices: PairedDevice[],
+	sendCounts: Record<string, number> = {}
+): PairedDevice[] {
+	return [...devices].sort((a, b) =>
+		comparePairedDevicesForList(a, b, sendCounts)
+	)
+}
+
+/** Settings list: most-sent devices first (local send-click counts), then name. */
+export function sortPairedDevicesForSettings(
+	devices: PairedDevice[],
+	sendCounts: Record<string, number>
+): PairedDevice[] {
+	return [...devices].sort((a, b) => {
+		const countA = sendCounts[a.endpoint_id.toLowerCase()] ?? 0
+		const countB = sendCounts[b.endpoint_id.toLowerCase()] ?? 0
+		if (countA !== countB) return countB - countA
+		return a.display_name.localeCompare(b.display_name)
+	})
 }
 
 export function patchDevicePresence(

@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Wyślij",
 	"webPreview": {
-		"banner": "Tryb podglądu — transfer plików wymaga aplikacji desktopowej.",
+		"banner": "Tryb podglądu - transfer plików wymaga aplikacji desktopowej.",
 		"transferUnavailable": "Transfer plików nie jest dostępny w podglądzie webowym. Pobierz aplikację desktopową, aby wysyłać i odbierać pliki."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Zobacz opcje pobierania",
 		"github": "GitHub",
 		"linksLabel": "Pobierz aplikację desktopową i linki do projektu",
-		"notice": "Wersja webowa nie obsługuje bezpośrednich połączeń — ruch jest przekierowywany przez szyfrowane publiczne relay, a prędkości są ograniczane. Twoje pliki pozostają zaszyfrowane w każdym przypadku. Użyj aplikacji desktopowej/CLI lub niestandardowych relay, aby uzyskać lepsze doświadczenie.",
+		"notice": "Wersja webowa nie obsługuje bezpośrednich połączeń - ruch jest przekierowywany przez szyfrowane publiczne relay, a prędkości są ograniczane. Twoje pliki pozostają zaszyfrowane w każdym przypadku. Użyj aplikacji desktopowej/CLI lub niestandardowych relay, aby uzyskać lepsze doświadczenie.",
 		"platforms": "AltSendme jest dostępne jako aplikacja desktopowa, Android, CLI i web.",
 		"website": "Strona internetowa"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Sparuj urządzenie",
 		"pairedDevices": {
 			"connectedTitle": "Połączone urządzenia",
-			"deviceOffline": "Urządzenie jest offline — użyj zamiast tego ręcznego biletu.",
+			"deviceOffline": "Urządzenie jest offline - użyj zamiast tego ręcznego biletu.",
 			"deviceUnreachable": "To urządzenie nadal jest sparowane. Spróbuj ponownie, gdy będzie online, lub użyj ręcznego biletu. Oba urządzenia mogą wymagać zgodnych ustawień relay.",
 			"failed": "Ponów",
 			"inviteFailed": "Nie udało się połączyć z urządzeniem",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Sparuj urządzenia w Ustawieniach, a następnie wróć tutaj, aby wysyłać bez linku.",
 				"emptyTitle": "Brak sparowanych urządzeń",
-				"hint": "Wybierz urządzenie — transfer rozpocznie się po akceptacji.",
+				"hint": "Wybierz urządzenie - transfer rozpocznie się po akceptacji.",
 				"manageInSettings": "Sparuj urządzenia w Ustawieniach",
 				"nodeUnavailable": "Wysyłanie na urządzenie jest teraz niedostępne. Nadal możesz użyć transferu jednorazowego z innej karty.",
 				"searchNoResults": "Żadne sparowane urządzenia nie pasują do wyszukiwania.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Wyślij do sparowanego urządzenia",
 			"link": {
 				"hint": "Każdy z tym linkiem może odebrać Twoje pliki.",
-				"transferInProgress": "Transfer w toku — otwórz transfer jednorazowy, aby zobaczyć szczegóły.",
+				"transferInProgress": "Transfer w toku - otwórz transfer jednorazowy, aby zobaczyć szczegóły.",
 				"waiting": "Oczekiwanie, aż ktoś użyje Twojego linku"
 			},
 			"or": "lub"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} rozparował(a) to urządzenie",
 			"enterCode": "Wprowadź kod parowania",
 			"hostExpiresIn": "Wygasa za {{seconds}} s.",
-			"hostHint": "Zeskanuj lub skopiuj ten kod na urządzeniu, które chcesz sparować. Możesz zamknąć to okno — parowanie pozostanie aktywne do momentu wygaśnięcia.",
-			"hostStillOpen": "Oczekiwanie na dołączenie urządzenia — parowanie otwarte przez {{seconds}} s.",
+			"hostHint": "Zeskanuj lub skopiuj ten kod na urządzeniu, które chcesz sparować. Możesz zamknąć to okno - parowanie pozostanie aktywne do momentu wygaśnięcia.",
+			"hostStillOpen": "Oczekiwanie na dołączenie urządzenia - parowanie otwarte przez {{seconds}} s.",
 			"joinHint": "Wklej kod parowania z drugiego urządzenia.",
 			"nameSaveFailed": "Nie udało się zapisać nazwy urządzenia",
 			"nameSaved": "Nazwa urządzenia zapisana",
@@ -339,7 +339,7 @@
 			"removeFailed": "Nie udało się usunąć urządzenia",
 			"rename": "Zmień nazwę",
 			"renameDevice": "Zmień nazwę sparowanego urządzenia",
-			"renameDeviceHint": "To zmienia nazwę tylko na tym urządzeniu — nie zmienia nazwy po drugiej stronie.",
+			"renameDeviceHint": "To zmienia nazwę tylko na tym urządzeniu - nie zmienia nazwy po drugiej stronie.",
 			"renameThisDevice": "Zmień nazwę tego urządzenia",
 			"renameThisDeviceHint": "Wybierz nazwę, która pomoże Ci rozpoznać ten komputer podczas parowania.",
 			"saveName": "Zapisz nazwę",
@@ -359,7 +359,7 @@
 	"updater": {
 		"newUpdateTitle": "Nowa aktualizacja!",
 		"newVersionAvailable": "Dostępna jest wersja {{version}}.",
-		"newVersionAvailableInline": "Dostępna jest nowa wersja — {{version}}",
+		"newVersionAvailableInline": "Dostępna jest nowa wersja - {{version}}",
 		"updateNow": "Aktualizuj teraz",
 		"later": "Później",
 		"checkForUpdates": "Sprawdź aktualizacje",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relay niedostępne",
 			"fellBackToPublic": "Niestandardowe relay niedostępne, używane jest publiczne relay.",
 			"fellBackToastTitle": "Używane publiczne relay",
-			"fellBackToastSend": "Twoje niestandardowe relay było niedostępne — ten transfer używa publicznego relay.",
-			"fellBackToastReceive": "Twoje niestandardowe relay było niedostępne — to pobieranie używa publicznego relay.",
+			"fellBackToastSend": "Twoje niestandardowe relay było niedostępne - ten transfer używa publicznego relay.",
+			"fellBackToastReceive": "Twoje niestandardowe relay było niedostępne - to pobieranie używa publicznego relay.",
 			"dialogDescription": "Pokazuje, którego serwera relay aplikacja obecnie używa do połączeń.",
 			"connectedRelay": "Połączone relay",
 			"checking": "Sprawdzanie połączenia…",

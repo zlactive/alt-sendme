@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from 'react'
-import { Copy, Eye, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
+import { Copy, Loader2, Pencil, Plus, Trash2 } from 'lucide-react'
 import { motion } from 'motion/react'
 import { useTranslation } from '../../../i18n'
 import { usePairing } from '../../../hooks/usePairing'
@@ -14,7 +14,6 @@ import {
 } from '../../ui/alert-dialog'
 import { Input } from '../../ui/input'
 import { Label } from '../../ui/label'
-import { Textarea } from '../../ui/textarea'
 import { toastManager } from '../../ui/toast'
 import { Frame, FrameDescription, FramePanel, FrameTitle } from '../../ui/frame'
 import { IS_DESKTOP } from '@/lib/platform'
@@ -22,95 +21,12 @@ import {
 	deviceSubtitle,
 	isPairedDeviceActive,
 	matchesPairedDeviceSearch,
+	sortPairedDevicesForSettings,
 } from '@/lib/pairing-api'
+import { getPairedSendCounts } from '@/lib/paired-send-counts'
 import { deviceTypeIcon } from '@/lib/device-icon'
 import { DevicePairingStatus } from '../../pairing/DevicePairingStatus'
 import { PairedDevicesSearchField } from '../../pairing/PairedDevicesSearchField'
-
-function PairHostModal({
-	open,
-	ticket,
-	isLoading,
-	expiresIn,
-	onDismiss,
-	onCancelPairing,
-}: {
-	open: boolean
-	ticket: string | null
-	isLoading: boolean
-	expiresIn: number | null
-	/** Hide the dialog but keep the pairing window open until TTL. */
-	onDismiss: () => void
-	/** Abort pairing immediately. */
-	onCancelPairing: () => void
-}) {
-	const { t } = useTranslation()
-	const [copied, setCopied] = useState(false)
-
-	const copyTicket = async () => {
-		if (!ticket) return
-		await navigator.clipboard.writeText(ticket)
-		setCopied(true)
-		window.setTimeout(() => setCopied(false), 2000)
-	}
-
-	return (
-		<AlertDialog
-			open={open}
-			onOpenChange={(next) => {
-				// Dismissing the dialog must NOT stop pairing — the peer still
-				// needs the host window open after the code is copied.
-				if (!next) onDismiss()
-			}}
-		>
-			<AlertDialogContent>
-				<AlertDialogHeader>
-					<AlertDialogTitle>
-						{t('common:settings.devices.showQrCode')}
-					</AlertDialogTitle>
-					<AlertDialogDescription>
-						{t('common:settings.devices.hostHint')}
-						{expiresIn != null && expiresIn > 0 ? (
-							<>
-								{' '}
-								{t('common:settings.devices.hostExpiresIn', {
-									seconds: expiresIn,
-								})}
-							</>
-						) : null}
-					</AlertDialogDescription>
-				</AlertDialogHeader>
-				<div className="space-y-3 px-6 pb-4">
-					<Label>{t('common:settings.devices.pairingCode')}</Label>
-					<Textarea
-						readOnly
-						value={isLoading ? t('common:loading') : (ticket ?? '')}
-						className="font-mono text-xs min-h-28"
-					/>
-					<Button
-						type="button"
-						variant="outline"
-						disabled={isLoading || !ticket}
-						onClick={copyTicket}
-					>
-						<Copy className="w-4 h-4 mr-2" />
-						{copied
-							? t('common:settings.devices.copied')
-							: t('common:sender.copyToClipboard')}
-					</Button>
-				</div>
-				<AlertDialogFooter>
-					<Button type="button" variant="outline" onClick={onCancelPairing}>
-						{t('common:settings.devices.cancelPairing')}
-					</Button>
-					<Button type="button" onClick={onDismiss}>
-						{t('common:ok')}
-					</Button>
-				</AlertDialogFooter>
-			</AlertDialogContent>
-		</AlertDialog>
-	)
-}
 
 function PairJoinModal({
 	open,
@@ -164,7 +80,7 @@ function PairJoinModal({
 						{t('common:settings.devices.joinHint')}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
-				<div className="px-6 pb-2">
+				<div className="px-6 pb-6">
 					<Input
 						value={code}
 						onChange={(event: React.ChangeEvent<HTMLInputElement>) =>
@@ -255,7 +171,7 @@ function RenameDeviceModal({
 					<AlertDialogTitle>{title}</AlertDialogTitle>
 					<AlertDialogDescription>{description}</AlertDialogDescription>
 				</AlertDialogHeader>
-				<div className="px-6 pb-2">
+				<div className="px-6 pb-6">
 					<Label htmlFor="device-display-name">
 						{t('common:settings.devices.deviceName')}
 					</Label>
@@ -293,6 +209,7 @@ export function DevicesSettings() {
 	const {
 		devices,
 		thisDevice,
+		pairingCode,
 		pairingTicket,
 		hostExpiresIn,
 		isJoining,
@@ -308,15 +225,14 @@ export function DevicesSettings() {
 		renameThisDevice,
 		renameDevice,
 	} = usePairing()
-	const [hostOpen, setHostOpen] = useState(false)
 	const [joinOpen, setJoinOpen] = useState(false)
 	const [renameThisOpen, setRenameThisOpen] = useState(false)
 	const [renamePeerId, setRenamePeerId] = useState<string | null>(null)
 	const [searchQuery, setSearchQuery] = useState('')
+	const [copied, setCopied] = useState(false)
 
 	const sortedDevices = useMemo(
-		() =>
-			[...devices].sort((a, b) => a.display_name.localeCompare(b.display_name)),
+		() => sortPairedDevicesForSettings(devices, getPairedSendCounts()),
 		[devices]
 	)
 
@@ -328,11 +244,10 @@ export function DevicesSettings() {
 		[sortedDevices, searchQuery]
 	)
 
-	// When a peer joins our open pairing window, close the QR dialog and
-	// confirm success instead of leaving the stale code on screen.
+	// When a peer joins our open pairing window, confirm success instead of
+	// leaving the host countdown looking active after the backend closed it.
 	useEffect(() => {
 		if (hostPairedCount === 0) return
-		setHostOpen(false)
 		toastManager.add({
 			title: t('common:settings.devices.devicePaired'),
 			type: 'success',
@@ -354,13 +269,16 @@ export function DevicesSettings() {
 		)
 	}
 
-	const openHost = async () => {
-		setHostOpen(true)
+	const copyPairingCode = async () => {
+		const code = pairingCode ?? pairingTicket
+		if (!code) return
 		try {
+			await navigator.clipboard.writeText(code)
+			setCopied(true)
+			window.setTimeout(() => setCopied(false), 2000)
 			await openHostPairing()
 		} catch (error) {
 			console.error(error)
-			setHostOpen(false)
 			toastManager.add({
 				title: t('common:settings.devices.pairFailed'),
 				type: 'error',
@@ -368,25 +286,23 @@ export function DevicesSettings() {
 		}
 	}
 
-	const dismissHost = () => {
-		setHostOpen(false)
-	}
-
 	const cancelHost = async () => {
-		setHostOpen(false)
 		await closeHostPairing()
 	}
 
 	const renamePeer = devices.find((d) => d.endpoint_id === renamePeerId)
 	const ThisDeviceIcon = deviceTypeIcon(thisDevice?.device_type)
 	const readyToPaint = !isPairingDataPending
+	const displayPairingCode = pairingCode ?? pairingTicket
+	const hostWindowOpen =
+		hostExpiresIn != null && hostExpiresIn > 0 && !!pairingTicket
 
 	return (
 		<motion.div
 			initial={false}
 			animate={{ opacity: readyToPaint ? 1 : 0 }}
 			transition={{ duration: 0.05, ease: 'easeOut' }}
-			className="flex flex-col gap-8"
+			className="flex flex-col gap-4"
 		>
 			{!readyToPaint ? (
 				<div
@@ -440,24 +356,70 @@ export function DevicesSettings() {
 											<ThisDeviceIcon className="h-5 w-5" />
 										</div>
 										<div className="min-w-0">
-											<p className="font-medium truncate">
-												{thisDevice.display_name}
-											</p>
+											<div className="flex min-w-0 items-center gap-1">
+												<p className="font-medium truncate">
+													{thisDevice.display_name}
+												</p>
+												<Button
+													type="button"
+													variant="ghost"
+													size="icon-xs"
+													className="shrink-0 text-muted-foreground"
+													aria-label={t('common:settings.devices.rename')}
+													onClick={() => setRenameThisOpen(true)}
+												>
+													<Pencil className="size-3" />
+												</Button>
+											</div>
 											<p className="text-xs text-muted-foreground truncate">
 												{deviceSubtitle(thisDevice)}
 											</p>
 										</div>
 									</div>
-									<Button
-										type="button"
-										size="sm"
-										variant="outline"
-										onClick={() => setRenameThisOpen(true)}
-									>
-										<Pencil className="w-4 h-4 mr-2" />
-										{t('common:settings.devices.rename')}
-									</Button>
+									{displayPairingCode ? (
+										<div className="flex max-w-[50%] shrink-0 items-center gap-1">
+											<span
+												className="truncate font-mono text-xs text-muted-foreground"
+												title={displayPairingCode}
+											>
+												{displayPairingCode}
+											</span>
+											<Button
+												type="button"
+												variant="ghost"
+												size="icon-sm"
+												className="shrink-0"
+												disabled={isLoading}
+												aria-label={
+													copied
+														? t('common:settings.devices.copied')
+														: t('common:sender.copyToClipboard')
+												}
+												onClick={copyPairingCode}
+											>
+												<Copy className="w-4 h-4" />
+											</Button>
+										</div>
+									) : null}
 								</div>
+
+								{hostWindowOpen ? (
+									<div className="flex flex-wrap items-center justify-between gap-2 text-sm">
+										<p className="text-muted-foreground">
+											{t('common:settings.devices.hostStillOpen', {
+												seconds: hostExpiresIn,
+											})}
+										</p>
+										<Button
+											type="button"
+											size="sm"
+											variant="ghost"
+											onClick={cancelHost}
+										>
+											{t('common:settings.devices.cancelPairing')}
+										</Button>
+									</div>
+								) : null}
 							</FramePanel>
 						</Frame>
 					) : null}
@@ -471,60 +433,19 @@ export function DevicesSettings() {
 										{t('common:settings.devices.description')}
 									</FrameDescription>
 								</div>
-								<div className="flex flex-wrap gap-2 shrink-0">
-									<Button
-										type="button"
-										size="sm"
-										disabled={isLoading && hostOpen}
-										onClick={openHost}
-									>
-										<Eye className="w-4 h-4 mr-2" />
-										{t('common:settings.devices.showQrCode')}
-									</Button>
-									<Button
-										type="button"
-										size="sm"
-										variant="outline"
-										onClick={() => setJoinOpen(true)}
-									>
-										<Plus className="w-4 h-4 mr-2" />
-										{t('common:settings.devices.enterCode')}
-									</Button>
-								</div>
+								<Button
+									type="button"
+									size="sm"
+									variant="outline"
+									className="shrink-0"
+									onClick={() => setJoinOpen(true)}
+								>
+									<Plus className="w-4 h-4 mr-2" />
+									{t('common:settings.devices.enterCode')}
+								</Button>
 							</div>
 
-							{pairingTicket &&
-							hostExpiresIn != null &&
-							hostExpiresIn > 0 &&
-							!hostOpen ? (
-								<div className="flex flex-wrap items-center justify-between gap-2 rounded-md border border-dashed px-3 py-2 text-sm">
-									<p className="text-muted-foreground">
-										{t('common:settings.devices.hostStillOpen', {
-											seconds: hostExpiresIn,
-										})}
-									</p>
-									<div className="flex gap-2">
-										<Button
-											type="button"
-											size="sm"
-											variant="outline"
-											onClick={() => setHostOpen(true)}
-										>
-											{t('common:settings.devices.showQrCode')}
-										</Button>
-										<Button
-											type="button"
-											size="sm"
-											variant="ghost"
-											onClick={cancelHost}
-										>
-											{t('common:settings.devices.cancelPairing')}
-										</Button>
-									</div>
-								</div>
-							) : null}
-
-							{devices.length === 0 ? (
+							{sortedDevices.length === 0 ? (
 								<div className="py-8 text-center text-sm text-muted-foreground border-t">
 									<p className="font-medium text-foreground mb-2">
 										{t('common:settings.devices.noPairedDevices')}
@@ -558,9 +479,27 @@ export function DevicesSettings() {
 																<Icon className="h-4 w-4" />
 															</div>
 															<div className="min-w-0">
-																<p className="font-medium truncate">
-																	{device.display_name}
-																</p>
+																<div className="flex min-w-0 items-center gap-1">
+																	<p className="font-medium truncate">
+																		{device.display_name}
+																	</p>
+																	{isActive ? (
+																		<Button
+																			type="button"
+																			variant="ghost"
+																			size="icon-xs"
+																			className="shrink-0 text-muted-foreground"
+																			aria-label={t(
+																				'common:settings.devices.rename'
+																			)}
+																			onClick={() =>
+																				setRenamePeerId(device.endpoint_id)
+																			}
+																		>
+																			<Pencil className="size-3" />
+																		</Button>
+																	) : null}
+																</div>
 																<p className="text-xs text-muted-foreground truncate">
 																	{deviceSubtitle(device)}
 																</p>
@@ -578,21 +517,6 @@ export function DevicesSettings() {
 																device={device}
 																namespace="settings"
 															/>
-															{isActive ? (
-																<Button
-																	type="button"
-																	variant="ghost"
-																	size="icon-sm"
-																	aria-label={t(
-																		'common:settings.devices.rename'
-																	)}
-																	onClick={() =>
-																		setRenamePeerId(device.endpoint_id)
-																	}
-																>
-																	<Pencil className="w-4 h-4" />
-																</Button>
-															) : null}
 															<Button
 																type="button"
 																variant="ghost"
@@ -633,14 +557,6 @@ export function DevicesSettings() {
 						</FramePanel>
 					</Frame>
 
-					<PairHostModal
-						open={hostOpen}
-						ticket={pairingTicket}
-						isLoading={isLoading}
-						expiresIn={hostExpiresIn}
-						onDismiss={dismissHost}
-						onCancelPairing={cancelHost}
-					/>
 					<PairJoinModal
 						open={joinOpen}
 						isLoading={isJoining}

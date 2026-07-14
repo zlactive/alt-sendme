@@ -2,7 +2,7 @@
 	"appTitle": "AltSendme",
 	"send": "Envoyer",
 	"webPreview": {
-		"banner": "Mode aperçu — les transferts de fichiers nécessitent l’application de bureau.",
+		"banner": "Mode aperçu - les transferts de fichiers nécessitent l’application de bureau.",
 		"transferUnavailable": "Le transfert de fichiers n’est pas disponible dans l’aperçu web. Téléchargez l’application de bureau pour envoyer et recevoir des fichiers."
 	},
 	"webPromo": {
@@ -12,7 +12,7 @@
 		"download": "Voir les options de téléchargement",
 		"github": "GitHub",
 		"linksLabel": "Application de bureau et liens du projet",
-		"notice": "La version web ne prend pas en charge les connexions directes — le trafic passe par des relais publics chiffrés et la vitesse est limitée. Vos fichiers restent chiffrés dans tous les cas. Utilisez l’application de bureau/CLI ou des relais personnalisés pour une meilleure expérience.",
+		"notice": "La version web ne prend pas en charge les connexions directes - le trafic passe par des relais publics chiffrés et la vitesse est limitée. Vos fichiers restent chiffrés dans tous les cas. Utilisez l’application de bureau/CLI ou des relais personnalisés pour une meilleure expérience.",
 		"platforms": "AltSendme est disponible en version bureau, Android, CLI et web.",
 		"website": "Site web"
 	},
@@ -82,7 +82,7 @@
 		"pairDevice": "Associer un appareil",
 		"pairedDevices": {
 			"connectedTitle": "Appareils connectés",
-			"deviceOffline": "L’appareil est hors ligne — utilisez plutôt le ticket manuel.",
+			"deviceOffline": "L’appareil est hors ligne - utilisez plutôt le ticket manuel.",
 			"deviceUnreachable": "Cet appareil reste associé. Réessayez lorsqu’il est en ligne, ou utilisez le ticket manuel. Les deux appareils peuvent nécessiter des paramètres relais compatibles.",
 			"failed": "Réessayer",
 			"inviteFailed": "Impossible de joindre l’appareil",
@@ -104,7 +104,7 @@
 			"devices": {
 				"emptyHint": "Associez des appareils dans les Réglages, puis revenez ici pour envoyer sans lien.",
 				"emptyTitle": "Aucun appareil associé pour l’instant",
-				"hint": "Choisissez un appareil — le transfert démarre lorsqu’il accepte.",
+				"hint": "Choisissez un appareil - le transfert démarre lorsqu’il accepte.",
 				"manageInSettings": "Associer des appareils dans les Réglages",
 				"nodeUnavailable": "L’envoi vers un appareil n’est pas disponible pour le moment. Vous pouvez toujours utiliser Transfert unique dans l’autre onglet.",
 				"searchNoResults": "Aucun appareil associé ne correspond à votre recherche.",
@@ -114,7 +114,7 @@
 			"devicesButton": "Envoyer à un appareil associé",
 			"link": {
 				"hint": "Toute personne disposant de ce lien peut recevoir vos fichiers.",
-				"transferInProgress": "Transfert en cours — ouvrez Transfert unique pour voir les détails.",
+				"transferInProgress": "Transfert en cours - ouvrez Transfert unique pour voir les détails.",
 				"waiting": "En attente que quelqu’un utilise votre lien"
 			},
 			"or": "ou"
@@ -320,8 +320,8 @@
 			"deviceUnpairedToast": "{{name}} a dissocié cet appareil",
 			"enterCode": "Saisir le code d’association",
 			"hostExpiresIn": "Expire dans {{seconds}} s.",
-			"hostHint": "Scannez ou copiez ce code sur l’appareil que vous souhaitez associer. Vous pouvez fermer cette fenêtre — l’association reste ouverte jusqu’à expiration.",
-			"hostStillOpen": "En attente qu’un appareil se joigne — association ouverte pendant {{seconds}} s.",
+			"hostHint": "Scannez ou copiez ce code sur l’appareil que vous souhaitez associer. Vous pouvez fermer cette fenêtre - l’association reste ouverte jusqu’à expiration.",
+			"hostStillOpen": "En attente qu’un appareil se joigne - association ouverte pendant {{seconds}} s.",
 			"joinHint": "Collez le code d’association depuis votre autre appareil.",
 			"nameSaveFailed": "Impossible d’enregistrer le nom de l’appareil",
 			"nameSaved": "Nom de l’appareil enregistré",
@@ -339,7 +339,7 @@
 			"removeFailed": "Impossible de supprimer l’appareil",
 			"rename": "Renommer",
 			"renameDevice": "Renommer l’appareil associé",
-			"renameDeviceHint": "Cela ne modifie le nom que sur cet appareil — pas de l’autre côté.",
+			"renameDeviceHint": "Cela ne modifie le nom que sur cet appareil - pas de l’autre côté.",
 			"renameThisDevice": "Renommer cet appareil",
 			"renameThisDeviceHint": "Choisissez un nom qui vous aide à reconnaître cet ordinateur lors de l’association.",
 			"saveName": "Enregistrer le nom",
@@ -382,8 +382,8 @@
 			"unavailableHeading": "Relais indisponible",
 			"fellBackToPublic": "Relais personnalisé inaccessible, utilisation d’un relais public à la place.",
 			"fellBackToastTitle": "Utilisation d’un relais public",
-			"fellBackToastSend": "Votre relais personnalisé était inaccessible — ce transfert utilise un relais public à la place.",
-			"fellBackToastReceive": "Votre relais personnalisé était inaccessible — ce téléchargement utilise un relais public à la place.",
+			"fellBackToastSend": "Votre relais personnalisé était inaccessible - ce transfert utilise un relais public à la place.",
+			"fellBackToastReceive": "Votre relais personnalisé était inaccessible - ce téléchargement utilise un relais public à la place.",
 			"dialogDescription": "Indique quel serveur relais cette application utilise actuellement pour les connexions.",
 			"connectedRelay": "Relais connecté",
 			"checking": "Vérification de la connexion…",
