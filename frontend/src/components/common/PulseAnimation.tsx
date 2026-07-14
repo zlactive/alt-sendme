@@ -56,11 +56,14 @@ export function PulseAnimation({
 		animationData,
 		loop: true,
 		autoplay: true,
-		style: { width: size, height: size },
+		style: { width: '100%', height: '100%' },
 	})
 
 	return (
-		<div className={cn(className, isTransporting && 'max-sm:hidden')}>
+		<div
+			className={cn(className, isTransporting && 'max-sm:hidden')}
+			style={{ width: size, height: size }}
+		>
 			{View}
 		</div>
 	)

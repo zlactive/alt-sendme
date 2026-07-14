@@ -55,7 +55,7 @@ export function SharingActiveCard({
 
 			{IS_DESKTOP ? (
 				<Sheet open={devicesOpen} onOpenChange={setDevicesOpen}>
-					<SheetContent side="right" inset className="sm:max-w-md">
+					<SheetContent side="right" inset className="sm:max-w-sm">
 						<SheetHeader>
 							<SheetTitle>
 								{t('common:sender.sharingActive.devices.title')}
@@ -71,6 +71,7 @@ export function SharingActiveCard({
 								isNodeReady={isNodeReady}
 								hasTicket={Boolean(ticket)}
 								onInvitePairedDevice={onInvitePairedDevice}
+								onInviteSuccess={() => setDevicesOpen(false)}
 								showHeader={false}
 								showSearch
 								isOpen={devicesOpen}

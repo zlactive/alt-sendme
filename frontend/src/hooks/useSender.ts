@@ -49,7 +49,7 @@ export interface UseSenderReturn {
 	pairedDevices: PairedDevice[]
 	isNodeReady: boolean
 	pairedInviteStatus: Record<string, PairedInviteStatus>
-	onInvitePairedDevice: (endpointId: string) => Promise<void>
+	onInvitePairedDevice: (endpointId: string) => Promise<boolean>
 
 	handleFileSelect: (
 		path: string,
@@ -882,10 +882,10 @@ export function useSender(): UseSenderReturn {
 		}
 	}
 
-	const onInvitePairedDevice = async (endpointId: string) => {
+	const onInvitePairedDevice = async (endpointId: string): Promise<boolean> => {
 		if (!ticket) {
 			console.warn('[paired-invite] sender: skipped — no active share ticket')
-			return
+			return false
 		}
 		if (!isNodeReady) {
 			console.warn('[paired-invite] sender: skipped — node not ready')
@@ -894,16 +894,16 @@ export function useSender(): UseSenderReturn {
 				description: t('common:settings.devices.nodeUnavailableHint'),
 				type: 'error',
 			})
-			return
+			return false
 		}
-		if (pairedInviteStatus[endpointId] === 'sending') return
+		if (pairedInviteStatus[endpointId] === 'sending') return false
 
 		const device =
 			pairedDevices.find((d) => d.endpoint_id === endpointId) ?? null
 		const deviceName =
 			device?.display_name ?? t('common:sender.pairedDevices.unknownPeer')
 		if (device && !isPairedDeviceActive(device)) {
-			return
+			return false
 		}
 		const fileCount = Math.max(selectedPaths.length, 1)
 		setInviteStatus(endpointId, 'sending')
@@ -925,15 +925,16 @@ export function useSender(): UseSenderReturn {
 					type: 'success',
 				})
 				setTimeout(() => setInviteStatus(endpointId, null), 5000)
-			} else {
-				setInviteStatus(endpointId, 'failed')
-				toastManager.add({
-					title: t('common:sender.pairedDevices.inviteFailed'),
-					description: t('common:sender.pairedDevices.deviceUnreachable'),
-					type: 'error',
-				})
-				setTimeout(() => setInviteStatus(endpointId, null), 4000)
+				return true
 			}
+			setInviteStatus(endpointId, 'failed')
+			toastManager.add({
+				title: t('common:sender.pairedDevices.inviteFailed'),
+				description: t('common:sender.pairedDevices.deviceUnreachable'),
+				type: 'error',
+			})
+			setTimeout(() => setInviteStatus(endpointId, null), 4000)
+			return false
 		} catch (error) {
 			console.error('[paired-invite] sender: invite failed', {
 				endpointId,
@@ -946,6 +947,7 @@ export function useSender(): UseSenderReturn {
 				type: 'error',
 			})
 			setTimeout(() => setInviteStatus(endpointId, null), 4000)
+			return false
 		}
 	}
 

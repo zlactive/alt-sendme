@@ -18,6 +18,7 @@ import { Link } from 'react-router-dom'
 import { handleExternalLinkClick } from '@/lib/openExternalUrl'
 import { IS_DESKTOP } from '@/lib/platform'
 import { cn } from '@/lib/utils'
+import { useSenderStore } from '@/store/sender-store'
 import { RelayStatusButton } from './RelayStatusButton'
 
 const CONTACTS = [
@@ -40,6 +41,10 @@ const CONTACTS = [
 
 export function AppFooter() {
 	const { t } = useTranslation()
+	const isSharing = useSenderStore(
+		(s) => s.viewState === 'SHARING' || s.viewState === 'TRANSPORTING'
+	)
+
 	return (
 		<div
 			className="w-full min-h-10 items-center flex bg-background/50 border-t border-border backdrop-blur-md"
@@ -81,28 +86,60 @@ export function AppFooter() {
 			</div>
 			<div className="flex flex-1 items-center justify-end gap-2">
 				{IS_DESKTOP ? (
-					<Link
-						to="/settings/devices"
-						className={buttonVariants({
-							variant: 'outline',
-							size: 'sm',
-						})}
-					>
-						<MonitorSmartphone />
-						{t('common:sender.pairDevice')}
-					</Link>
+					isSharing ? (
+						<span
+							aria-disabled
+							className={cn(
+								buttonVariants({
+									variant: 'outline',
+									size: 'sm',
+								}),
+								'pointer-events-none opacity-64'
+							)}
+						>
+							<MonitorSmartphone />
+							{t('common:sender.pairDevice')}
+						</span>
+					) : (
+						<Link
+							to="/settings/devices"
+							className={buttonVariants({
+								variant: 'outline',
+								size: 'sm',
+							})}
+						>
+							<MonitorSmartphone />
+							{t('common:sender.pairDevice')}
+						</Link>
+					)
 				) : null}
 				<RelayStatusButton />
-				<Link
-					to="/settings"
-					className={buttonVariants({
-						size: 'icon-sm',
-						variant: 'outline',
-					})}
-					aria-label={t('settings.title')}
-				>
-					<SettingsIcon />
-				</Link>
+				{isSharing ? (
+					<span
+						aria-disabled
+						aria-label={t('settings.title')}
+						className={cn(
+							buttonVariants({
+								size: 'icon-sm',
+								variant: 'outline',
+							}),
+							'pointer-events-none opacity-64'
+						)}
+					>
+						<SettingsIcon />
+					</span>
+				) : (
+					<Link
+						to="/settings"
+						className={buttonVariants({
+							size: 'icon-sm',
+							variant: 'outline',
+						})}
+						aria-label={t('settings.title')}
+					>
+						<SettingsIcon />
+					</Link>
+				)}
 			</div>
 		</div>
 	)
