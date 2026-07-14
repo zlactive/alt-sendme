@@ -15,7 +15,7 @@ import {
 	SelectPopup,
 	SelectItem,
 } from '../../ui/select'
-import type { AppTheme } from '../../../types/app'
+import { THEME_LABELS, type AppTheme } from '../../../types/app'
 import { LazyIcon } from '../../icons'
 
 export function ThemeSelectRadio() {
@@ -46,10 +46,11 @@ export function ThemeSelectRadio() {
 					<FrameDescription>{t('settings.theme.description')}</FrameDescription>
 					<Select value={activeTheme}>
 						<SelectTrigger size="default" className="w-full">
-							<SelectValue
-								className={'capitalize'}
-								placeholder="Select a theme"
-							/>
+							<SelectValue placeholder="Select a theme">
+								{(value: string | null) =>
+									value ? THEME_LABELS[value as AppTheme] : null
+								}
+							</SelectValue>
 						</SelectTrigger>
 						<SelectPopup positionerClassName="!left-1/2 !-translate-x-1/2">
 							{themes.map((theme) => (
@@ -58,7 +59,7 @@ export function ThemeSelectRadio() {
 									value={theme}
 									onClick={() => handleThemeChange(theme)}
 								>
-									<span className="capitalize">{theme}</span>
+									{THEME_LABELS[theme]}
 								</SelectItem>
 							))}
 						</SelectPopup>
@@ -66,7 +67,7 @@ export function ThemeSelectRadio() {
 				</div>
 
 				{/* Desktop view - Radio cards */}
-				<div className="hidden sm:flex flex-wrap gap-6 justify-start">
+				<div className="hidden sm:flex flex-wrap gap-4 justify-start">
 					{themes.map((theme) => (
 						<ThemeSelectRadioItem
 							key={theme}

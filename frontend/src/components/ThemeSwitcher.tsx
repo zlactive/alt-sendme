@@ -3,20 +3,18 @@ import { MoonIcon, SunIcon } from 'lucide-react'
 import { Toggle } from './ui/toggle'
 
 export function ThemeSwitcher() {
-	const { setTheme, activeTheme } = useThemeStore()
-	const checked = activeTheme === 'dark'
+	const { setTheme, isDark } = useThemeStore()
 	const setChecked = (checked: boolean) => {
-		const newTheme = checked ? 'dark' : 'light'
-		setTheme(newTheme)
+		setTheme(checked ? 'dark' : 'light')
 	}
 	return (
 		<div>
 			<Toggle
-				aria-label={`Switch to ${activeTheme === 'dark' ? 'light' : 'dark'} mode`}
+				aria-label={`Switch to ${isDark ? 'light' : 'dark'} mode`}
 				className="group data-[state=on]:bg-transparent data-[state=on]:hover:bg-muted"
-				onPressedChange={() => setChecked(!checked)}
-				data-state={activeTheme === 'dark' ? 'on' : 'off'}
-				pressed={activeTheme === 'dark'}
+				onPressedChange={() => setChecked(!isDark)}
+				data-state={isDark ? 'on' : 'off'}
+				pressed={isDark}
 				size="sm"
 			>
 				<MoonIcon
