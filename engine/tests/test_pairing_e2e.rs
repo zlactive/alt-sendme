@@ -41,10 +41,6 @@ fn paired_status(node: &NodeService, endpoint_id: &str) -> Option<PairingStatus>
 
 #[tokio::test(flavor = "multi_thread", worker_threads = 4)]
 async fn e2e_pairing_lifecycle() {
-    // Cargo only shows these logs when the test fails.
-    let _ = tracing_subscriber::fmt()
-        .with_env_filter("pairing-dev=info")
-        .try_init();
     assert!(
         std::env::var_os("IROH_SECRET").is_none(),
         "IROH_SECRET overrides the seeded per-node identities; unset it first"

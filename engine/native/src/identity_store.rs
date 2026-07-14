@@ -42,13 +42,7 @@ pub fn load_or_create_secret(data_dir: &Path) -> Result<SecretLoadOutcome> {
 
     if let Ok(hex) = std::env::var("IROH_SECRET") {
         let secret = parse_secret_hex(&hex)?;
-        tracing::info!(
-            target: "pairing-dev",
-            step = "identity.secret.loaded",
-            source = "env",
-            endpoint_id = %endpoint_id_for(&secret),
-            "pairing-dev"
-        );
+
         return Ok(SecretLoadOutcome {
             secret,
             source: SecretSource::EnvVar,
@@ -61,27 +55,14 @@ pub fn load_or_create_secret(data_dir: &Path) -> Result<SecretLoadOutcome> {
 
     match (file_secret, keychain_secret) {
         (Some(file), Some(keychain)) if secrets_equal(&file, &keychain) => {
-            tracing::info!(
-                target: "pairing-dev",
-                step = "identity.secret.loaded",
-                source = "identity_file",
-                endpoint_id = %endpoint_id_for(&file),
-                "pairing-dev"
-            );
+
             Ok(SecretLoadOutcome {
                 secret: file,
                 source: SecretSource::IdentityFile,
             })
         }
-        (Some(file), Some(keychain)) => {
-            tracing::warn!(
-                target: "pairing-dev",
-                step = "identity.secret.conflict",
-                file_endpoint = %endpoint_id_for(&file),
-                keychain_endpoint = %endpoint_id_for(&keychain),
-                resolution = "identity_file_wins",
-                "pairing-dev"
-            );
+        (Some(file), Some(_keychain)) => {
+
             sync_keychain_best_effort(&file);
             Ok(SecretLoadOutcome {
                 secret: file,
@@ -90,13 +71,7 @@ pub fn load_or_create_secret(data_dir: &Path) -> Result<SecretLoadOutcome> {
         }
         (Some(file), None) => {
             sync_keychain_best_effort(&file);
-            tracing::info!(
-                target: "pairing-dev",
-                step = "identity.secret.loaded",
-                source = "identity_file",
-                endpoint_id = %endpoint_id_for(&file),
-                "pairing-dev"
-            );
+
             Ok(SecretLoadOutcome {
                 secret: file,
                 source: SecretSource::IdentityFile,
@@ -105,14 +80,7 @@ pub fn load_or_create_secret(data_dir: &Path) -> Result<SecretLoadOutcome> {
         (None, Some(keychain)) => {
             write_identity_file(&file_path, &keychain)?;
             sync_keychain_best_effort(&keychain);
-            tracing::info!(
-                target: "pairing-dev",
-                step = "identity.secret.migrated",
-                source = "keychain",
-                endpoint_id = %endpoint_id_for(&keychain),
-                path = %file_path.display(),
-                "pairing-dev"
-            );
+
             Ok(SecretLoadOutcome {
                 secret: keychain,
                 source: SecretSource::KeychainMigrated,
@@ -122,24 +90,13 @@ pub fn load_or_create_secret(data_dir: &Path) -> Result<SecretLoadOutcome> {
             let secret = SecretKey::generate();
             write_identity_file(&file_path, &secret)?;
             sync_keychain_best_effort(&secret);
-            tracing::info!(
-                target: "pairing-dev",
-                step = "identity.secret.generated",
-                source = "generated",
-                endpoint_id = %endpoint_id_for(&secret),
-                path = %file_path.display(),
-                "pairing-dev"
-            );
+
             Ok(SecretLoadOutcome {
                 secret,
                 source: SecretSource::Generated,
             })
         }
     }
-}
-
-fn endpoint_id_for(secret: &SecretKey) -> String {
-    HEXLOWER.encode(secret.public().as_bytes())
 }
 
 fn secrets_equal(a: &SecretKey, b: &SecretKey) -> bool {
@@ -153,14 +110,8 @@ fn read_identity_file(path: &Path) -> Result<Option<SecretKey>> {
     let bytes = std::fs::read(path).with_context(|| format!("read {}", path.display()))?;
     match parse_secret_bytes(&bytes) {
         Ok(secret) => Ok(Some(secret)),
-        Err(err) => {
-            tracing::warn!(
-                target: "pairing-dev",
-                step = "identity.secret.file_invalid",
-                path = %path.display(),
-                error = %err,
-                "pairing-dev"
-            );
+        Err(_err) => {
+
             Ok(None)
         }
     }
@@ -195,13 +146,8 @@ fn read_keychain_secret() -> Result<Option<SecretKey>> {
     };
     match parse_secret_hex(&hex) {
         Ok(secret) => Ok(Some(secret)),
-        Err(err) => {
-            tracing::warn!(
-                target: "pairing-dev",
-                step = "identity.secret.keychain_invalid",
-                error = %err,
-                "pairing-dev"
-            );
+        Err(_err) => {
+
             Ok(None)
         }
     }
@@ -213,31 +159,12 @@ fn sync_keychain_best_effort(secret: &SecretKey) {
         Ok(()) => {
             match secret_store::load_secret_hex() {
                 Ok(Some(stored)) if stored == hex => {}
-                Ok(Some(_)) => tracing::warn!(
-                    target: "pairing-dev",
-                    step = "identity.secret.keychain_roundtrip_mismatch",
-                    "pairing-dev"
-                ),
-                Ok(None) => tracing::warn!(
-                    target: "pairing-dev",
-                    step = "identity.secret.keychain_roundtrip_empty",
-                    hint = "identity.key is authoritative; OS keychain may be unavailable in this environment",
-                    "pairing-dev"
-                ),
-                Err(err) => tracing::warn!(
-                    target: "pairing-dev",
-                    step = "identity.secret.keychain_roundtrip_failed",
-                    error = %err,
-                    "pairing-dev"
-                ),
+                Ok(Some(_)) => {},
+                Ok(None) => {},
+                Err(_err) => {}
             }
         }
-        Err(err) => tracing::warn!(
-            target: "pairing-dev",
-            step = "identity.secret.keychain_sync_failed",
-            error = %err,
-            "pairing-dev"
-        ),
+        Err(_err) => {}
     }
 }
 

@@ -149,19 +149,12 @@ export async function invitePairedDevice(
 	totalSize: number
 ): Promise<boolean> {
 	if (!desktopOnly()) return false
-	console.log('[paired-invite] sender: invoking invite_paired_device', {
-		endpointId,
-		fileCount,
-		totalSize,
-		ticketLen: blobTicket.length,
-	})
 	const result = await invoke<InviteDelivered>('invite_paired_device', {
 		endpointId,
 		blobTicket,
 		fileCount,
 		totalSize,
 	})
-	console.log('[paired-invite] sender: invite_paired_device returned', result)
 	return result.delivered
 }
 
@@ -170,15 +163,10 @@ export async function respondPairedInvite(
 	accepted: boolean
 ): Promise<void> {
 	if (!desktopOnly()) return
-	console.log('[paired-invite] receiver: invoking respond_paired_invite', {
-		endpointId,
-		accepted,
-	})
 	await invoke('respond_paired_invite', {
 		endpointId,
 		accepted,
 	})
-	console.log('[paired-invite] receiver: respond_paired_invite returned')
 }
 
 export function formatOsLabel(os: string | undefined | null): string {

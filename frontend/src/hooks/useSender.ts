@@ -245,11 +245,8 @@ export function useSender(): UseSenderReturn {
 									})
 						if (!payload?.endpoint_id) return
 						setInviteStatus(payload.endpoint_id, null)
-					} catch (error) {
-						console.error(
-							'[paired-invite] sender: failed to parse invite response',
-							error
-						)
+					} catch {
+						// Ignore malformed invite response payloads
 					}
 				}
 			)
@@ -926,11 +923,9 @@ export function useSender(): UseSenderReturn {
 
 	const onInvitePairedDevice = async (endpointId: string): Promise<boolean> => {
 		if (!ticket) {
-			console.warn('[paired-invite] sender: skipped — no active share ticket')
 			return false
 		}
 		if (!isNodeReady) {
-			console.warn('[paired-invite] sender: skipped — node not ready')
 			toastManager.add({
 				title: t('common:settings.devices.nodeUnavailableTitle'),
 				description: t('common:settings.devices.nodeUnavailableHint'),
@@ -985,10 +980,6 @@ export function useSender(): UseSenderReturn {
 			setTimeout(() => setInviteStatus(endpointId, null), 4000)
 			return false
 		} catch (error) {
-			console.error('[paired-invite] sender: invite failed', {
-				endpointId,
-				error,
-			})
 			setInviteStatus(endpointId, 'failed')
 			toastManager.add({
 				title: t('common:sender.pairedDevices.inviteFailed'),

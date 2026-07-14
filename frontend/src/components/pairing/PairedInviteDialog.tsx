@@ -32,12 +32,8 @@ export function PairedInviteDialog() {
 	const savePath = useReceiverActionsStore((s) => s.savePath)
 
 	const notifyInviteResponse = (endpointId: string, accepted: boolean) => {
-		void respondPairedInvite(endpointId, accepted).catch((error) => {
-			console.warn('[paired-invite] receiver: respond failed', {
-				endpointId,
-				accepted,
-				error,
-			})
+		void respondPairedInvite(endpointId, accepted).catch(() => {
+			// Best-effort notify; accept/decline UI already proceeded.
 		})
 	}
 
@@ -51,14 +47,7 @@ export function PairedInviteDialog() {
 	const accept = async () => {
 		const current = usePairedInviteStore.getState().invite
 		if (!current) return
-		console.log('[paired-invite] receiver: dialog accept clicked', {
-			sender: current.sender_name,
-			hasHandler: Boolean(acceptPairedInvite),
-		})
 		if (!acceptPairedInvite) {
-			console.warn(
-				'[paired-invite] receiver: accept handler not registered (Receive tab may be unmounted)'
-			)
 			toastManager.add({
 				title: t('common:errors.receiveFailed'),
 				description: t('common:receiver.openReceiveTabHint'),
@@ -74,9 +63,8 @@ export function PairedInviteDialog() {
 		}
 		try {
 			await acceptPairedInvite(current)
-			console.log('[paired-invite] receiver: accept handler completed')
-		} catch (error) {
-			console.error('[paired-invite] receiver: accept handler failed', error)
+		} catch {
+			// receiveWithTicket / accept path surfaces its own errors
 		}
 	}
 

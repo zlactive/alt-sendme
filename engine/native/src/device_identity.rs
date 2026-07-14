@@ -85,16 +85,7 @@ impl PairedDeviceStore {
     }
 
     pub fn remember(&self, device: PairedDevice) -> anyhow::Result<PairedDevice> {
-        tracing::info!(
-            target: "pairing-dev",
-            step = "store.remember.start",
-            endpoint_id = %device.endpoint_id,
-            display_name = %device.display_name,
-            device_type = %device.device_type,
-            os = %device.os,
-            relay_url = ?device.relay_url,
-            "pairing-dev"
-        );
+
         let mut file = self.read_file()?;
         let id = device.endpoint_id.to_lowercase();
         if let Some(existing) = file
@@ -112,23 +103,12 @@ impl PairedDeviceStore {
             existing.pairing_status = PairingStatus::Active;
             let saved = existing.clone();
             self.write_file(&file)?;
-            tracing::info!(
-                target: "pairing-dev",
-                step = "store.remember.updated",
-                endpoint_id = %saved.endpoint_id,
-                "pairing-dev"
-            );
+
             return Ok(saved);
         }
         file.devices.push(device.clone());
         self.write_file(&file)?;
-        tracing::info!(
-            target: "pairing-dev",
-            step = "store.remember.inserted",
-            endpoint_id = %device.endpoint_id,
-            total_devices = file.devices.len(),
-            "pairing-dev"
-        );
+
         Ok(device)
     }
 
@@ -148,12 +128,7 @@ impl PairedDeviceStore {
     }
 
     pub fn forget(&self, endpoint_id: &str) -> anyhow::Result<()> {
-        tracing::info!(
-            target: "pairing-dev",
-            step = "store.forget",
-            endpoint_id = %endpoint_id,
-            "pairing-dev"
-        );
+
         let mut file = self.read_file()?;
         let id = endpoint_id.to_lowercase();
         file.devices
@@ -163,13 +138,7 @@ impl PairedDeviceStore {
     }
 
     pub fn touch(&self, endpoint_id: &str, last_seen_at: u64) -> anyhow::Result<()> {
-        tracing::info!(
-            target: "pairing-dev",
-            step = "store.touch",
-            endpoint_id = %endpoint_id,
-            last_seen_at,
-            "pairing-dev"
-        );
+
         let mut file = self.read_file()?;
         let id = endpoint_id.to_lowercase();
         if let Some(existing) = file
@@ -184,12 +153,7 @@ impl PairedDeviceStore {
     }
 
     pub fn mark_unpaired_remotely(&self, endpoint_id: &str) -> anyhow::Result<Option<PairedDevice>> {
-        tracing::info!(
-            target: "pairing-dev",
-            step = "store.mark_unpaired_remotely",
-            endpoint_id = %endpoint_id,
-            "pairing-dev"
-        );
+
         let mut file = self.read_file()?;
         let id = endpoint_id.to_lowercase();
         let saved = if let Some(existing) = file
@@ -219,12 +183,7 @@ impl PairedDeviceStore {
         }
         if updated > 0 {
             self.write_file(&file)?;
-            tracing::warn!(
-                target: "pairing-dev",
-                step = "store.mark_stale_local_identity",
-                count = updated,
-                "pairing-dev"
-            );
+
         }
         Ok(updated)
     }
@@ -276,13 +235,7 @@ pub fn load_or_create_identity(data_dir: &Path) -> anyhow::Result<DeviceIdentity
         outcome.source,
         identity_store::SecretSource::KeychainMigrated | identity_store::SecretSource::Generated
     ) {
-        tracing::info!(
-            target: "pairing-dev",
-            step = "identity.secret.persisted",
-            source = ?outcome.source,
-            endpoint_id = %endpoint_id,
-            "pairing-dev"
-        );
+
     }
 
     let mut identity_rotated = false;
@@ -295,21 +248,8 @@ pub fn load_or_create_identity(data_dir: &Path) -> anyhow::Result<DeviceIdentity
             identity_rotated = true;
             previous_endpoint_id = Some(meta.endpoint_id.clone());
             tracing::warn!("device.json endpoint_id mismatch; syncing to persisted identity");
-            tracing::info!(
-                target: "pairing-dev",
-                step = "identity.endpoint_mismatch",
-                old = %meta.endpoint_id,
-                new = %endpoint_id,
-                "pairing-dev"
-            );
-            tracing::warn!(
-                target: "pairing-dev",
-                step = "identity.endpoint_changed",
-                old = %meta.endpoint_id,
-                new = %endpoint_id,
-                impact = "remote peers still paired with the old endpoint_id will fail connect/presence until re-paired",
-                "pairing-dev"
-            );
+
+
             meta.endpoint_id = endpoint_id;
         }
         meta.migrate();
