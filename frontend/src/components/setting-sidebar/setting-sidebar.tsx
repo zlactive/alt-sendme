@@ -15,6 +15,7 @@ import {
 	SidebarMenu,
 	SidebarMenuButton,
 	SidebarMenuItem,
+	useSidebar,
 } from '../ui/sidebar'
 import { settingSidebarConfig } from './config'
 
@@ -60,6 +61,7 @@ function SettingSidebarContent(
 function SettingSidebarCore() {
 	const items = settingSidebarConfig.core
 	const { t } = useTranslation()
+	const { isMobile, setOpenMobile } = useSidebar()
 	return (
 		<SidebarGroup>
 			<SidebarMenu>
@@ -73,6 +75,10 @@ function SettingSidebarCore() {
 								if (item.disable) {
 									e.preventDefault()
 									e.stopPropagation()
+									return
+								}
+								if (isMobile) {
+									setOpenMobile(false)
 								}
 							}}
 							end

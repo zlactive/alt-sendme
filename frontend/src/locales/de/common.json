@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Senden",
-	"comingSoon": "Demnächst",
+	"webPreview": {
+		"banner": "Vorschaumodus — Dateiübertragungen erfordern die Desktop-App.",
+		"transferUnavailable": "Dateiübertragung ist in der Web-Vorschau nicht verfügbar. Laden Sie die Desktop-App herunter, um Dateien zu senden und zu empfangen."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Community",
+		"compare": "Mit anderen P2P-Tools vergleichen",
+		"download": "Download-Optionen ansehen",
+		"github": "GitHub",
+		"linksLabel": "Desktop-App und Projektlinks",
+		"notice": "Die Webversion unterstützt keine direkten Verbindungen — der Datenverkehr wird über verschlüsselte öffentliche Relays geleitet und die Geschwindigkeit ist gedrosselt. Ihre Dateien bleiben in jedem Fall verschlüsselt. Für ein besseres Erlebnis nutzen Sie die Desktop-/CLI-App oder eigene Relays.",
+		"platforms": "AltSendme ist als Desktop-, Android-, CLI- und Web-App verfügbar.",
+		"website": "Website"
+	},
 	"receive": "Empfangen",
 	"ok": "OK",
 	"undo": "Rückgängig",
@@ -60,6 +74,50 @@
 				"label": "Privates Teilen",
 				"description": "Nur die Person, mit der Sie das Ticket teilen, kann die Datei herunterladen."
 			}
+		},
+		"addFile": "Datei hinzufügen",
+		"addFolder": "Ordner hinzufügen",
+		"clearSelection": "Auswahl löschen",
+		"exitSharing": "Freigabe beenden",
+		"pairDevice": "Gerät koppeln",
+		"pairedDevices": {
+			"connectedTitle": "Verbundene Geräte",
+			"deviceOffline": "Gerät ist offline — verwenden Sie stattdessen das manuelle Ticket.",
+			"deviceUnreachable": "Dieses Gerät ist weiterhin gekoppelt. Versuchen Sie es erneut, wenn es online ist, oder verwenden Sie das manuelle Ticket. Beide Geräte benötigen möglicherweise kompatible Relay-Einstellungen.",
+			"failed": "Erneut versuchen",
+			"inviteFailed": "Gerät nicht erreichbar",
+			"inviteSent": "Einladung gesendet",
+			"inviteSentDesc": "Die Person kann annehmen, um den Download zu starten.",
+			"inviteSentTo": "Einladung an {{name}} gesendet",
+			"pair": "Koppeln",
+			"send": "Senden",
+			"sending": "Wird gesendet…",
+			"sent": "Gesendet",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Erneutes Koppeln erforderlich",
+			"statusUnpaired": "Nicht gekoppelt",
+			"unknownPeer": "Unbekanntes Gerät",
+			"yourDevicesTitle": "An gekoppeltes Gerät senden"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Koppeln Sie Geräte in den Einstellungen und kehren Sie hierher zurück, um ohne Link zu senden.",
+				"emptyTitle": "Noch keine gekoppelten Geräte",
+				"hint": "Wählen Sie ein Gerät — die Übertragung startet, sobald es angenommen wird.",
+				"manageInSettings": "Geräte in Einstellungen koppeln",
+				"nodeUnavailable": "Senden an Geräte ist derzeit nicht verfügbar. Sie können weiterhin „Einmalige Übertragung“ im anderen Tab verwenden.",
+				"searchNoResults": "Keine gekoppelten Geräte entsprechen Ihrer Suche.",
+				"searchPlaceholder": "Gekoppelte Geräte suchen",
+				"title": "An gekoppeltes Gerät senden"
+			},
+			"devicesButton": "An gekoppeltes Gerät senden",
+			"link": {
+				"hint": "Jeder mit diesem Link kann Ihre Dateien empfangen.",
+				"transferInProgress": "Übertragung läuft — öffnen Sie „Einmalige Übertragung“, um Details anzuzeigen.",
+				"waiting": "Warten auf jemanden, der Ihren Link verwendet"
+			},
+			"or": "oder"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Download abgeschlossen, Namenskonflikte wurden gelöst",
 		"downloadedFile": "Heruntergeladene Datei",
 		"stopReceiving": "Empfang beenden",
-		"download": "Herunterladen"
+		"download": "Herunterladen",
+		"acceptInvite": "Annehmen",
+		"browserDownloadsFallback": "Browser-Downloadordner",
+		"browserDownloadsHint": "Dieser Browser kann keinen Speicherordner auswählen. Dateien werden in Ihren Standard-Downloadordner gespeichert.",
+		"declineInvite": "Ablehnen",
+		"openReceiveTabHint": "Öffnen Sie einmal den Tab „Empfangen“ und versuchen Sie es erneut.",
+		"pairedInvite": {
+			"changeFolder": "Ordner ändern",
+			"saveTo": "Speichern in"
+		},
+		"receiveBusyDescription": "Warten Sie, bis der aktuelle Download abgeschlossen ist, bevor Sie eine weitere Datei annehmen.",
+		"receiveBusyTitle": "Download läuft bereits",
+		"receiveFromPairedDescription": "{{sender}} möchte Ihnen {{count}} Datei(en) senden ({{size}}). Annehmen, um den Download zu starten.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} möchte Ihnen {{count}} Datei(en) senden. Annehmen, um den Download zu starten.",
+		"receiveFromPairedTitle": "Eingehende Datei von gekoppeltem Gerät",
+		"saveLocation": "Speicherort:"
 	},
 	"transfer": {
 		"progress": "Übertragungsfortschritt",
@@ -112,8 +185,8 @@
 		"duration": "Dauer",
 		"avgSpeed": "Durchschnittsgeschwindigkeit",
 		"multipleFiles": "{{count}} Dateien",
-		"donatePrompt": "Machen Sie AltSendme besser durch ",
-		"donateLink": "Spenden"
+		"donatePrompt": "Wenn Ihnen die Erfahrung gefällt, erwägen Sie bitte {{link}}. Danke!",
+		"donateLink": "zu spenden"
 	},
 	"errors": {
 		"sharingFailed": "Freigabe fehlgeschlagen",
@@ -138,7 +211,8 @@
 			"general": "Allgemein",
 			"relay": "Relay",
 			"network": "Netzwerk",
-			"notification": "Benachrichtigungen"
+			"notification": "Benachrichtigungen",
+			"devices": "Geräte"
 		},
 		"theme": {
 			"description": "Wählen Sie Ihr bevorzugtes Design",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Sie haben sich entschieden, Relays zu deaktivieren. Dateiübertragungen können fehlschlagen, wenn Sie Dateien mit jemandem außerhalb Ihres lokalen Netzwerks teilen möchten. Relays helfen Geräten, sich unter schwierigen Netzwerkbedingungen zu finden und zu verbinden, und Ihre Übertragungen bleiben immer Ende-zu-Ende-verschlüsselt.",
 				"confirmCustomTitle": "Benutzerdefinierte Relays verwenden?",
 				"confirmCustomDescription": "Sie haben sich entschieden, eigene selbst gehostete Relays zu verwenden. Wenn Ihre benutzerdefinierten Relays nicht erreichbar sind, wechseln Übertragungen automatisch auf öffentliche Relays und Sie werden benachrichtigt. Relays helfen Ihren Geräten nur, sich unter schwierigen Netzwerkbedingungen zu verbinden, und Ihre Übertragungen bleiben immer Ende-zu-Ende-verschlüsselt.",
-				"confirmContinue": "Weiter"
+				"confirmContinue": "Weiter",
+				"confirmCustomDescriptionWithPolicy": "Sie haben sich für eigene, selbst gehostete Relays entschieden. Wenn sie nicht erreichbar sind, folgt AltSendme der in den Relay-Einstellungen gewählten Fallback-Richtlinie. Relays helfen Ihren Geräten nur, sich unter schwierigen Netzwerkbedingungen zu verbinden, und Ihre Übertragungen bleiben immer Ende-zu-Ende-verschlüsselt.",
+				"fallbackDescription": "Legen Sie fest, was passiert, wenn Ihr benutzerdefiniertes Relay nicht erreichbar ist.",
+				"fallbackLabel": "Fallback-Richtlinie",
+				"fallbackPublic": "Bei Bedarf öffentliche Relays verwenden",
+				"fallbackPublicDesc": "Auf öffentliche iroh-Relays zurückfallen, wenn benutzerdefinierte Relays nicht erreichbar sind.",
+				"fallbackStrict": "Bei benutzerdefinierten Relays bleiben",
+				"fallbackStrictDesc": "Übertragung abbrechen, statt auf öffentliche Relays umzuschalten. Am besten für private Setups."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Kopplung abbrechen",
+			"codePlaceholder": "Kopplungscode einfügen",
+			"copied": "Kopplungscode kopiert",
+			"description": "Koppeln Sie Ihre Geräte einmalig und senden Sie Dateien ohne Tickets zu kopieren.",
+			"desktopOnly": "Gerätekopplung ist nur in der Desktop-App verfügbar.",
+			"deviceName": "Gerätename",
+			"deviceNamePlaceholder": "z. B. Tonys MacBook",
+			"devicePaired": "Gerät gekoppelt",
+			"deviceRemoved": "Gerät entfernt",
+			"deviceUnpairedToast": "{{name}} hat die Kopplung dieses Geräts aufgehoben",
+			"enterCode": "Kopplungscode eingeben",
+			"hostExpiresIn": "Läuft ab in {{seconds}} s.",
+			"hostHint": "Scannen oder kopieren Sie diesen Code auf dem Gerät, das Sie koppeln möchten. Sie können diesen Dialog schließen — die Kopplung bleibt bis zum Ablauf offen.",
+			"hostStillOpen": "Warten auf ein Gerät — Kopplung noch {{seconds}} s offen.",
+			"joinHint": "Fügen Sie den Kopplungscode von Ihrem anderen Gerät ein.",
+			"nameSaveFailed": "Gerätename konnte nicht gespeichert werden",
+			"nameSaved": "Gerätename gespeichert",
+			"noPairedDevices": "Noch keine gekoppelten Geräte",
+			"noPairedDevicesHint": "Koppeln Sie ein weiteres Telefon oder einen Computer, um Dateien ohne wiederholtes Teilen von Tickets zu senden.",
+			"nodeUnavailableHint": "Manuelle Tickets und Dateifreigabe funktionieren weiterhin normal.",
+			"nodeUnavailableTitle": "Gerätekopplung nicht verfügbar",
+			"pairDevice": "Koppeln",
+			"pairFailed": "Kopplung fehlgeschlagen",
+			"pairNewDevice": "Neues Gerät koppeln",
+			"pairing": "Kopplung läuft…",
+			"pairingCode": "Kopplungscode",
+			"relayChangePairedHint": "Gekoppelte Geräte bleiben in der Liste. Senden an gekoppelte Geräte funktioniert möglicherweise erst, wenn beide Geräte sich in der neuen Netzwerkkonfiguration erreichen können.",
+			"removeDevice": "Gerät entfernen",
+			"removeFailed": "Gerät konnte nicht entfernt werden",
+			"rename": "Umbenennen",
+			"renameDevice": "Gekoppeltes Gerät umbenennen",
+			"renameDeviceHint": "Dies ändert nur den Namen auf diesem Gerät — nicht auf der anderen Seite.",
+			"renameThisDevice": "Dieses Gerät umbenennen",
+			"renameThisDeviceHint": "Wählen Sie einen Namen, der Ihnen hilft, diesen Computer beim Koppeln wiederzuerkennen.",
+			"saveName": "Name speichern",
+			"searchNoResults": "Keine gekoppelten Geräte entsprechen Ihrer Suche.",
+			"searchPlaceholder": "Gekoppelte Geräte suchen",
+			"showQrCode": "Kopplungscode anzeigen",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Erneutes Koppeln erforderlich",
+			"statusUnpaired": "Nicht gekoppelt",
+			"thisDevice": "Dieses Gerät",
+			"thisDeviceHint": "Name, der gekoppelten Geräten angezeigt wird. Betriebssystem und Gerätetyp werden automatisch erkannt.",
+			"title": "Gekoppelte Geräte",
+			"unpairedHint": "Dieses Gerät hat die Kopplung aufgehoben. Entfernen Sie es aus Ihrer Liste."
 		}
 	},
 	"updater": {
@@ -270,5 +399,6 @@
 			"encryptedNote": "Übertragungen sind immer Ende-zu-Ende-verschlüsselt, sodass Relays deine Dateien nie sehen.",
 			"disabledNote": "Relays sind deaktiviert. Nur direkte Verbindungen, daher können Übertragungen bei strengen Firewalls oder NATs fehlschlagen."
 		}
-	}
+	},
+	"comingSoon": "Demnächst"
 }

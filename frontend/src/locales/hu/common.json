@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Küldés",
-	"comingSoon": "Hamarosan",
+	"webPreview": {
+		"banner": "Előnézeti mód — fájlátvitelhez asztali alkalmazás szükséges.",
+		"transferUnavailable": "A fájlátvitel nem érhető el a webes előnézetben. Töltsd le az asztali alkalmazást fájlok küldéséhez és fogadásához."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Hívj meg egy kávéra",
+		"community": "Közösség",
+		"compare": "Összehasonlítás más P2P eszközökkel",
+		"download": "Letöltési lehetőségek",
+		"github": "GitHub",
+		"linksLabel": "Asztali alkalmazás és projektlinkek",
+		"notice": "A webes verzió nem támogat közvetlen kapcsolatokat — a forgalom titkosított nyilvános relay-ken keresztül megy, és a sebesség korlátozott. A fájljaid mindenesetre titkosítva maradnak. Jobb élményért használd az asztali/CLI alkalmazást vagy egyéni relay-ket.",
+		"platforms": "Az AltSendme elérhető asztali, Android, CLI és webes formában.",
+		"website": "Weboldal"
+	},
 	"receive": "Fogadás",
 	"ok": "Rendben",
 	"undo": "Visszavonás",
@@ -60,6 +74,50 @@
 				"label": "Privát megosztás",
 				"description": "Csak az töltheti le a fájl(oka)t akivel megosztod a jegyet."
 			}
+		},
+		"addFile": "Fájl hozzáadása",
+		"addFolder": "Mappa hozzáadása",
+		"clearSelection": "Kijelölés törlése",
+		"exitSharing": "Megosztás befejezése",
+		"pairDevice": "Eszköz párosítása",
+		"pairedDevices": {
+			"connectedTitle": "Csatlakoztatott eszközök",
+			"deviceOffline": "Az eszköz offline — használj helyette kézi jegyet.",
+			"deviceUnreachable": "Ez az eszköz továbbra is párosítva van. Próbáld újra, amikor online, vagy használj kézi jegyet. Mindkét eszközön kompatibilis relay-beállítások lehetnek szükségesek.",
+			"failed": "Újra",
+			"inviteFailed": "Az eszköz elérhetetlen",
+			"inviteSent": "Meghívó elküldve",
+			"inviteSentDesc": "A címzett elfogadhatja a letöltés indításához.",
+			"inviteSentTo": "Meghívó elküldve: {{name}}",
+			"pair": "Párosítás",
+			"send": "Küldés",
+			"sending": "Küldés…",
+			"sent": "Elküldve",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Újrapárosítás szükséges",
+			"statusUnpaired": "Nincs párosítva",
+			"unknownPeer": "Ismeretlen eszköz",
+			"yourDevicesTitle": "Küldés párosított eszközre"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Párosíts eszközöket a Beállításokban, majd térj vissza ide link nélküli küldéshez.",
+				"emptyTitle": "Még nincs párosított eszköz",
+				"hint": "Válassz eszközt — az átvitel elfogadáskor indul.",
+				"manageInSettings": "Eszközök párosítása a Beállításokban",
+				"nodeUnavailable": "Az eszközre küldés jelenleg nem elérhető. A másik lapon továbbra is használhatod az egyszeri átvitelt.",
+				"searchNoResults": "Egy párosított eszköz sem felel meg a keresésnek.",
+				"searchPlaceholder": "Párosított eszközök keresése",
+				"title": "Küldés párosított eszközre"
+			},
+			"devicesButton": "Küldés párosított eszközre",
+			"link": {
+				"hint": "Bárki, aki rendelkezik ezzel a linkkel, fogadhatja a fájljaidat.",
+				"transferInProgress": "Átvitel folyamatban — nyisd meg az egyszeri átvitelt a részletekért.",
+				"waiting": "Várakozás, hogy valaki használja a linkedet"
+			},
+			"or": "vagy"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Letöltés kész, névütközések feloldva",
 		"downloadedFile": "Letöltött fájl",
 		"stopReceiving": "Fogadás leállítása",
-		"download": "Letöltés"
+		"download": "Letöltés",
+		"acceptInvite": "Elfogadás",
+		"browserDownloadsFallback": "Böngésző letöltési mappa",
+		"browserDownloadsHint": "Ez a böngésző nem tud mentési mappát választani. A fájlok az alapértelmezett letöltési helyre kerülnek.",
+		"declineInvite": "Elutasítás",
+		"openReceiveTabHint": "Nyisd meg egyszer a Fogadás lapot, majd próbáld újra.",
+		"pairedInvite": {
+			"changeFolder": "Mappa módosítása",
+			"saveTo": "Mentés ide"
+		},
+		"receiveBusyDescription": "Várj, amíg a jelenlegi letöltés befejeződik, mielőtt elfogadsz egy másik fájlt.",
+		"receiveBusyTitle": "Letöltés már folyamatban",
+		"receiveFromPairedDescription": "{{sender}} {{count}} fájlt szeretne küldeni neked ({{size}}). Fogadd el a letöltés indításához.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} {{count}} fájlt szeretne küldeni neked. Fogadd el a letöltés indításához.",
+		"receiveFromPairedTitle": "Bejövő fájl párosított eszközről",
+		"saveLocation": "Mentési hely:"
 	},
 	"transfer": {
 		"progress": "Átvitel állapota",
@@ -112,8 +185,8 @@
 		"duration": "Időtartam",
 		"avgSpeed": "Átlag sebesség",
 		"multipleFiles": "{{count}} fájl",
-		"donatePrompt": "Tegye jobbá az AltSendme-et ",
-		"donateLink": "adományozással"
+		"donatePrompt": "Ha tetszett a tapasztalat, kérjük, fontolja meg a {{link}}. Köszönjük!",
+		"donateLink": "adományozást"
 	},
 	"errors": {
 		"sharingFailed": "Sikertelen megosztás",
@@ -138,7 +211,8 @@
 			"general": "Általános",
 			"relay": "Relay",
 			"network": "Hálózat",
-			"notification": "Értesítések"
+			"notification": "Értesítések",
+			"devices": "Eszközök"
 		},
 		"theme": {
 			"description": "Válassza ki a kívánt témát",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Úgy döntött, hogy letiltja a relay-eket. A fájlátvitelek meghiúsulhatnak, ha a helyi hálózatán kívüli valakivel próbál fájlokat megosztani. A relay-ek segítenek az eszközöknek megtalálni egymást és kapcsolódni nehéz hálózati körülmények között, és az átvitelei mindig végpontok közötti titkosítással védettek maradnak.",
 				"confirmCustomTitle": "Egyéni relay-eket használ?",
 				"confirmCustomDescription": "Úgy döntött, hogy saját, önállóan üzemeltetett relay-eket használ. Ha az egyéni relay-ei nem elérhetők, az átvitelek automatikusan visszaállnak a nyilvános relay-ekre, és értesítést kap. A relay-ek csak abban segítenek, hogy az eszközei nehéz hálózati körülmények között is kapcsolódjanak, és az átvitelei mindig végpontok közötti titkosítással védettek maradnak.",
-				"confirmContinue": "Folytatás"
+				"confirmContinue": "Folytatás",
+				"confirmCustomDescriptionWithPolicy": "Saját, self-hosted relay használatát választottad. Ha elérhetetlenek, az AltSendme a Relay beállításokban kiválasztott tartalék szabályzatot követi. A relay csak a nehéz hálózati körülmények közötti kapcsolódásban segít, az átvitelek mindig end-to-end titkosítottak maradnak.",
+				"fallbackDescription": "Válaszd ki, mi történjen, ha az egyéni relay elérhetetlen.",
+				"fallbackLabel": "Tartalék szabályzat",
+				"fallbackPublic": "Szükség esetén nyilvános relay használata",
+				"fallbackPublicDesc": "Váltás nyilvános iroh relay-kre, ha az egyéni relay-k elérhetetlenek.",
+				"fallbackStrict": "Maradj az egyéni relay-knél",
+				"fallbackStrictDesc": "Az átvitel meghiúsul a nyilvános relay-kre váltás helyett. Privát környezetekhez ideális."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Párosítás megszakítása",
+			"codePlaceholder": "Illeszd be a párosítási kódot",
+			"copied": "Párosítási kód másolva",
+			"description": "Párosítsd az eszközeidet egyszer, majd küldj fájlokat jegyek másolása nélkül.",
+			"desktopOnly": "Az eszközpárosítás csak az asztali alkalmazásban érhető el.",
+			"deviceName": "Eszköz neve",
+			"deviceNamePlaceholder": "pl. Tony MacBookja",
+			"devicePaired": "Eszköz párosítva",
+			"deviceRemoved": "Eszköz eltávolítva",
+			"deviceUnpairedToast": "{{name}} megszüntette ennek az eszköznek a párosítását",
+			"enterCode": "Párosítási kód megadása",
+			"hostExpiresIn": "Lejár {{seconds}} mp múlva.",
+			"hostHint": "Olvasd be vagy másold ezt a kódot a párosítani kívánt eszközön. Bezárhatod ezt az ablakot — a párosítás a lejáratig nyitva marad.",
+			"hostStillOpen": "Várakozás eszköz csatlakozására — párosítás nyitva {{seconds}} mp-ig.",
+			"joinHint": "Illeszd be a párosítási kódot a másik eszközről.",
+			"nameSaveFailed": "Nem sikerült menteni az eszköz nevét",
+			"nameSaved": "Eszköz neve mentve",
+			"noPairedDevices": "Még nincs párosított eszköz",
+			"noPairedDevicesHint": "Párosíts egy másik telefont vagy számítógépet, hogy minden alkalommal jegy megosztása nélkül küldhess fájlokat.",
+			"nodeUnavailableHint": "A kézi jegyek és fájlmegosztás továbbra is normálisan működik.",
+			"nodeUnavailableTitle": "Az eszközpárosítás nem elérhető",
+			"pairDevice": "Párosítás",
+			"pairFailed": "A párosítás sikertelen",
+			"pairNewDevice": "Új eszköz párosítása",
+			"pairing": "Párosítás…",
+			"pairingCode": "Párosítási kód",
+			"relayChangePairedHint": "A párosított eszközök a listán maradnak. A párosított küldés nem biztos, hogy működik, amíg mindkét eszköz el nem éri egymást az új hálózati beállításokkal.",
+			"removeDevice": "Eszköz eltávolítása",
+			"removeFailed": "Nem sikerült eltávolítani az eszközt",
+			"rename": "Átnevezés",
+			"renameDevice": "Párosított eszköz átnevezése",
+			"renameDeviceHint": "Ez csak ezen az eszközön változtatja meg a nevet — a másik oldalon nem.",
+			"renameThisDevice": "Ennek az eszköznek az átnevezése",
+			"renameThisDeviceHint": "Válassz olyan nevet, amellyel felismered ezt a számítógépet párosításkor.",
+			"saveName": "Név mentése",
+			"searchNoResults": "Egy párosított eszköz sem felel meg a keresésnek.",
+			"searchPlaceholder": "Párosított eszközök keresése",
+			"showQrCode": "Párosítási kód megjelenítése",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Újrapárosítás szükséges",
+			"statusUnpaired": "Nincs párosítva",
+			"thisDevice": "Ez az eszköz",
+			"thisDeviceHint": "A párosított eszközök számára megjelenő név. Az operációs rendszer és az eszköztípus automatikusan felismerésre kerül.",
+			"title": "Párosított eszközök",
+			"unpairedHint": "Ez az eszköz megszüntette a párosítást. Távolítsd el a listádról."
 		}
 	},
 	"updater": {
@@ -270,5 +399,6 @@
 			"encryptedNote": "Az átvitelek mindig végpontok közötti titkosítással történnek, így a relayek soha nem látják a fájljaidat.",
 			"disabledNote": "A relayek ki vannak kapcsolva. Csak közvetlen kapcsolatok, így szigorú tűzfalak vagy NAT-ok esetén az átvitel meghiúsulhat."
 		}
-	}
+	},
+	"comingSoon": "Hamarosan"
 }

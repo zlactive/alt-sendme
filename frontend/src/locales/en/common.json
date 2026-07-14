@@ -64,6 +64,7 @@
 		"addMoreFolders": "Add more folders",
 		"addFile": "Add file",
 		"addFolder": "Add folder",
+		"addMore": "Add more",
 		"clearSelection": "Clear selection",
 		"multipleItemsSelected": "{{firstName}} and {{count}} more",
 		"removeFromSelection": "Remove from selection",
@@ -185,7 +186,7 @@
 		"duration": "Duration",
 		"avgSpeed": "Avg Speed",
 		"multipleFiles": "{{count}} Files",
-		"donatePrompt": "Make AltSendme better by ",
+		"donatePrompt": "If you love the experience, please consider {{link}}. Thanks!",
 		"donateLink": "donating"
 	},
 	"errors": {

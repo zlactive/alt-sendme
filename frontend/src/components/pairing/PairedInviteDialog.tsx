@@ -113,7 +113,7 @@ export function PairedInviteDialog() {
 							: ''}
 					</AlertDialogDescription>
 				</AlertDialogHeader>
-				<div className="space-y-2 px-6">
+				<div className="space-y-2 px-6 pb-4">
 					<p className="text-xs font-medium text-muted-foreground">
 						{t('common:receiver.pairedInvite.saveTo')}
 					</p>

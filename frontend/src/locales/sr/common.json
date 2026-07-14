@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Пошаљи",
-	"comingSoon": "Ускоро",
+	"webPreview": {
+		"banner": "Režim pregleda — prenos datoteka zahteva desktop aplikaciju.",
+		"transferUnavailable": "Prenos datoteka nije dostupan u web pregledu. Preuzmi desktop aplikaciju za slanje i prijem datoteka."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Kupi mi kafu",
+		"community": "Zajednica",
+		"compare": "Uporedi sa drugim P2P alatima",
+		"download": "Pogledaj opcije preuzimanja",
+		"github": "GitHub",
+		"linksLabel": "Desktop aplikacija i linkovi projekta",
+		"notice": "Web verzija ne podržava direktne veze — saobraćaj ide kroz šifrovane javne relay servere, a brzine su ograničene. Tvoje datoteke ipak ostaju šifrovane. Koristi desktop/CLI aplikaciju ili prilagođene relay servere za bolje iskustvo.",
+		"platforms": "AltSendme je dostupan kao desktop, Android, CLI i web.",
+		"website": "Veb sajt"
+	},
 	"receive": "Прими",
 	"ok": "У реду",
 	"undo": "Опозови",
@@ -60,6 +74,50 @@
 				"label": "Приватно дељење",
 				"description": "Само особа са којом делиш карту може преузети датотеку."
 			}
+		},
+		"addFile": "Dodaj datoteku",
+		"addFolder": "Dodaj fasciklu",
+		"clearSelection": "Obriši izbor",
+		"exitSharing": "Izađi iz deljenja",
+		"pairDevice": "Upari uređaj",
+		"pairedDevices": {
+			"connectedTitle": "Povezani uređaji",
+			"deviceOffline": "Uređaj je offline — koristi ručnu kartu umesto toga.",
+			"deviceUnreachable": "Ovaj uređaj je i dalje uparen. Pokušaj ponovo kada bude online, ili koristi ručnu kartu. Oba uređaja možda treba da imaju kompatibilna relay podešavanja.",
+			"failed": "Ponovi",
+			"inviteFailed": "Uređaj nije dostupan",
+			"inviteSent": "Pozivnica poslata",
+			"inviteSentDesc": "Primalac može da je prihvati da započne preuzimanje.",
+			"inviteSentTo": "Pozivnica poslata za {{name}}",
+			"pair": "Upari",
+			"send": "Pošalji",
+			"sending": "Slanje…",
+			"sent": "Poslato",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Potrebno ponovno uparivanje",
+			"statusUnpaired": "Nije upareno",
+			"unknownPeer": "Nepoznat uređaj",
+			"yourDevicesTitle": "Pošalji na upareni uređaj"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Upari uređaje u Podešavanjima, pa se vrati ovde da šalješ bez linka.",
+				"emptyTitle": "Još nema uparenih uređaja",
+				"hint": "Izaberi uređaj — prenos počinje kada prihvate.",
+				"manageInSettings": "Upari uređaje u Podešavanjima",
+				"nodeUnavailable": "Slanje na uređaj trenutno nije dostupno. I dalje možeš koristiti jednokratni prenos sa druge kartice.",
+				"searchNoResults": "Nijedan upareni uređaj ne odgovara pretrazi.",
+				"searchPlaceholder": "Pretraži uparene uređaje",
+				"title": "Pošalji na upareni uređaj"
+			},
+			"devicesButton": "Pošalji na upareni uređaj",
+			"link": {
+				"hint": "Svako sa ovim linkom može da primi tvoje datoteke.",
+				"transferInProgress": "Prenos u toku — otvori jednokratni prenos za detalje.",
+				"waiting": "Čekanje da neko koristi tvoj link"
+			},
+			"or": "ili"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Preuzimanje završeno, konflikti imena rešeni",
 		"downloadedFile": "Preuzeta datoteka",
 		"stopReceiving": "Прекини примање",
-		"download": "Преузми"
+		"download": "Преузми",
+		"acceptInvite": "Prihvati",
+		"browserDownloadsFallback": "Fascikla preuzimanja pregledača",
+		"browserDownloadsHint": "Ovaj pregledač ne može da izabere fasciklu za čuvanje. Datoteke će se preuzeti na podrazumevanu lokaciju preuzimanja.",
+		"declineInvite": "Odbij",
+		"openReceiveTabHint": "Otvori kartu Primi jednom, pa pokušaj ponovo.",
+		"pairedInvite": {
+			"changeFolder": "Promeni fasciklu",
+			"saveTo": "Sačuvaj u"
+		},
+		"receiveBusyDescription": "Sačekaj da se trenutno preuzimanje završi pre nego što prihvatiš drugu datoteku.",
+		"receiveBusyTitle": "Preuzimanje je već u toku",
+		"receiveFromPairedDescription": "{{sender}} želi da ti pošalje {{count}} datoteku/e ({{size}}). Prihvati da započneš preuzimanje.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} želi da ti pošalje {{count}} datoteku/e. Prihvati da započneš preuzimanje.",
+		"receiveFromPairedTitle": "Dolazna datoteka sa uparenog uređaja",
+		"saveLocation": "Lokacija čuvanja:"
 	},
 	"transfer": {
 		"progress": "Напредак преноса",
@@ -112,8 +185,8 @@
 		"duration": "Трајање",
 		"avgSpeed": "Просечна брзина",
 		"multipleFiles": "{{count}} datoteka",
-		"donatePrompt": "Učinite AltSendme boljim ",
-		"donateLink": "donacijom"
+		"donatePrompt": "Ako vam se dopao doživljaj, razmislite o {{link}}. Hvala!",
+		"donateLink": "donaciji"
 	},
 	"errors": {
 		"sharingFailed": "Дељење није успело",
@@ -138,7 +211,8 @@
 			"general": "Опште",
 			"relay": "Relay",
 			"network": "Мрежа",
-			"notification": "Обавештења"
+			"notification": "Обавештења",
+			"devices": "Uređaji"
 		},
 		"theme": {
 			"description": "Изаберите жељену тему",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Odabrali ste da onemogućite relay servere. Prenos datoteka može da ne uspe ako pokušate da delite datoteke sa nekim van vaše lokalne mreže. Relay serveri pomažu uređajima da se pronađu i povežu u teškim mrežnim uslovima, a vaši prenosi uvek ostaju end-to-end šifrovani.",
 				"confirmCustomTitle": "Koristiti prilagođene relay servere?",
 				"confirmCustomDescription": "Odabrali ste da koristite sopstvene relay servere koje sami hostujete. Ako vaši prilagođeni relay serveri nisu dostupni, prenosi će se automatski vratiti na javne relay servere i bićete obavešteni. Relay serveri samo pomažu vašim uređajima da se povežu u teškim mrežnim uslovima, a vaši prenosi uvek ostaju end-to-end šifrovani.",
-				"confirmContinue": "Nastavi"
+				"confirmContinue": "Nastavi",
+				"confirmCustomDescriptionWithPolicy": "Izabrao si korišćenje sopstvenih self-hosted relay servera. Ako nisu dostupni, AltSendme će pratiti rezervnu politiku iz Relay podešavanja. Relay serveri samo pomažu uređajima da se povežu u teškim mrežnim uslovima, a tvoji prenosi uvek ostaju end-to-end šifrovani.",
+				"fallbackDescription": "Izaberi šta se dešava kada tvoj prilagođeni relay nije dostupan.",
+				"fallbackLabel": "Rezervna politika",
+				"fallbackPublic": "Koristi javne relay servere po potrebi",
+				"fallbackPublicDesc": "Prebaci se na javne iroh relay servere kada prilagođeni relay nisu dostupni.",
+				"fallbackStrict": "Ostani na prilagođenim relay serverima",
+				"fallbackStrictDesc": "Prenos ne uspe umesto prebacivanja na javne relay servere. Najbolje za privatna okruženja."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Otkaži uparivanje",
+			"codePlaceholder": "Nalepi kod za uparivanje",
+			"copied": "Kod za uparivanje kopiran",
+			"description": "Upari uređaje jednom, pa šalji datoteke bez kopiranja karata.",
+			"desktopOnly": "Uparivanje uređaja dostupno je samo u desktop aplikaciji.",
+			"deviceName": "Naziv uređaja",
+			"deviceNamePlaceholder": "npr. Tonyjev MacBook",
+			"devicePaired": "Uređaj uparen",
+			"deviceRemoved": "Uređaj uklonjen",
+			"deviceUnpairedToast": "{{name}} je uklonio uparivanje ovog uređaja",
+			"enterCode": "Unesi kod za uparivanje",
+			"hostExpiresIn": "Ističe za {{seconds}} s.",
+			"hostHint": "Skeniraj ili kopiraj ovaj kod na uređaju koji želiš da upariš. Možeš zatvoriti ovaj dijalog — uparivanje ostaje otvoreno do isteka.",
+			"hostStillOpen": "Čekanje da se uređaj priključi — uparivanje otvoreno {{seconds}} s.",
+			"joinHint": "Nalepi kod za uparivanje sa drugog uređaja.",
+			"nameSaveFailed": "Nije moguće sačuvati naziv uređaja",
+			"nameSaved": "Naziv uređaja sačuvan",
+			"noPairedDevices": "Još nema uparenih uređaja",
+			"noPairedDevicesHint": "Upari drugi telefon ili računar da šalješ datoteke bez deljenja karata svaki put.",
+			"nodeUnavailableHint": "Ručne karte i deljenje datoteka i dalje rade normalno.",
+			"nodeUnavailableTitle": "Uparivanje uređaja nije dostupno",
+			"pairDevice": "Upari",
+			"pairFailed": "Uparivanje nije uspelo",
+			"pairNewDevice": "Upari novi uređaj",
+			"pairing": "Uparivanje…",
+			"pairingCode": "Kod za uparivanje",
+			"relayChangePairedHint": "Upareni uređaji ostaju na listi. Slanje na uparene uređaje možda neće raditi dok oba uređaja ne mogu da se povežu u novoj mrežnoj konfiguraciji.",
+			"removeDevice": "Ukloni uređaj",
+			"removeFailed": "Nije moguće ukloniti uređaj",
+			"rename": "Preimenuj",
+			"renameDevice": "Preimenuj upareni uređaj",
+			"renameDeviceHint": "Ovo menja naziv samo na ovom uređaju — ne preimenuje drugu stranu.",
+			"renameThisDevice": "Preimenuj ovaj uređaj",
+			"renameThisDeviceHint": "Izaberi naziv koji ti pomaže da prepoznaš ovaj računar pri uparivanju.",
+			"saveName": "Sačuvaj naziv",
+			"searchNoResults": "Nijedan upareni uređaj ne odgovara pretrazi.",
+			"searchPlaceholder": "Pretraži uparene uređaje",
+			"showQrCode": "Prikaži kod za uparivanje",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Potrebno ponovno uparivanje",
+			"statusUnpaired": "Nije upareno",
+			"thisDevice": "Ovaj uređaj",
+			"thisDeviceHint": "Naziv prikazan uređajima sa kojima se uparuješ. OS i tip uređaja se automatski detektuju.",
+			"title": "Upareni uređaji",
+			"unpairedHint": "Ovaj uređaj je uklonio uparivanje. Ukloni ga sa svoje liste."
 		}
 	},
 	"updater": {
@@ -270,5 +399,6 @@
 			"encryptedNote": "Prenosi su uvek end-to-end šifrovani, pa releji nikada ne vide vaše datoteke.",
 			"disabledNote": "Releji su isključeni. Samo direktne veze, pa prenosi mogu da ne uspeju kroz stroge zaštitne zidove ili NAT."
 		}
-	}
+	},
+	"comingSoon": "Ускоро"
 }

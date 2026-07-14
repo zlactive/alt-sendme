@@ -5,6 +5,7 @@ import {
 	ChevronRight,
 	FilePlus,
 	FolderPlus,
+	Plus,
 	Upload,
 	X,
 } from 'lucide-react'
@@ -13,7 +14,12 @@ import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { DropzoneProps } from '../../types/sender'
 import { getPreviewFileIcon } from '../../lib/fileIcons'
 import { Button } from '../ui/button'
-import { Group, GroupSeparator } from '../ui/group'
+import {
+	Menu,
+	MenuItem,
+	MenuPopup,
+	MenuTrigger,
+} from '../ui/menu'
 import {
 	Tooltip,
 	TooltipContent,
@@ -262,28 +268,70 @@ export function Dropzone({
 				{...dropzoneDragProps}
 			>
 				{hasSelection && !isLoading ? (
-					<Tooltip>
-						<TooltipTrigger
-							render={
-								<Button
-									type="button"
-									variant="ghost"
-									size="icon-sm"
-									onClick={(e) => {
-										e.stopPropagation()
-										onClearSelection()
-									}}
-									className="absolute top-3 right-3 z-30 text-muted-foreground"
-									aria-label={t('common:sender.clearSelection')}
+					<>
+						<div
+							className="absolute top-3 left-3 z-30"
+							onClick={(e) => e.stopPropagation()}
+							onKeyDown={(e) => e.stopPropagation()}
+						>
+							<Menu>
+								<MenuTrigger
+									render={
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon-sm"
+											className="text-muted-foreground/70 hover:text-muted-foreground"
+											aria-label={t('common:sender.addMore')}
+											title={t('common:sender.addMore')}
+										/>
+									}
 								>
-									<X />
-								</Button>
-							}
-						/>
-						<TooltipContent>
-							<p>{t('common:sender.clearSelection')}</p>
-						</TooltipContent>
-					</Tooltip>
+									<Plus className="size-4" strokeWidth={1.75} />
+								</MenuTrigger>
+								<MenuPopup align="start" side="bottom" sideOffset={6}>
+									<MenuItem
+										onClick={() => {
+											void onAddFiles()
+										}}
+									>
+										<FilePlus />
+										{t('common:sender.addFile')}
+									</MenuItem>
+									<MenuItem
+										onClick={() => {
+											void onAddFolders()
+										}}
+									>
+										<FolderPlus />
+										{t('common:sender.addFolder')}
+									</MenuItem>
+								</MenuPopup>
+							</Menu>
+						</div>
+						<Tooltip>
+							<TooltipTrigger
+								render={
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-sm"
+										onClick={(e) => {
+											e.stopPropagation()
+											onClearSelection()
+										}}
+										className="absolute top-3 right-3 z-30 text-muted-foreground"
+										aria-label={t('common:sender.clearSelection')}
+									>
+										<X />
+									</Button>
+								}
+							/>
+							<TooltipContent>
+								<p>{t('common:sender.clearSelection')}</p>
+							</TooltipContent>
+						</Tooltip>
+					</>
 				) : null}
 				<motion.div
 					key={selectedPath ? 'selected' : 'empty'}
@@ -291,10 +339,10 @@ export function Dropzone({
 					animate={{ opacity: 1, filter: 'blur(0px)' }}
 					exit={{ opacity: 0, filter: 'blur(4px)' }}
 					transition={{ duration: 0.25 }}
-					className="w-full p-4 sm:p-6"
+					className="h-full w-full p-4 sm:p-6"
 				>
 					{!hasSelection && (
-						<div className="flex min-h-52 w-full flex-col items-center justify-center space-y-4">
+						<div className="flex h-full min-h-52 w-full flex-col items-center justify-center space-y-4">
 							<div className="flex justify-center items-center h-16">
 								<Upload
 									className="h-12 w-12 text-foreground/60 data-active:text-accent-foreground transition-transform"
@@ -321,7 +369,7 @@ export function Dropzone({
 								animate={{ opacity: 1, y: 0 }}
 								exit={{ opacity: 0, y: 6 }}
 								transition={{ duration: 0.2 }}
-								className="w-full flex flex-col items-center gap-4"
+								className="flex h-full w-full flex-col items-center justify-center gap-4 pt-4"
 							>
 								<div
 									ref={attachPreviewScroller}
@@ -393,40 +441,6 @@ export function Dropzone({
 										</AnimatePresence>
 									</motion.div>
 								</div>
-
-								{!isLoading ? (
-									<Group className="mx-auto flex w-full max-w-sm flex-col gap-2 sm:w-fit sm:max-w-none sm:flex-row sm:gap-0">
-										<div className="w-full sm:w-auto">
-											<Button
-												type="button"
-												size="sm"
-												onClick={(e) => {
-													e.stopPropagation()
-													void onAddFiles()
-												}}
-												className="w-full rounded-lg sm:rounded-l-lg sm:rounded-r-none"
-											>
-												{t('common:sender.addFile')}
-												<FilePlus />
-											</Button>
-										</div>
-										<GroupSeparator className="hidden sm:block" />
-										<div className="w-full sm:w-auto">
-											<Button
-												type="button"
-												size="sm"
-												onClick={(e) => {
-													e.stopPropagation()
-													void onAddFolders()
-												}}
-												className="w-full rounded-lg sm:rounded-r-lg sm:rounded-l-none"
-											>
-												{t('common:sender.addFolder')}
-												<FolderPlus />
-											</Button>
-										</div>
-									</Group>
-								) : null}
 							</motion.div>
 						)}
 					</AnimatePresence>

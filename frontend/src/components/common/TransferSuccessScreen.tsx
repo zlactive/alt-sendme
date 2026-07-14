@@ -52,6 +52,10 @@ export function TransferSuccessScreen({
 	const isReceiver = !!metadata.downloadPath
 	const isDirectory = metadata.pathType === 'directory'
 	const { t } = useTranslation()
+	const donateLinkText = t('common:transfer.donateLink')
+	const [donatePromptBefore, donatePromptAfter = ''] = t(
+		'common:transfer.donatePrompt'
+	).split('{{link}}')
 
 	return (
 		<div className="flex flex-col items-center justify-center space-y-6 ">
@@ -178,7 +182,7 @@ export function TransferSuccessScreen({
 
 			{!wasStopped ? (
 				<p className="text-center text-xs sm:text-sm text-muted-foreground">
-					{t('common:transfer.donatePrompt')}
+					{donatePromptBefore}
 					<a
 						href={DONATE_LINK}
 						onClick={(event) => handleExternalLinkClick(event, DONATE_LINK)}
@@ -186,9 +190,9 @@ export function TransferSuccessScreen({
 						rel="noopener noreferrer"
 						className="font-medium text-foreground/70 underline decoration-muted-foreground/40 underline-offset-4 transition-colors hover:text-primary hover:decoration-primary/60"
 					>
-						{t('common:transfer.donateLink')}
+						{donateLinkText}
 					</a>
-					{t('common:transfer.donateSuffix', { defaultValue: '' })}
+					{donatePromptAfter}
 				</p>
 			) : null}
 		</div>

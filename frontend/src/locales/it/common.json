@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Invia",
-	"comingSoon": "Prossimamente",
+	"webPreview": {
+		"banner": "Modalità anteprima — i trasferimenti file richiedono l’app desktop.",
+		"transferUnavailable": "Il trasferimento file non è disponibile nell’anteprima web. Scarica l’app desktop per inviare e ricevere file."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Community",
+		"compare": "Confronta con altri strumenti P2P",
+		"download": "Vedi opzioni di download",
+		"github": "GitHub",
+		"linksLabel": "App desktop e link del progetto",
+		"notice": "La versione web non supporta connessioni dirette — il traffico passa per relay pubblici crittografati e la velocità è limitata. I tuoi file restano comunque crittografati. Usa l’app desktop/CLI o relay personalizzati per un’esperienza migliore.",
+		"platforms": "AltSendme è disponibile come app desktop, Android, CLI e web.",
+		"website": "Sito web"
+	},
 	"receive": "Ricevi",
 	"ok": "OK",
 	"undo": "Annulla",
@@ -60,6 +74,50 @@
 				"label": "Condivisione privata",
 				"description": "Solo la persona con cui condividi il ticket può scaricare il file."
 			}
+		},
+		"addFile": "Aggiungi file",
+		"addFolder": "Aggiungi cartella",
+		"clearSelection": "Cancella selezione",
+		"exitSharing": "Esci dalla condivisione",
+		"pairDevice": "Associa dispositivo",
+		"pairedDevices": {
+			"connectedTitle": "Dispositivi connessi",
+			"deviceOffline": "Il dispositivo è offline — usa il ticket manuale.",
+			"deviceUnreachable": "Questo dispositivo è ancora associato. Riprova quando è online oppure usa il ticket manuale. Entrambi i dispositivi potrebbero richiedere impostazioni relay compatibili.",
+			"failed": "Riprova",
+			"inviteFailed": "Impossibile raggiungere il dispositivo",
+			"inviteSent": "Invito inviato",
+			"inviteSentDesc": "Può accettarlo per avviare il download.",
+			"inviteSentTo": "Invito inviato a {{name}}",
+			"pair": "Associa",
+			"send": "Invia",
+			"sending": "Invio…",
+			"sent": "Inviato",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Nuova associazione necessaria",
+			"statusUnpaired": "Non associato",
+			"unknownPeer": "Dispositivo sconosciuto",
+			"yourDevicesTitle": "Invia a dispositivo associato"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Associa i dispositivi nelle Impostazioni, poi torna qui per inviare senza un link.",
+				"emptyTitle": "Nessun dispositivo associato",
+				"hint": "Scegli un dispositivo — il trasferimento inizia quando lo accetta.",
+				"manageInSettings": "Associa dispositivi nelle Impostazioni",
+				"nodeUnavailable": "L’invio al dispositivo non è disponibile al momento. Puoi comunque usare Trasferimento singolo nell’altra scheda.",
+				"searchNoResults": "Nessun dispositivo associato corrisponde alla ricerca.",
+				"searchPlaceholder": "Cerca dispositivi associati",
+				"title": "Invia a un dispositivo associato"
+			},
+			"devicesButton": "Invia a un dispositivo associato",
+			"link": {
+				"hint": "Chiunque abbia questo link può ricevere i tuoi file.",
+				"transferInProgress": "Trasferimento in corso — apri Trasferimento singolo per i dettagli.",
+				"waiting": "In attesa che qualcuno usi il tuo link"
+			},
+			"or": "oppure"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Download completato con conflitti di nomi risolti",
 		"downloadedFile": "File scaricato",
 		"stopReceiving": "Ferma ricezione",
-		"download": "Scarica"
+		"download": "Scarica",
+		"acceptInvite": "Accetta",
+		"browserDownloadsFallback": "Cartella Download del browser",
+		"browserDownloadsHint": "Questo browser non consente di scegliere una cartella di salvataggio. I file verranno scaricati nella posizione predefinita dei download.",
+		"declineInvite": "Rifiuta",
+		"openReceiveTabHint": "Apri la scheda Ricevi una volta, poi riprova.",
+		"pairedInvite": {
+			"changeFolder": "Cambia cartella",
+			"saveTo": "Salva in"
+		},
+		"receiveBusyDescription": "Attendi il completamento del download in corso prima di accettare un altro file.",
+		"receiveBusyTitle": "Download già in corso",
+		"receiveFromPairedDescription": "{{sender}} vuole inviarti {{count}} file ({{size}}). Accetta per avviare il download.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} vuole inviarti {{count}} file. Accetta per avviare il download.",
+		"receiveFromPairedTitle": "File in arrivo da dispositivo associato",
+		"saveLocation": "Percorso di salvataggio:"
 	},
 	"transfer": {
 		"progress": "Avanzamento Trasferimento",
@@ -112,8 +185,8 @@
 		"duration": "Durata",
 		"avgSpeed": "Velocità Media",
 		"multipleFiles": "{{count}} file",
-		"donatePrompt": "Migliora AltSendme ",
-		"donateLink": "donando"
+		"donatePrompt": "Se ti è piaciuta l'esperienza, considera di {{link}}. Grazie!",
+		"donateLink": "donare"
 	},
 	"errors": {
 		"sharingFailed": "Condivisione Fallita",
@@ -138,7 +211,8 @@
 			"general": "Generale",
 			"relay": "Relay",
 			"network": "Rete",
-			"notification": "Notifiche"
+			"notification": "Notifiche",
+			"devices": "Dispositivi"
 		},
 		"theme": {
 			"description": "Seleziona il tema preferito",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Hai scelto di disabilitare i relay. I trasferimenti di file potrebbero non riuscire se provi a condividere file con qualcuno al di fuori della tua rete locale. I relay aiutano i dispositivi a trovarsi e connettersi in condizioni di rete difficili, e i tuoi trasferimenti restano sempre crittografati end-to-end.",
 				"confirmCustomTitle": "Usare relay personalizzati?",
 				"confirmCustomDescription": "Hai scelto di usare i tuoi relay self-hosted. Se i tuoi relay personalizzati non sono raggiungibili, i trasferimenti torneranno automaticamente ai relay pubblici e riceverai una notifica. I relay aiutano solo i tuoi dispositivi a connettersi in condizioni di rete difficili, e i tuoi trasferimenti restano sempre crittografati end-to-end.",
-				"confirmContinue": "Continua"
+				"confirmContinue": "Continua",
+				"confirmCustomDescriptionWithPolicy": "Hai scelto di usare relay personalizzati self-hosted. Se non sono raggiungibili, AltSendme seguirà la policy di fallback selezionata nelle impostazioni Relay. I relay aiutano solo i tuoi dispositivi a connettersi in condizioni di rete difficili, e i trasferimenti restano sempre crittografati end-to-end.",
+				"fallbackDescription": "Scegli cosa succede quando il tuo relay personalizzato non è raggiungibile.",
+				"fallbackLabel": "Policy di fallback",
+				"fallbackPublic": "Usa relay pubblici se necessario",
+				"fallbackPublicDesc": "Passa ai relay pubblici iroh quando i relay personalizzati non sono raggiungibili.",
+				"fallbackStrict": "Resta sui relay personalizzati",
+				"fallbackStrictDesc": "Interrompi il trasferimento invece di passare ai relay pubblici. Ideale per configurazioni private."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Annulla associazione",
+			"codePlaceholder": "Incolla codice di associazione",
+			"copied": "Codice di associazione copiato",
+			"description": "Associa i tuoi dispositivi una volta, poi invia file senza copiare ticket.",
+			"desktopOnly": "L’associazione dei dispositivi è disponibile solo nell’app desktop.",
+			"deviceName": "Nome dispositivo",
+			"deviceNamePlaceholder": "es. MacBook di Tony",
+			"devicePaired": "Dispositivo associato",
+			"deviceRemoved": "Dispositivo rimosso",
+			"deviceUnpairedToast": "{{name}} ha annullato l’associazione di questo dispositivo",
+			"enterCode": "Inserisci codice di associazione",
+			"hostExpiresIn": "Scade tra {{seconds}} s.",
+			"hostHint": "Scansiona o copia questo codice sul dispositivo che vuoi associare. Puoi chiudere questa finestra — l’associazione resta aperta fino alla scadenza.",
+			"hostStillOpen": "In attesa che un dispositivo si unisca — associazione aperta per {{seconds}} s.",
+			"joinHint": "Incolla il codice di associazione dal tuo altro dispositivo.",
+			"nameSaveFailed": "Impossibile salvare il nome del dispositivo",
+			"nameSaved": "Nome dispositivo salvato",
+			"noPairedDevices": "Nessun dispositivo associato",
+			"noPairedDevicesHint": "Associa un altro telefono o computer per inviare file senza condividere ticket ogni volta.",
+			"nodeUnavailableHint": "I ticket manuali e la condivisione file funzionano normalmente.",
+			"nodeUnavailableTitle": "Associazione dispositivi non disponibile",
+			"pairDevice": "Associa",
+			"pairFailed": "Associazione non riuscita",
+			"pairNewDevice": "Associa nuovo dispositivo",
+			"pairing": "Associazione…",
+			"pairingCode": "Codice di associazione",
+			"relayChangePairedHint": "I dispositivi associati restano nell’elenco. L’invio associato potrebbe non funzionare finché entrambi i dispositivi non possono raggiungersi con la nuova configurazione di rete.",
+			"removeDevice": "Rimuovi dispositivo",
+			"removeFailed": "Impossibile rimuovere il dispositivo",
+			"rename": "Rinomina",
+			"renameDevice": "Rinomina dispositivo associato",
+			"renameDeviceHint": "Modifica solo il nome su questo dispositivo — non sull’altro.",
+			"renameThisDevice": "Rinomina questo dispositivo",
+			"renameThisDeviceHint": "Scegli un nome che ti aiuti a riconoscere questo computer durante l’associazione.",
+			"saveName": "Salva nome",
+			"searchNoResults": "Nessun dispositivo associato corrisponde alla ricerca.",
+			"searchPlaceholder": "Cerca dispositivi associati",
+			"showQrCode": "Mostra codice di associazione",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Nuova associazione necessaria",
+			"statusUnpaired": "Non associato",
+			"thisDevice": "Questo dispositivo",
+			"thisDeviceHint": "Nome mostrato ai dispositivi con cui ti associ. Sistema operativo e tipo di dispositivo vengono rilevati automaticamente.",
+			"title": "Dispositivi associati",
+			"unpairedHint": "Questo dispositivo ha rimosso l’associazione. Rimuovilo dall’elenco."
 		}
 	},
 	"updater": {
@@ -270,5 +399,6 @@
 			"encryptedNote": "I trasferimenti sono sempre crittografati end-to-end, quindi i relay non vedono mai i tuoi file.",
 			"disabledNote": "I relay sono disattivati. Solo connessioni dirette, quindi i trasferimenti possono fallire con firewall o NAT restrittivi."
 		}
-	}
+	},
+	"comingSoon": "Prossimamente"
 }

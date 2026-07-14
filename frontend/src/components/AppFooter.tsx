@@ -17,6 +17,7 @@ import { Separator } from './ui/separator'
 import { Link } from 'react-router-dom'
 import { handleExternalLinkClick } from '@/lib/openExternalUrl'
 import { IS_DESKTOP } from '@/lib/platform'
+import { cn } from '@/lib/utils'
 import { RelayStatusButton } from './RelayStatusButton'
 
 const CONTACTS = [
@@ -53,7 +54,10 @@ export function AppFooter() {
 				<span className="text-sm text-muted-foreground ml-1">
 					{VERSION_DISPLAY}
 				</span>
-				<Separator className="h-6" orientation="vertical" />
+				<Separator
+					className="hidden h-6 sm:block"
+					orientation="vertical"
+				/>
 
 				{CONTACTS.map((contact) => (
 					<a
@@ -63,10 +67,13 @@ export function AppFooter() {
 						target="_blank"
 						rel="noopener noreferrer"
 						aria-label={contact['aria-label']}
-						className={buttonVariants({
-							size: 'icon-sm',
-							variant: 'outline',
-						})}
+						className={cn(
+							buttonVariants({
+								size: 'icon-sm',
+								variant: 'outline',
+							}),
+							'hidden sm:inline-flex'
+						)}
 					>
 						{contact.icon}
 					</a>
