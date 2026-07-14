@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -139,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -149,10 +149,10 @@ jobs:
           node-version: '24.x'
           cache: pnpm
 
+      # Pin encodes toolchain 1.91.0; `toolchain:` is not a valid input on this action form.
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           components: rustfmt
           targets: "${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.rust_target }}"
 
@@ -197,6 +197,7 @@ jobs:
         run: |
           set -eux
           if [ "${{ matrix.platform }}" = "macos-latest" ]; then
+            brew untap aws/tap 2>/dev/null || true
             brew install llvm
             echo "CC=$(brew --prefix llvm)/bin/clang" >> "$GITHUB_ENV"
           fi
@@ -258,7 +259,8 @@ jobs:
           fi
           echo "All notarization secrets present"
 
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5
+      # v1.0.0: jittered retries for parallel latest.json uploads (already_exists races).
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_SIGNING_IDENTITY: "Developer ID Application: Tony Antony (9H7RVQAP36)"
@@ -279,7 +281,8 @@ jobs:
           args: ${{ matrix.args }}
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
+          retryAttempts: 8
 
       - name: Patch Linux .deb dependencies (ubuntu only)
         if: contains(matrix.platform, 'ubuntu')
@@ -302,7 +305,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -313,13 +316,13 @@ jobs:
           cache: pnpm
 
       - name: Set up JDK 17
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
         with:
           packages: build-tools;36.0.0 platform-tools platforms;android-36
 
@@ -344,9 +347,8 @@ jobs:
           fi
 
       - name: Set Rust 1.91 and Android targets
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           components: rustfmt
           targets: aarch64-linux-android,armv7-linux-androideabi
 
@@ -429,7 +431,7 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -440,9 +442,8 @@ jobs:
           cache: pnpm
 
       - name: Set up Rust (WASM)
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           targets: wasm32-unknown-unknown
 
       - name: Ensure wasm32 target
