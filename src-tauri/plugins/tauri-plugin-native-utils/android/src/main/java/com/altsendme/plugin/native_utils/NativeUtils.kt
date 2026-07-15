@@ -69,6 +69,9 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
         private const val SHARE_RECEIVED_EVENT = "shareReceived"
     }
 
+    private val consumedShareUris =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
+
     @Command
     fun select_download_folder(invoke: Invoke) = startActivityForResult(
         invoke,
@@ -95,8 +98,7 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
     @Command
     fun consume_share_intent(invoke: Invoke) {
         val args = invoke.parseArgs(SelectorArgs::class.java)
-        val uri = pendingShareUri.getAndSet(null)
-            ?: takeShareUri(activity.intent)
+        val uri = takePendingOrIntentShare()
             ?: return invoke.resolveObject(false)
 
         startUriCopy(uri, args.channel)
@@ -215,11 +217,15 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
     override fun load(webView: WebView) {
         super.load(webView)
 
-        // Cold start: capture share URI before the frontend mounts and asks to consume it.
+        // Cold start: capture share URI before / as the frontend mounts.
         // Skip wiping file_cache when a share is pending so cleanup cannot race the copy.
-        val shareUri = takeShareUri(activity.intent)
+        val shareUri = peekShareUri(activity.intent)
         if (shareUri != null) {
             pendingShareUri.set(shareUri)
+            // Notify after the WebView can register plugin listeners (cold-start race).
+            webView.post {
+                trigger(SHARE_RECEIVED_EVENT, JSObject())
+            }
         } else {
             scope.launch {
                 activity.cacheDir.resolve("file_cache").deleteRecursively()
@@ -229,9 +235,23 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
-        val uri = takeShareUri(intent) ?: return
+        // Without this, activity.intent stays the old MAIN launcher intent under singleTask.
+        activity.intent = intent
+
+        val uri = peekShareUri(intent) ?: return
         pendingShareUri.set(uri)
         trigger(SHARE_RECEIVED_EVENT, JSObject())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Safety net: if the frontend missed the first event (listener not ready yet),
+        // re-advertise any still-unconsumed share when we come to the foreground.
+        val uri = peekShareUri(activity.intent) ?: return
+        pendingShareUri.compareAndSet(null, uri)
+        if (pendingShareUri.get() != null) {
+            trigger(SHARE_RECEIVED_EVENT, JSObject())
+        }
     }
 
     override fun onDestroy() {
@@ -264,8 +284,16 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
                 copyUri(activity, uri, tempFolder).collect {
                     channel.send(it.toJSObject())
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 tempFolder.deleteRecursively()
+                channel.send(
+                    JSObject().apply {
+                        put("error", e.message ?: "Failed to copy shared file")
+                        put("progress", -1.0)
+                        put("copiedBytes", "0")
+                        put("totalBytes", "0")
+                    }
+                )
             } finally {
                 jobs.remove(channel.id)
             }
@@ -275,28 +303,50 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
         job.start()
     }
 
-    private fun takeShareUri(intent: Intent?): Uri? {
+    @Synchronized
+    private fun takePendingOrIntentShare(): Uri? {
+        pendingShareUri.getAndSet(null)?.let { uri ->
+            markShareConsumed(uri)
+            return uri
+        }
+        return takeAndMarkShareUri(activity.intent)
+    }
+
+    private fun peekShareUri(intent: Intent?): Uri? {
         if (intent == null || intent.action != Intent.ACTION_SEND) {
             return null
         }
-
         val uri = extractShareUri(intent) ?: return null
-
-        // Prevent the same intent from being consumed again after process/activity recreation.
-        intent.removeExtra(Intent.EXTRA_STREAM)
-        intent.clipData = null
-        intent.action = Intent.ACTION_MAIN
-
+        if (consumedShareUris.contains(uri.toString())) {
+            return null
+        }
         return uri
+    }
+
+    private fun takeAndMarkShareUri(intent: Intent?): Uri? {
+        val uri = peekShareUri(intent) ?: return null
+        markShareConsumed(uri)
+        return uri
+    }
+
+    private fun markShareConsumed(uri: Uri) {
+        consumedShareUris.add(uri.toString())
     }
 
     private fun extractShareUri(intent: Intent): Uri? {
         parcelableStreamExtra(intent)?.let { return it }
 
+        when (val stream = intent.extras?.get(Intent.EXTRA_STREAM)) {
+            is Uri -> return stream
+            is String -> if (stream.isNotBlank()) return Uri.parse(stream)
+        }
+
         val clip = intent.clipData
         if (clip != null && clip.itemCount > 0) {
             clip.getItemAt(0)?.uri?.let { return it }
         }
+
+        intent.data?.let { return it }
 
         return null
     }

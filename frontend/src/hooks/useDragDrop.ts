@@ -167,7 +167,8 @@ export function useDragDrop(
 			startCopy: (
 				onStart: (path: string, size: bigint) => void,
 				onEvent: (event: { progress: number }) => void,
-				onComplete: (path: string) => void
+				onComplete: (path: string) => void,
+				onError?: (message: string) => void
 			) => Promise<{ cancelJob: () => Promise<void> } | null>,
 			pathType: 'file' | 'directory'
 		) => {
@@ -188,6 +189,18 @@ export function useDragDrop(
 					setCopyTotalBytes('0')
 					cancelRef.current = null
 					await triggerFilesSelect([path], pathType)
+				},
+				(message) => {
+					setIsCopying(false)
+					setCopyProgress(0)
+					setCopyFileName('')
+					setCopyTotalBytes('0')
+					cancelRef.current = null
+					showAlert(
+						t('common:errors.fileDialogFailed'),
+						message,
+						'error'
+					)
 				}
 			)
 
@@ -197,7 +210,7 @@ export function useDragDrop(
 
 			return Boolean(handler)
 		},
-		[triggerFilesSelect]
+		[showAlert, t, triggerFilesSelect]
 	)
 
 	const consumeAndroidShare = useCallback(async () => {
@@ -437,6 +450,7 @@ export function useDragDrop(
 
 		let disposed = false
 		let unlistenShare: (() => void) | undefined
+		const retryTimers: number[] = []
 
 		const run = () => {
 			if (!disposed) {
@@ -452,6 +466,10 @@ export function useDragDrop(
 			}
 			// Cold start: intent may already be pending before listeners registered.
 			run()
+			// Native load() posts shareReceived after WebView is ready; these retries
+			// cover the case where the first consume ran before the URI was stashed.
+			retryTimers.push(window.setTimeout(run, 400))
+			retryTimers.push(window.setTimeout(run, 1200))
 		}
 
 		void setup()
@@ -459,6 +477,9 @@ export function useDragDrop(
 		return () => {
 			disposed = true
 			unlistenShare?.()
+			for (const id of retryTimers) {
+				window.clearTimeout(id)
+			}
 		}
 	}, [])
 

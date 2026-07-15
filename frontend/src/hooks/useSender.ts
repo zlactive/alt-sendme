@@ -947,7 +947,7 @@ export function useSender(): UseSenderReturn {
 			pairedDevices.find((d) => d.endpoint_id === endpointId) ?? null
 		const deviceName =
 			device?.display_name ?? t('common:sender.pairedDevices.unknownPeer')
-		if (device && !isPairedDeviceActive(device)) {
+		if (device && (!isPairedDeviceActive(device) || !device.online)) {
 			return false
 		}
 		incrementPairedSendCount(endpointId)

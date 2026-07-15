@@ -111,6 +111,48 @@ function copyDir(src, dest) {
 	}
 }
 
+/**
+ * Tauri packages `bundle.resources` into installers but often does not leave a
+ * persistent `resources/` tree next to the release exe. Prefer that tree when
+ * present; otherwise assemble it from src-tauri paths listed in tauri.conf.json.
+ */
+function stageResources(releaseDir, stagingAppDir) {
+	const stagedResources = path.join(stagingAppDir, 'resources')
+	const releaseResources = path.join(releaseDir, 'resources')
+
+	if (fs.existsSync(releaseResources)) {
+		copyDir(releaseResources, stagedResources)
+		console.log(`Bundled resources/ from ${releaseResources}`)
+		return
+	}
+
+	const confPath = path.join(repoRoot, 'src-tauri', 'tauri.conf.json')
+	const conf = JSON.parse(fs.readFileSync(confPath, 'utf8'))
+	const resourceEntries = conf?.bundle?.resources
+	if (!Array.isArray(resourceEntries) || resourceEntries.length === 0) {
+		throw new Error(
+			`No resources/ next to the exe and no bundle.resources in ${confPath}`
+		)
+	}
+
+	const srcTauri = path.join(repoRoot, 'src-tauri')
+	for (const entry of resourceEntries) {
+		if (typeof entry !== 'string') {
+			throw new Error(
+				`Unsupported bundle.resources entry (expected string path): ${JSON.stringify(entry)}`
+			)
+		}
+		const from = path.join(srcTauri, entry)
+		if (!fs.existsSync(from) || !fs.statSync(from).isFile()) {
+			throw new Error(`bundle.resources file missing: ${from}`)
+		}
+		copyFile(from, path.join(stagedResources, entry))
+	}
+	console.log(
+		`Assembled resources/ from src-tauri (${resourceEntries.length} file(s); Tauri did not leave resources/ under ${releaseDir})`
+	)
+}
+
 function stagePortablePayload(releaseDir, stagingAppDir) {
 	fs.rmSync(stagingAppDir, { recursive: true, force: true })
 	fs.mkdirSync(stagingAppDir, { recursive: true })
@@ -134,13 +176,7 @@ function stagePortablePayload(releaseDir, stagingAppDir) {
 		copyFile(loader, path.join(stagingAppDir, 'WebView2Loader.dll'))
 	}
 
-	const resources = path.join(releaseDir, 'resources')
-	if (!fs.existsSync(resources)) {
-		throw new Error(
-			`Missing resources/ next to ${path.basename(builtExe)} at ${releaseDir}. The portable ZIP must include the same resources as the installer.`
-		)
-	}
-	copyDir(resources, path.join(stagingAppDir, 'resources'))
+	stageResources(releaseDir, stagingAppDir)
 
 	fs.writeFileSync(path.join(stagingAppDir, PORTABLE_MARKER), 'portable\n', 'utf8')
 	fs.writeFileSync(

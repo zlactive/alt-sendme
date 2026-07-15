@@ -94,6 +94,7 @@ export function PairedDevicesPanel({
 					const Icon = deviceTypeIcon(device.device_type)
 					const inviteStatus = pairedInviteStatus[device.endpoint_id]
 					const isActive = isPairedDeviceActive(device)
+					const isOnline = device.online
 					const isSending = inviteStatus === 'sending'
 					const anotherDeviceSelected = Object.entries(
 						pairedInviteStatus
@@ -107,6 +108,7 @@ export function PairedDevicesPanel({
 						!hasTicket ||
 						isSending ||
 						!isActive ||
+						!isOnline ||
 						anotherDeviceSelected ||
 						inviteStatus === 'sent'
 					return (
