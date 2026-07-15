@@ -38,6 +38,12 @@ impl<R: Runtime> NativeUtils<R> {
 }
 
 impl<R: Runtime> NativeUtils<R> {
+    pub fn debug_share_snapshot(&self) -> crate::Result<ShareDebugSnapshot> {
+        Ok(ShareDebugSnapshot::default())
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
     pub fn cancel_job(&self, _: AsyncJob) -> crate::Result<()> {
         Err(crate::Error::UnsupportedPlafrormError)
     }

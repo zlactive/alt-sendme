@@ -95,6 +95,28 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
         this::handleSendSelection.name
     )
 
+    /**
+     * Temporary diagnostic command — reports what the plugin currently sees for the
+     * launching/current intent, so the state can be shown directly in the app UI when
+     * device logs (adb/chrome://inspect) aren't available for debugging.
+     */
+    @Command
+    fun debug_share_snapshot(invoke: Invoke) {
+        val intent = activity.intent
+        val extractedUri = intent?.let { extractShareUri(it) }
+        invoke.resolveObject(
+            JSObject().apply {
+                put("action", intent?.action)
+                put("type", intent?.type)
+                put("hasStream", intent?.hasExtra(Intent.EXTRA_STREAM) == true)
+                put("hasClipData", intent?.clipData != null)
+                put("dataString", intent?.dataString)
+                put("extractedUri", extractedUri?.toString())
+                put("pendingUriPresent", pendingShareUri.get() != null)
+            }
+        )
+    }
+
     @Command
     fun consume_share_intent(invoke: Invoke) {
         val args = invoke.parseArgs(SelectorArgs::class.java)

@@ -156,6 +156,33 @@ export async function consumeShareIntent(
 	return new FileSelectedHandler(String(channel.id))
 }
 
+export type ShareDebugSnapshot = {
+	action: string | null
+	type: string | null
+	hasStream: boolean
+	hasClipData: boolean
+	dataString: string | null
+	extractedUri: string | null
+	pendingUriPresent: boolean
+}
+
+/**
+ * Temporary diagnostic: reports what the native plugin currently sees for the
+ * launching/current Android intent. Lets us see share-intent state directly in
+ * the app UI when adb/chrome://inspect logs aren't available.
+ */
+export async function debugShareSnapshot(): Promise<ShareDebugSnapshot | null> {
+	if (!IS_TAURI) return null
+	try {
+		return await invoke<ShareDebugSnapshot>(
+			'plugin:native-utils|debug_share_snapshot'
+		)
+	} catch (error) {
+		console.error('[ShareIntent] debugShareSnapshot failed:', error)
+		return null
+	}
+}
+
 /** Fired when a share arrives while the app is already open. */
 export async function onShareReceived(
 	handler: () => void

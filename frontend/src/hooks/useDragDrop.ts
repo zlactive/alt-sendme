@@ -2,6 +2,7 @@ import { getCurrentWindow, invoke, openDialog } from '@/lib/platform-api'
 import { processWebDataTransfer } from '@/lib/web-drag-drop'
 import {
 	consumeShareIntent,
+	debugShareSnapshot,
 	onShareReceived,
 	selectSendDocument,
 	selectSendFolder,
@@ -213,13 +214,13 @@ export function useDragDrop(
 		[showAlert, t, triggerFilesSelect]
 	)
 
-	const consumeAndroidShare = useCallback(async () => {
+	const consumeAndroidShare = useCallback(async (): Promise<boolean> => {
 		try {
 			useTransferTabStore.getState().requestTab('send')
 			if (cancelRef.current) {
 				await cancelCopy()
 			}
-			await beginAndroidCacheCopy(consumeShareIntent, 'file')
+			return await beginAndroidCacheCopy(consumeShareIntent, 'file')
 		} catch (error) {
 			console.error('Failed to consume Android share intent:', error)
 			showAlert(
@@ -227,6 +228,7 @@ export function useDragDrop(
 				`${t('common:errors.fileDialogFailedDesc')}: ${error}`,
 				'error'
 			)
+			return false
 		}
 	}, [beginAndroidCacheCopy, cancelCopy, showAlert, t])
 
@@ -450,26 +452,64 @@ export function useDragDrop(
 
 		let disposed = false
 		let unlistenShare: (() => void) | undefined
+		let settled = false
 		const retryTimers: number[] = []
+		// Widened window: cold-start IPC-bridge readiness can vary a lot across
+		// devices, so keep polling for several seconds rather than giving up early.
+		const retryDelaysMs = [400, 1000, 2000, 3500, 5500, 8000]
 
-		const run = () => {
-			if (!disposed) {
-				void consumeAndroidShareRef.current()
+		// Temporary diagnostic: if we still haven't consumed anything by the time
+		// retries run out, show what the native side actually saw on-screen (no
+		// adb/chrome://inspect required to see this).
+		const reportIfUnresolved = async () => {
+			if (disposed || settled) return
+			const snapshot = await debugShareSnapshot()
+			if (disposed || settled || !snapshot) return
+			if (snapshot.action !== 'android.intent.action.SEND') return
+			showAlert(
+				'Share debug',
+				[
+					`action=${snapshot.action}`,
+					`type=${snapshot.type}`,
+					`hasStream=${snapshot.hasStream}`,
+					`hasClipData=${snapshot.hasClipData}`,
+					`dataString=${snapshot.dataString}`,
+					`extractedUri=${snapshot.extractedUri}`,
+					`pendingUriPresent=${snapshot.pendingUriPresent}`,
+				].join(' | '),
+				'info'
+			)
+		}
+
+		const run = async () => {
+			if (disposed || settled) return
+			const consumed = await consumeAndroidShareRef.current()
+			if (consumed) {
+				settled = true
 			}
 		}
 
 		const setup = async () => {
-			unlistenShare = await onShareReceived(run)
+			unlistenShare = await onShareReceived(() => {
+				void run()
+			})
 			if (disposed) {
 				unlistenShare()
 				return
 			}
 			// Cold start: intent may already be pending before listeners registered.
-			run()
+			void run()
 			// Native load() posts shareReceived after WebView is ready; these retries
 			// cover the case where the first consume ran before the URI was stashed.
-			retryTimers.push(window.setTimeout(run, 400))
-			retryTimers.push(window.setTimeout(run, 1200))
+			for (const delay of retryDelaysMs) {
+				retryTimers.push(window.setTimeout(() => void run(), delay))
+			}
+			retryTimers.push(
+				window.setTimeout(
+					() => void reportIfUnresolved(),
+					retryDelaysMs[retryDelaysMs.length - 1] + 500
+				)
+			)
 		}
 
 		void setup()
@@ -481,7 +521,7 @@ export function useDragDrop(
 				window.clearTimeout(id)
 			}
 		}
-	}, [])
+	}, [showAlert])
 
 	return {
 		isDragActive,

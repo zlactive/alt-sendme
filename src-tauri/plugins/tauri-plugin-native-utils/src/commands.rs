@@ -37,6 +37,13 @@ pub(crate) async fn consume_share_intent<R: Runtime>(
 }
 
 #[command]
+pub(crate) async fn debug_share_snapshot<R: Runtime>(
+    app: AppHandle<R>,
+) -> Result<ShareDebugSnapshot> {
+    app.native_utils().debug_share_snapshot()
+}
+
+#[command]
 pub(crate) async fn cancel_job<R: Runtime>(
     app: tauri::AppHandle<R>,
     job: AsyncJob,

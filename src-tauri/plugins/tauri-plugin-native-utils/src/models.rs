@@ -45,3 +45,18 @@ pub struct ExportToTreeResult {
     pub exported_count: u32,
     pub conflicts: Vec<ExportToTreeConflict>,
 }
+
+/// Temporary diagnostic snapshot of the Android share-intent state, surfaced
+/// directly in the app UI when device logs aren't available for debugging.
+#[derive(Debug, Clone, Default, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct ShareDebugSnapshot {
+    pub action: Option<String>,
+    #[serde(rename = "type")]
+    pub mime_type: Option<String>,
+    pub has_stream: bool,
+    pub has_clip_data: bool,
+    pub data_string: Option<String>,
+    pub extracted_uri: Option<String>,
+    pub pending_uri_present: bool,
+}
