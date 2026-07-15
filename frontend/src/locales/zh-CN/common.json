@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "发送",
-	"comingSoon": "即将推出",
+	"webPreview": {
+		"banner": "预览模式 - 文件传输需要桌面应用。",
+		"transferUnavailable": "Web 预览不支持文件传输。请下载桌面应用以发送和接收文件。"
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "社区",
+		"compare": "与其他 P2P 工具比较",
+		"download": "查看下载选项",
+		"github": "GitHub",
+		"linksLabel": "获取桌面应用和项目链接",
+		"notice": "Web 版不支持直连 - 流量经由加密的公共中继转发，速度受限。无论如何，您的文件始终保持加密。建议使用桌面/CLI 应用或自定义中继以获得更好体验。",
+		"platforms": "AltSendme 提供桌面版、Android 版、CLI 版和 Web 版。",
+		"website": "网站"
+	},
 	"receive": "接收",
 	"ok": "确定",
 	"undo": "撤销",
@@ -60,6 +74,50 @@
 				"label": "私人共享",
 				"description": "只有您与之共享票据的人才能下载文件。"
 			}
+		},
+		"addFile": "添加文件",
+		"addFolder": "添加文件夹",
+		"clearSelection": "清除选择",
+		"exitSharing": "退出共享",
+		"pairDevice": "配对设备",
+		"pairedDevices": {
+			"connectedTitle": "已连接的设备",
+			"deviceOffline": "设备已离线 - 请改用手动票据。",
+			"deviceUnreachable": "此设备仍处于配对状态。请在其上线后重试，或使用手动票据。两台设备可能需要兼容的中继设置。",
+			"failed": "重试",
+			"inviteFailed": "无法连接设备",
+			"inviteSent": "邀请已发送",
+			"inviteSentDesc": "对方接受后即可开始下载。",
+			"inviteSentTo": "已向 {{name}} 发送邀请",
+			"pair": "配对",
+			"send": "发送",
+			"sending": "发送中…",
+			"sent": "已发送",
+			"statusOffline": "离线",
+			"statusOnline": "在线",
+			"statusRePairRequired": "需要重新配对",
+			"statusUnpaired": "已取消配对",
+			"unknownPeer": "未知设备",
+			"yourDevicesTitle": "发送到配对设备"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "在设置中配对设备后，返回此处即可无需链接发送。",
+				"emptyTitle": "尚无配对设备",
+				"hint": "选择一台设备 - 对方接受后开始传输。",
+				"manageInSettings": "在设置中配对设备",
+				"nodeUnavailable": "设备发送当前不可用。您仍可在另一标签页使用一次性传输。",
+				"searchNoResults": "没有与搜索匹配的配对设备。",
+				"searchPlaceholder": "搜索配对设备",
+				"title": "发送到配对设备"
+			},
+			"devicesButton": "发送到配对设备",
+			"link": {
+				"hint": "拥有此链接的任何人都可以接收您的文件。",
+				"transferInProgress": "传输进行中 - 打开「一次性传输」查看详情。",
+				"waiting": "等待有人使用您的链接"
+			},
+			"or": "或"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "下载完成，已处理重名冲突",
 		"downloadedFile": "已下载文件",
 		"stopReceiving": "停止接收",
-		"download": "下载"
+		"download": "下载",
+		"acceptInvite": "接受",
+		"browserDownloadsFallback": "浏览器下载文件夹",
+		"browserDownloadsHint": "此浏览器无法选择保存文件夹。文件将下载到您的默认下载位置。",
+		"declineInvite": "拒绝",
+		"openReceiveTabHint": "请先打开一次「接收」标签页，然后再试。",
+		"pairedInvite": {
+			"changeFolder": "更改文件夹",
+			"saveTo": "保存到"
+		},
+		"receiveBusyDescription": "请等待当前下载完成后再接受其他文件。",
+		"receiveBusyTitle": "已有下载正在进行",
+		"receiveFromPairedDescription": "{{sender}} 想向您发送 {{count}} 个文件（{{size}}）。接受后开始下载。",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} 想向您发送 {{count}} 个文件。接受后开始下载。",
+		"receiveFromPairedTitle": "来自配对设备的文件",
+		"saveLocation": "保存位置："
 	},
 	"transfer": {
 		"progress": "传输进度",
@@ -112,9 +185,8 @@
 		"duration": "持续时间",
 		"avgSpeed": "平均速度",
 		"multipleFiles": "{{count}} 个文件",
-		"donatePrompt": "通过",
-		"donateLink": "捐赠",
-		"donateSuffix": "，让 AltSendme 变得更好"
+		"donatePrompt": "如果喜欢这次体验，请考虑{{link}}。谢谢！",
+		"donateLink": "捐赠"
 	},
 	"errors": {
 		"sharingFailed": "共享失败",
@@ -139,7 +211,8 @@
 			"general": "通用",
 			"relay": "中继",
 			"network": "网络",
-			"notification": "通知"
+			"notification": "通知",
+			"devices": "设备"
 		},
 		"theme": {
 			"description": "选择您喜欢的主题",
@@ -224,14 +297,69 @@
 				"confirmDisableDescription": "您已选择禁用中继。如果您尝试与本地网络之外的人共享文件，文件传输可能会失败。中继可帮助设备在困难的网络条件下相互发现并连接，而您的传输始终保持端到端加密。",
 				"confirmCustomTitle": "使用自定义中继？",
 				"confirmCustomDescription": "您已选择使用自己托管的自定义中继。如果您的自定义中继无法访问，传输将自动回退到公共中继，并会通知您。中继仅帮助您的设备在困难的网络条件下连接，而您的传输始终保持端到端加密。",
-				"confirmContinue": "继续"
+				"confirmContinue": "继续",
+				"confirmCustomDescriptionWithPolicy": "您已选择使用自定义自托管中继。如果无法连接，AltSendme 将遵循中继设置中选择的回退策略。中继仅帮助设备在复杂网络环境下建立连接，传输始终端到端加密。",
+				"fallbackDescription": "选择自定义中继无法连接时的处理方式。",
+				"fallbackLabel": "回退策略",
+				"fallbackPublic": "必要时使用公共中继",
+				"fallbackPublicDesc": "自定义中继不可达时回退到公共 iroh 中继。",
+				"fallbackStrict": "仅使用自定义中继",
+				"fallbackStrictDesc": "不切换到公共中继，直接使传输失败。适合私有部署。"
 			}
+		},
+		"devices": {
+			"cancelPairing": "取消配对",
+			"codePlaceholder": "粘贴配对码",
+			"copied": "配对码已复制",
+			"description": "配对设备一次，即可无需复制票据发送文件。",
+			"desktopOnly": "设备配对可在桌面和 Android 应用中使用。",
+			"deviceName": "设备名称",
+			"deviceNamePlaceholder": "例如：Tony 的 MacBook",
+			"devicePaired": "设备已配对",
+			"deviceRemoved": "设备已移除",
+			"deviceUnpairedToast": "{{name}} 已取消与此设备的配对",
+			"enterCode": "输入配对码",
+			"hostExpiresIn": "{{seconds}} 秒后过期。",
+			"hostHint": "在您要配对的设备上扫描或复制此码。您可以关闭此对话框 - 配对将保持有效直至过期。",
+			"hostStillOpen": "等待设备加入 - 配对将在 {{seconds}} 秒内保持开放。",
+			"joinHint": "粘贴您其他设备上的配对码。",
+			"nameSaveFailed": "无法保存设备名称",
+			"nameSaved": "设备名称已保存",
+			"noPairedDevices": "尚无配对设备",
+			"noPairedDevicesHint": "配对另一部手机或电脑，即可每次无需分享票据发送文件。",
+			"nodeUnavailableHint": "手动票据和文件共享仍可正常使用。",
+			"nodeUnavailableTitle": "设备配对不可用",
+			"pairDevice": "配对",
+			"pairFailed": "配对失败",
+			"pairNewDevice": "配对新设备",
+			"pairing": "配对中…",
+			"pairingCode": "配对码",
+			"relayChangePairedHint": "已配对设备仍会保留在列表中。在新的网络配置下，两台设备能够互相连接之前，配对发送可能无法使用。",
+			"removeDevice": "移除设备",
+			"removeFailed": "无法移除设备",
+			"rename": "重命名",
+			"renameDevice": "重命名配对设备",
+			"renameDeviceHint": "这只会更改本设备上的名称 - 不会更改对方设备的名称。",
+			"renameThisDevice": "重命名此设备",
+			"renameThisDeviceHint": "选择一个便于在配对时识别此电脑的名称。",
+			"saveName": "保存名称",
+			"searchNoResults": "没有与搜索匹配的配对设备。",
+			"searchPlaceholder": "搜索配对设备",
+			"showQrCode": "显示配对码",
+			"statusOffline": "离线",
+			"statusOnline": "在线",
+			"statusRePairRequired": "需要重新配对",
+			"statusUnpaired": "已取消配对",
+			"thisDevice": "此设备",
+			"thisDeviceHint": "显示给配对设备的名称。操作系统和设备类型会自动检测。",
+			"title": "配对设备",
+			"unpairedHint": "此设备已取消配对。请从列表中移除。"
 		}
 	},
 	"updater": {
 		"newUpdateTitle": "有新更新！",
 		"newVersionAvailable": "新版本 {{version}} 可用。",
-		"newVersionAvailableInline": "有新版本可用 — {{version}}",
+		"newVersionAvailableInline": "有新版本可用 - {{version}}",
 		"updateNow": "立即更新",
 		"later": "稍后",
 		"checkForUpdates": "检查更新",
@@ -254,8 +382,8 @@
 			"unavailableHeading": "中继不可用",
 			"fellBackToPublic": "自定义中继不可达，改用公共中继。",
 			"fellBackToastTitle": "正在使用公共中继",
-			"fellBackToastSend": "您的自定义中继不可达 — 此次传输正在使用公共中继。",
-			"fellBackToastReceive": "您的自定义中继不可达 — 此次下载正在使用公共中继。",
+			"fellBackToastSend": "您的自定义中继不可达 - 此次传输正在使用公共中继。",
+			"fellBackToastReceive": "您的自定义中继不可达 - 此次下载正在使用公共中继。",
 			"dialogDescription": "显示应用当前用于连接的中继服务器。",
 			"connectedRelay": "已连接的中继",
 			"checking": "正在检查连接…",
@@ -271,5 +399,6 @@
 			"encryptedNote": "传输始终采用端到端加密，因此中继永远看不到你的文件。",
 			"disabledNote": "中继已禁用。仅限直接连接，因此在严格的防火墙或 NAT 环境下传输可能失败。"
 		}
-	}
+	},
+	"comingSoon": "即将推出"
 }

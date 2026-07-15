@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "傳送",
-	"comingSoon": "即將推出",
+	"webPreview": {
+		"banner": "預覽模式 - 檔案傳輸需要桌面應用程式。",
+		"transferUnavailable": "Web 預覽不支援檔案傳輸。請下載桌面應用程式以傳送和接收檔案。"
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "社群",
+		"compare": "與其他 P2P 工具比較",
+		"download": "查看下載選項",
+		"github": "GitHub",
+		"linksLabel": "取得桌面應用程式與專案連結",
+		"notice": "Web 版不支援直連 - 流量經由加密的公共中繼轉送，速度受限。無論如何，您的檔案始終保持加密。建議使用桌面/CLI 應用程式或自訂中繼以獲得更好體驗。",
+		"platforms": "AltSendme 提供桌面版、Android 版、CLI 版與 Web 版。",
+		"website": "網站"
+	},
 	"receive": "接收",
 	"ok": "確定",
 	"undo": "復原",
@@ -60,6 +74,50 @@
 				"label": "私人分享",
 				"description": "只有您與之分享票券的人才能下載檔案。"
 			}
+		},
+		"addFile": "新增檔案",
+		"addFolder": "新增資料夾",
+		"clearSelection": "清除選取",
+		"exitSharing": "結束分享",
+		"pairDevice": "配對裝置",
+		"pairedDevices": {
+			"connectedTitle": "已連線的裝置",
+			"deviceOffline": "裝置已離線 - 請改用手動票券。",
+			"deviceUnreachable": "此裝置仍處於配對狀態。請在其上線後重試，或使用手動票券。兩台裝置可能需要相容的中繼設定。",
+			"failed": "重試",
+			"inviteFailed": "無法連線至裝置",
+			"inviteSent": "邀請已傳送",
+			"inviteSentDesc": "對方接受後即可開始下載。",
+			"inviteSentTo": "已向 {{name}} 傳送邀請",
+			"pair": "配對",
+			"send": "傳送",
+			"sending": "傳送中…",
+			"sent": "已傳送",
+			"statusOffline": "離線",
+			"statusOnline": "線上",
+			"statusRePairRequired": "需要重新配對",
+			"statusUnpaired": "已取消配對",
+			"unknownPeer": "未知裝置",
+			"yourDevicesTitle": "傳送至配對裝置"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "在設定中配對裝置後，返回此處即可無需連結傳送。",
+				"emptyTitle": "尚無配對裝置",
+				"hint": "選擇一台裝置 - 對方接受後即開始傳輸。",
+				"manageInSettings": "在設定中配對裝置",
+				"nodeUnavailable": "裝置傳送目前無法使用。您仍可在其他分頁使用一次性傳輸。",
+				"searchNoResults": "沒有與搜尋相符的配對裝置。",
+				"searchPlaceholder": "搜尋配對裝置",
+				"title": "傳送至配對裝置"
+			},
+			"devicesButton": "傳送至配對裝置",
+			"link": {
+				"hint": "擁有此連結的任何人都可以接收您的檔案。",
+				"transferInProgress": "傳輸進行中 - 開啟「一次性傳輸」查看詳情。",
+				"waiting": "等待有人使用您的連結"
+			},
+			"or": "或"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "下載完成，已處理同名衝突",
 		"downloadedFile": "已下載檔案",
 		"stopReceiving": "停止接收",
-		"download": "下載"
+		"download": "下載",
+		"acceptInvite": "接受",
+		"browserDownloadsFallback": "瀏覽器下載資料夾",
+		"browserDownloadsHint": "此瀏覽器無法選擇儲存資料夾。檔案將下載到您的預設下載位置。",
+		"declineInvite": "拒絕",
+		"openReceiveTabHint": "請先開啟一次「接收」分頁，然後再試。",
+		"pairedInvite": {
+			"changeFolder": "變更資料夾",
+			"saveTo": "儲存至"
+		},
+		"receiveBusyDescription": "請等待目前下載完成後，再接受其他檔案。",
+		"receiveBusyTitle": "已有下載正在進行",
+		"receiveFromPairedDescription": "{{sender}} 想傳送 {{count}} 個檔案（{{size}}）給您。接受後即開始下載。",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} 想傳送 {{count}} 個檔案給您。接受後即開始下載。",
+		"receiveFromPairedTitle": "來自配對裝置的檔案",
+		"saveLocation": "儲存位置："
 	},
 	"transfer": {
 		"progress": "傳輸進度",
@@ -112,9 +185,8 @@
 		"duration": "持續時間",
 		"avgSpeed": "平均速度",
 		"multipleFiles": "{{count}} 個檔案",
-		"donatePrompt": "透過",
-		"donateLink": "捐贈",
-		"donateSuffix": "，讓 AltSendme 變得更好"
+		"donatePrompt": "如果喜歡這次體驗，請考慮{{link}}。謝謝！",
+		"donateLink": "捐贈"
 	},
 	"errors": {
 		"sharingFailed": "分享失敗",
@@ -139,7 +211,8 @@
 			"general": "一般",
 			"relay": "中繼",
 			"network": "網路",
-			"notification": "通知"
+			"notification": "通知",
+			"devices": "裝置"
 		},
 		"theme": {
 			"description": "選擇您偏好的主題",
@@ -224,14 +297,69 @@
 				"confirmDisableDescription": "您已選擇停用中繼。如果您嘗試與本地網路以外的人分享檔案，檔案傳輸可能會失敗。中繼可協助裝置在困難的網路條件下相互尋找並連線，而您的傳輸始終保持端對端加密。",
 				"confirmCustomTitle": "使用自訂中繼？",
 				"confirmCustomDescription": "您已選擇使用自行託管的自訂中繼。如果您的自訂中繼無法連線，傳輸將自動回退到公共中繼，並會通知您。中繼僅協助您的裝置在困難的網路條件下連線，而您的傳輸始終保持端對端加密。",
-				"confirmContinue": "繼續"
+				"confirmContinue": "繼續",
+				"confirmCustomDescriptionWithPolicy": "您已選擇使用自訂自架中繼。如果無法連線，AltSendme 將遵循中繼設定中選擇的備援策略。中繼僅協助裝置在複雜網路環境下建立連線，傳輸始終端對端加密。",
+				"fallbackDescription": "選擇自訂中繼無法連線時的處理方式。",
+				"fallbackLabel": "備援策略",
+				"fallbackPublic": "必要時使用公共中繼",
+				"fallbackPublicDesc": "自訂中繼無法連線時，改為使用公共 iroh 中繼。",
+				"fallbackStrict": "僅使用自訂中繼",
+				"fallbackStrictDesc": "不切換至公共中繼，直接使傳輸失敗。適合私有部署。"
 			}
+		},
+		"devices": {
+			"cancelPairing": "取消配對",
+			"codePlaceholder": "貼上配對碼",
+			"copied": "配對碼已複製",
+			"description": "配對裝置一次，即可無需複製票券傳送檔案。",
+			"desktopOnly": "裝置配對可在桌面與 Android 應用程式中使用。",
+			"deviceName": "裝置名稱",
+			"deviceNamePlaceholder": "例如：Tony 的 MacBook",
+			"devicePaired": "裝置已配對",
+			"deviceRemoved": "裝置已移除",
+			"deviceUnpairedToast": "{{name}} 已取消與此裝置的配對",
+			"enterCode": "輸入配對碼",
+			"hostExpiresIn": "{{seconds}} 秒後過期。",
+			"hostHint": "在您要配對的裝置上掃描或複製此碼。您可以關閉此對話方塊 - 配對將保持有效直至過期。",
+			"hostStillOpen": "等待裝置加入 - 配對將在 {{seconds}} 秒內保持開放。",
+			"joinHint": "貼上您其他裝置上的配對碼。",
+			"nameSaveFailed": "無法儲存裝置名稱",
+			"nameSaved": "裝置名稱已儲存",
+			"noPairedDevices": "尚無配對裝置",
+			"noPairedDevicesHint": "配對另一部手機或電腦，即可每次無需分享票券傳送檔案。",
+			"nodeUnavailableHint": "手動票券和檔案分享仍可正常使用。",
+			"nodeUnavailableTitle": "裝置配對無法使用",
+			"pairDevice": "配對",
+			"pairFailed": "配對失敗",
+			"pairNewDevice": "配對新裝置",
+			"pairing": "配對中…",
+			"pairingCode": "配對碼",
+			"relayChangePairedHint": "已配對裝置仍會保留在清單中。在新的網路設定下，兩台裝置能夠互相連線之前，配對傳送可能無法使用。",
+			"removeDevice": "移除裝置",
+			"removeFailed": "無法移除裝置",
+			"rename": "重新命名",
+			"renameDevice": "重新命名配對裝置",
+			"renameDeviceHint": "這只會變更本裝置上的名稱 - 不會變更對方裝置的名稱。",
+			"renameThisDevice": "重新命名此裝置",
+			"renameThisDeviceHint": "選擇一個便於在配對時辨識此電腦的名稱。",
+			"saveName": "儲存名稱",
+			"searchNoResults": "沒有與搜尋相符的配對裝置。",
+			"searchPlaceholder": "搜尋配對裝置",
+			"showQrCode": "顯示配對碼",
+			"statusOffline": "離線",
+			"statusOnline": "線上",
+			"statusRePairRequired": "需要重新配對",
+			"statusUnpaired": "已取消配對",
+			"thisDevice": "此裝置",
+			"thisDeviceHint": "顯示給配對裝置的名稱。作業系統和裝置類型會自動偵測。",
+			"title": "配對裝置",
+			"unpairedHint": "此裝置已取消配對。請從清單中移除。"
 		}
 	},
 	"updater": {
 		"newUpdateTitle": "有新更新！",
 		"newVersionAvailable": "已有新版本 {{version}}。",
-		"newVersionAvailableInline": "有新版本可用 — {{version}}",
+		"newVersionAvailableInline": "有新版本可用 - {{version}}",
 		"updateNow": "立即更新",
 		"later": "稍後",
 		"checkForUpdates": "檢查更新",
@@ -254,8 +382,8 @@
 			"unavailableHeading": "中繼不可用",
 			"fellBackToPublic": "自訂中繼無法連線，改用公共中繼。",
 			"fellBackToastTitle": "正在使用公共中繼",
-			"fellBackToastSend": "您的自訂中繼無法連線 — 此次傳輸正在使用公共中繼。",
-			"fellBackToastReceive": "您的自訂中繼無法連線 — 此次下載正在使用公共中繼。",
+			"fellBackToastSend": "您的自訂中繼無法連線 - 此次傳輸正在使用公共中繼。",
+			"fellBackToastReceive": "您的自訂中繼無法連線 - 此次下載正在使用公共中繼。",
 			"dialogDescription": "顯示應用程式目前用於連線的中繼伺服器。",
 			"connectedRelay": "已連線的中繼",
 			"checking": "正在檢查連線…",
@@ -271,5 +399,6 @@
 			"encryptedNote": "傳輸一律採用端對端加密，因此中繼永遠看不到你的檔案。",
 			"disabledNote": "中繼已停用。僅限直接連線，因此在嚴格的防火牆或 NAT 環境下傳輸可能失敗。"
 		}
-	}
+	},
+	"comingSoon": "即將推出"
 }

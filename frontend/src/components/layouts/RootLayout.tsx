@@ -4,19 +4,30 @@ import { AppFooter } from '../AppFooter'
 import { TitleBar } from '../TitleBar'
 import { useTranslation } from '@/i18n'
 import { AppUpdater } from '../common/AppUpdater'
+import { DeviceNodeSync } from '../pairing/DeviceNodeSync'
+import { PairedInviteDialog } from '../pairing/PairedInviteDialog'
+import { ReceiverProvider } from '../receiver/ReceiverProvider'
+import { WindowsContextMenuSync } from '../settings/system-tray/context-menu-toggle'
+import { useIsWindowsPortable } from '@/hooks/use-windows-portable'
 import {
 	IS_ANDROID,
 	IS_LINUX,
 	IS_MACOS,
+	IS_PAIRING_CAPABLE,
 	IS_TAURI,
 	IS_WEB,
+	IS_WINDOWS,
 } from '@/lib/platform'
 
 export function RootLayout() {
 	const { t } = useTranslation('common')
+	const { data: isWindowsPortable = false } = useIsWindowsPortable()
 	return (
-		<>
-			{IS_TAURI && !IS_ANDROID && <AppUpdater />}
+		<ReceiverProvider>
+			{IS_TAURI && !IS_ANDROID && !isWindowsPortable && <AppUpdater />}
+			{IS_WINDOWS && <WindowsContextMenuSync />}
+			{IS_PAIRING_CAPABLE && <DeviceNodeSync />}
+			{IS_PAIRING_CAPABLE && <PairedInviteDialog />}
 			<main
 				className={
 					IS_WEB
@@ -32,6 +43,6 @@ export function RootLayout() {
 				<Outlet />
 				<AppFooter />
 			</main>
-		</>
+		</ReceiverProvider>
 	)
 }

@@ -3,6 +3,7 @@ package com.altsendme.plugin.native_utils
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.webkit.WebView
@@ -14,6 +15,7 @@ import app.tauri.annotation.InvokeArg
 import app.tauri.annotation.TauriPlugin
 import app.tauri.plugin.Channel
 import app.tauri.plugin.Invoke
+import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 @InvokeArg
 class SelectorArgs {
@@ -37,6 +40,17 @@ class CancelJobArgs(
     var channelId: Long = 0
 )
 
+@InvokeArg
+class ExportToTreeArgs {
+    var treeUri: String = ""
+    var sourceDir: String = ""
+}
+
+@InvokeArg
+class OpenDownloadFolderArgs {
+    var treeUri: String = ""
+}
+
 @Keep
 data class DownloadFolderSelectionResponse(
     val uri: String,
@@ -47,11 +61,16 @@ data class DownloadFolderSelectionResponse(
 class NativeUtils(private val activity: Activity) : Plugin(activity) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val jobs = ConcurrentHashMap<Long, Pair<Job, String>>()
+    private val pendingShareUri = AtomicReference<Uri?>(null)
 
     companion object {
         private const val RW_PERMISSION_FLAGS =
             Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        private const val SHARE_RECEIVED_EVENT = "shareReceived"
     }
+
+    private val consumedShareUris =
+        java.util.Collections.synchronizedSet(mutableSetOf<String>())
 
     @Command
     fun select_download_folder(invoke: Invoke) = startActivityForResult(
@@ -77,6 +96,16 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
     )
 
     @Command
+    fun consume_share_intent(invoke: Invoke) {
+        val args = invoke.parseArgs(SelectorArgs::class.java)
+        val uri = takePendingOrIntentShare()
+            ?: return invoke.resolveObject(false)
+
+        startUriCopy(uri, args.channel)
+        invoke.resolveObject(true)
+    }
+
+    @Command
     fun cancel_job(invoke: Invoke) {
         val args = invoke.parseArgs(CancelJobArgs::class.java)
         val channelId = args.channelId
@@ -90,6 +119,56 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
             } catch (e: Exception) {
                 invoke.reject(e.message)
             }
+        }
+    }
+
+    @Command
+    fun export_to_tree(invoke: Invoke) {
+        val args = invoke.parseArgs(ExportToTreeArgs::class.java)
+        scope.launch {
+            try {
+                val treeUri = Uri.parse(args.treeUri)
+                val sourceDir = File(args.sourceDir)
+                val result = exportDirectoryToTree(activity, treeUri, sourceDir)
+                invoke.resolveObject(result)
+            } catch (e: SecurityException) {
+                invoke.reject(e.message ?: "SAF permission denied")
+            } catch (e: Exception) {
+                invoke.reject(e.message ?: "Failed to export to selected folder")
+            }
+        }
+    }
+
+    @Command
+    fun open_download_folder(invoke: Invoke) {
+        val args = invoke.parseArgs(OpenDownloadFolderArgs::class.java)
+        val treeUriString = args.treeUri.trim()
+        if (treeUriString.isEmpty()) {
+            return invoke.reject("No download folder URI available")
+        }
+
+        try {
+            val treeUri = Uri.parse(treeUriString)
+            if (!DocumentsContract.isTreeUri(treeUri)) {
+                return invoke.reject("Invalid download folder URI")
+            }
+
+            val docId = DocumentsContract.getTreeDocumentId(treeUri)
+            val documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(documentUri, DocumentsContract.Document.MIME_TYPE_DIR)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            try {
+                activity.startActivity(intent)
+            } catch (_: android.content.ActivityNotFoundException) {
+                activity.startActivity(Intent.createChooser(intent, null))
+            }
+            invoke.resolve()
+        } catch (e: Exception) {
+            invoke.reject(e.message ?: "Failed to open download folder")
         }
     }
 
@@ -131,40 +210,47 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
 
         val uri = result.data?.data ?: return invoke.resolveObject(false)
 
-        val path = listOf(
-            activity.cacheDir.absolutePath,
-            "file_cache",
-            System.currentTimeMillis().toString(),
-        ).joinToString(File.separator)
-
+        startUriCopy(uri, channel)
         invoke.resolveObject(true)
-
-        val tempFolder = File(path)
-
-        val job = scope.launch(start = CoroutineStart.LAZY) {
-            try {
-                tempFolder.parentFile?.mkdirs()
-                    ?: throw IOException("Unable to create parent folders for ${tempFolder.absolutePath}")
-
-                copyUri(activity, uri, tempFolder).collect {
-                    channel.send(it.toJSObject())
-                }
-            } catch (_: Exception) {
-                tempFolder.deleteRecursively()
-            } finally {
-                jobs.remove(channel.id)
-            }
-        }
-
-        jobs[channel.id] = job to tempFolder.absolutePath
-        job.start()
     }
 
     override fun load(webView: WebView) {
         super.load(webView)
 
-        scope.launch {
-            activity.cacheDir.resolve("file_cache").deleteRecursively()
+        // Cold start: capture share URI before / as the frontend mounts.
+        // Skip wiping file_cache when a share is pending so cleanup cannot race the copy.
+        val shareUri = peekShareUri(activity.intent)
+        if (shareUri != null) {
+            pendingShareUri.set(shareUri)
+            // Notify after the WebView can register plugin listeners (cold-start race).
+            webView.post {
+                trigger(SHARE_RECEIVED_EVENT, JSObject())
+            }
+        } else {
+            scope.launch {
+                activity.cacheDir.resolve("file_cache").deleteRecursively()
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        // Without this, activity.intent stays the old MAIN launcher intent under singleTask.
+        activity.intent = intent
+
+        val uri = peekShareUri(intent) ?: return
+        pendingShareUri.set(uri)
+        trigger(SHARE_RECEIVED_EVENT, JSObject())
+    }
+
+    override fun onResume() {
+        super.onResume()
+        // Safety net: if the frontend missed the first event (listener not ready yet),
+        // re-advertise any still-unconsumed share when we come to the foreground.
+        val uri = peekShareUri(activity.intent) ?: return
+        pendingShareUri.compareAndSet(null, uri)
+        if (pendingShareUri.get() != null) {
+            trigger(SHARE_RECEIVED_EVENT, JSObject())
         }
     }
 
@@ -179,6 +265,99 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
 
         scope.cancel()
         super.onDestroy()
+    }
+
+    private fun startUriCopy(uri: Uri, channel: Channel) {
+        val path = listOf(
+            activity.cacheDir.absolutePath,
+            "file_cache",
+            System.currentTimeMillis().toString(),
+        ).joinToString(File.separator)
+
+        val tempFolder = File(path)
+
+        val job = scope.launch(start = CoroutineStart.LAZY) {
+            try {
+                tempFolder.parentFile?.mkdirs()
+                    ?: throw IOException("Unable to create parent folders for ${tempFolder.absolutePath}")
+
+                copyUri(activity, uri, tempFolder).collect {
+                    channel.send(it.toJSObject())
+                }
+            } catch (e: Exception) {
+                tempFolder.deleteRecursively()
+                channel.send(
+                    JSObject().apply {
+                        put("error", e.message ?: "Failed to copy shared file")
+                        put("progress", -1.0)
+                        put("copiedBytes", "0")
+                        put("totalBytes", "0")
+                    }
+                )
+            } finally {
+                jobs.remove(channel.id)
+            }
+        }
+
+        jobs[channel.id] = job to tempFolder.absolutePath
+        job.start()
+    }
+
+    @Synchronized
+    private fun takePendingOrIntentShare(): Uri? {
+        pendingShareUri.getAndSet(null)?.let { uri ->
+            markShareConsumed(uri)
+            return uri
+        }
+        return takeAndMarkShareUri(activity.intent)
+    }
+
+    private fun peekShareUri(intent: Intent?): Uri? {
+        if (intent == null || intent.action != Intent.ACTION_SEND) {
+            return null
+        }
+        val uri = extractShareUri(intent) ?: return null
+        if (consumedShareUris.contains(uri.toString())) {
+            return null
+        }
+        return uri
+    }
+
+    private fun takeAndMarkShareUri(intent: Intent?): Uri? {
+        val uri = peekShareUri(intent) ?: return null
+        markShareConsumed(uri)
+        return uri
+    }
+
+    private fun markShareConsumed(uri: Uri) {
+        consumedShareUris.add(uri.toString())
+    }
+
+    private fun extractShareUri(intent: Intent): Uri? {
+        parcelableStreamExtra(intent)?.let { return it }
+
+        when (val stream = intent.extras?.get(Intent.EXTRA_STREAM)) {
+            is Uri -> return stream
+            is String -> if (stream.isNotBlank()) return Uri.parse(stream)
+        }
+
+        val clip = intent.clipData
+        if (clip != null && clip.itemCount > 0) {
+            clip.getItemAt(0)?.uri?.let { return it }
+        }
+
+        intent.data?.let { return it }
+
+        return null
+    }
+
+    @Suppress("DEPRECATION")
+    private fun parcelableStreamExtra(intent: Intent): Uri? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+        }
     }
 }
 

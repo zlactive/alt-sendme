@@ -3,8 +3,8 @@ use crate::state::{AppStateMutex, ShareHandle};
 use engine::{
     download, fetch_metadata, get_relay_status as engine_get_relay_status,
     resolve_relay_mode_with_fallback, start_share_items, verify_relays as engine_verify_relays,
-    AddrInfoOptions, AppHandle, EventEmitter, FileMetadata, FilePreviewItem, ReceiveOptions,
-    SendOptions,
+    AddrInfoOptions, AppHandle, DeviceInfo, EventEmitter, FileMetadata, FilePreviewItem,
+    NodeService, PairedDevice, PairedDeviceInfo, ReceiveOptions, SendOptions,
 };
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -149,7 +149,7 @@ pub async fn send_items(
         });
         let boxed_handle: AppHandle = Some(emitter);
 
-        // Start sharing multiple files/folders via core send pipeline.
+        // Ephemeral share — relay settings apply per session (all platforms including Android).
         let result = start_share_items(path_bufs.clone(), options, &boxed_handle, Some(metadata))
             .await
             .map_err(|e| format!("Failed to start sharing: {}", e))?;
@@ -288,13 +288,17 @@ pub async fn stop_sharing(state: State<'_, AppStateMutex>) -> Result<(), String>
     let mut app_state = state.lock().await;
 
     if let Some(mut share) = app_state.current_share.take() {
-        // Explicitly clean up the share session
         if let Err(e) = share.stop().await {
             return Err(e);
         }
 
         #[cfg(target_os = "android")]
         std::fs::remove_dir_all(&share._path);
+    }
+
+    #[cfg(any(desktop, target_os = "android"))]
+    if let Some(node) = app_state.node.as_ref() {
+        node.stop_pairing_host().await;
     }
 
     Ok(())
@@ -305,6 +309,7 @@ pub async fn stop_sharing(state: State<'_, AppStateMutex>) -> Result<(), String>
 pub async fn receive_file(
     ticket: String,
     output_path: String,
+    tree_uri: Option<String>,
     relay: Option<RelayConfigArg>,
     state: State<'_, AppStateMutex>,
     app_handle: tauri::AppHandle,
@@ -312,10 +317,10 @@ pub async fn receive_file(
     use iroh_blobs::ticket::BlobTicket;
     use std::str::FromStr;
 
-    let output_dir = PathBuf::from(output_path);
+    let output_dir = resolve_receive_output_dir(&app_handle, output_path)?;
     let (relay_mode, fell_back_to_public) = resolve_relay_mode_with_fallback(relay).await?;
     let options = ReceiveOptions {
-        output_dir: Some(output_dir),
+        output_dir: Some(output_dir.clone()),
         relay_mode,
         magic_ipv4_addr: None,
         magic_ipv6_addr: None,
@@ -359,6 +364,11 @@ pub async fn receive_file(
     let (cancel_tx, cancel_rx) = tokio::sync::oneshot::channel::<()>();
     {
         let mut app_state = state.lock().await;
+        if app_state.current_receive_cancel.is_some() {
+            return Err(
+                "Already receiving a file. Wait for the current download to finish.".to_string(),
+            );
+        }
         app_state.current_receive_cancel = Some(cancel_tx);
     }
 
@@ -385,7 +395,17 @@ pub async fn receive_file(
     }
 
     match result {
-        Ok(r) => Ok(r.message),
+        Ok(r) => {
+            #[cfg(target_os = "android")]
+            {
+                finalize_android_receive(&app_handle, &output_dir, tree_uri.as_deref())?;
+            }
+            #[cfg(not(target_os = "android"))]
+            {
+                let _ = tree_uri;
+            }
+            Ok(r.message)
+        }
         Err(e) if e.to_string() == "cancelled" => {
             // User-initiated cancellation — not an error from the UI's perspective.
             Err("cancelled".to_string())
@@ -395,6 +415,135 @@ pub async fn receive_file(
             Err(format!("Failed to receive file: {}", e))
         }
     }
+}
+
+#[cfg(target_os = "android")]
+fn finalize_android_receive(
+    app_handle: &tauri::AppHandle,
+    staging_dir: &Path,
+    tree_uri: Option<&str>,
+) -> Result<(), String> {
+    use tauri_plugin_native_utils::{ExportToTreeArgs, NativeUtilsExt};
+
+    let tree_uri = tree_uri.map(str::trim).filter(|uri| !uri.is_empty());
+
+    let Some(tree_uri) = tree_uri else {
+        emit_receive_download_fallback(app_handle, staging_dir, "private");
+        return Ok(());
+    };
+
+    let export_result = app_handle.native_utils().export_to_tree(ExportToTreeArgs {
+        tree_uri: tree_uri.to_string(),
+        source_dir: staging_dir.to_string_lossy().into_owned(),
+    });
+
+    match export_result {
+        Ok(result) => {
+            tracing::info!(
+                exported = result.exported_count,
+                conflicts = result.conflicts.len(),
+                "Exported received files to SAF tree"
+            );
+            if let Err(e) = std::fs::remove_dir_all(staging_dir) {
+                tracing::warn!(
+                    "Failed to clean staging dir after SAF export ({}): {}",
+                    staging_dir.display(),
+                    e
+                );
+            }
+            Ok(())
+        }
+        Err(e) => {
+            tracing::warn!("SAF export failed, keeping app-private files: {e}");
+            emit_receive_download_fallback(app_handle, staging_dir, "saf");
+            // Transfer itself succeeded — files remain in staging.
+            Ok(())
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn emit_receive_download_fallback(app_handle: &tauri::AppHandle, staging_dir: &Path, reason: &str) {
+    let payload = serde_json::json!({
+        "path": staging_dir.to_string_lossy(),
+        "reason": reason,
+    });
+    let _ = app_handle.emit("receive-download-fallback", payload);
+}
+
+fn resolve_receive_output_dir(
+    app_handle: &tauri::AppHandle,
+    output_path: String,
+) -> Result<PathBuf, String> {
+    #[cfg(target_os = "android")]
+    {
+        let _ = output_path;
+        return android_staging_receive_dir(app_handle);
+    }
+
+    #[cfg(not(target_os = "android"))]
+    {
+        let output_dir = PathBuf::from(output_path.trim());
+        if output_dir.as_os_str().is_empty() {
+            return fallback_receive_dir(app_handle);
+        }
+
+        match ensure_dir_writable(&output_dir) {
+            Ok(()) => Ok(output_dir),
+            Err(error) => {
+                tracing::warn!(
+                    "Receive output dir not writable ({}): {}",
+                    output_dir.display(),
+                    error
+                );
+                Err("Selected download folder is not writable".to_string())
+            }
+        }
+    }
+}
+
+#[cfg(target_os = "android")]
+fn android_staging_receive_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let transfer_id = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .unwrap_or_default()
+        .as_nanos();
+    let staging = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to resolve app data dir: {e}"))?
+        .join("downloads")
+        .join(format!("recv-{transfer_id}"));
+    ensure_dir_writable(&staging)
+        .map_err(|e| format!("Failed to prepare staging download dir: {e}"))?;
+    Ok(staging)
+}
+
+#[cfg(not(target_os = "android"))]
+fn fallback_receive_dir(app_handle: &tauri::AppHandle) -> Result<PathBuf, String> {
+    let fallback = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| format!("Failed to resolve app data dir: {e}"))?
+        .join("downloads");
+    ensure_dir_writable(&fallback)
+        .map_err(|e| format!("Failed to prepare fallback download dir: {e}"))?;
+    Ok(fallback)
+}
+
+fn ensure_dir_writable(dir: &Path) -> std::io::Result<()> {
+    std::fs::create_dir_all(dir)?;
+    let probe_name = format!(
+        ".sendme_write_test_{}",
+        std::time::SystemTime::now()
+            .duration_since(std::time::UNIX_EPOCH)
+            .unwrap_or_default()
+            .as_nanos()
+    );
+    let probe_path = dir.join(probe_name);
+    std::fs::write(&probe_path, b"probe")?;
+    std::fs::remove_file(probe_path)?;
+    Ok(())
 }
 
 /// Cancel the currently active receive, if any.
@@ -480,15 +629,20 @@ pub async fn check_launch_intent(
 }
 
 #[tauri::command]
-pub async fn toggle_context_menu(enable: bool) -> Result<(), String> {
+pub async fn toggle_context_menu(
+    enable: bool,
+    #[allow(unused_variables)] allow_elevation: Option<bool>,
+) -> Result<(), String> {
     #[cfg(target_os = "windows")]
     {
         if enable {
             crate::platform::windows::context_menu::register_context_menu()
                 .map_err(|e| e.to_string())
         } else {
-            crate::platform::windows::context_menu::unregister_context_menu()
-                .map_err(|e| e.to_string())
+            crate::platform::windows::context_menu::unregister_context_menu(
+                allow_elevation.unwrap_or(true),
+            )
+            .map_err(|e| e.to_string())
         }
     }
     #[cfg(not(target_os = "windows"))]
@@ -496,6 +650,12 @@ pub async fn toggle_context_menu(enable: bool) -> Result<(), String> {
         let _ = enable;
         Ok(())
     }
+}
+
+/// True when running the Windows no-install ZIP layout (`.portable` marker).
+#[tauri::command]
+pub fn is_windows_portable() -> bool {
+    crate::platform::windows::portable::is_portable()
 }
 
 /// Helper function to calculate total size of a file or directory
@@ -587,6 +747,301 @@ async fn collect_preview_items(paths: &[PathBuf]) -> Result<Vec<FilePreviewItem>
 #[tauri::command]
 pub async fn verify_relays(relay: RelayConfigArg) -> Result<VerifyRelaysResponse, String> {
     engine_verify_relays(relay).await
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+pub async fn init_node_service(app_handle: tauri::AppHandle) -> Result<(), String> {
+    let data_dir = app_handle
+        .path()
+        .app_data_dir()
+        .map_err(|e| e.to_string())?;
+
+    let (relay_mode, _) = resolve_relay_mode_with_fallback(None).await?;
+    let relay_mode: iroh::endpoint::RelayMode = relay_mode.into();
+
+    let emitter = Arc::new(TauriEventEmitter {
+        app_handle: app_handle.clone(),
+    });
+    let boxed_handle: AppHandle = Some(emitter);
+    let node = NodeService::start(&data_dir, relay_mode, boxed_handle)
+        .await
+        .map_err(|e| format!("Failed to start device node: {e}"))?;
+    let state = app_handle.state::<AppStateMutex>();
+    let mut guard = state.lock().await;
+    guard.node = Some(Arc::new(node));
+    guard.node_init_error = None;
+
+    Ok(())
+}
+
+#[derive(serde::Serialize)]
+pub struct NodeStatusResponse {
+    pub status: String,
+    pub reason: Option<String>,
+    /// When status is ready: whether the home relay / network path is warmed up.
+    #[serde(default)]
+    pub network_ready: bool,
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+fn node_status_from_state(guard: &crate::state::AppState) -> NodeStatusResponse {
+    if let Some(node) = &guard.node {
+        return NodeStatusResponse {
+            status: "ready".to_string(),
+            reason: None,
+            network_ready: node.is_network_ready(),
+        };
+    }
+    // Init still in flight: distinguish from a hard failure so the UI keeps waiting.
+    if guard.node_init_error.is_none() {
+        return NodeStatusResponse {
+            status: "starting".to_string(),
+            reason: None,
+            network_ready: false,
+        };
+    }
+    NodeStatusResponse {
+        status: "unavailable".to_string(),
+        reason: guard.node_init_error.clone(),
+        network_ready: false,
+    }
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn get_node_status(
+    state: State<'_, AppStateMutex>,
+) -> Result<NodeStatusResponse, String> {
+    let guard = state.lock().await;
+    let status = node_status_from_state(&guard);
+
+    Ok(status)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn reconfigure_node_relay(
+    relay: Option<RelayConfigArg>,
+    state: State<'_, AppStateMutex>,
+) -> Result<(), String> {
+    let (relay_mode, _) = resolve_relay_mode_with_fallback(relay).await?;
+    let relay_mode: iroh::endpoint::RelayMode = relay_mode.into();
+
+    let node = {
+        let guard = state.lock().await;
+        if guard.current_share.is_some() || guard.is_share_starting {
+            return Err(
+                "Stop sharing before changing relay settings for paired devices.".to_string(),
+            );
+        }
+        guard
+            .node
+            .clone()
+            .ok_or_else(|| "Device pairing is not available on this device.".to_string())?
+    };
+
+    node.reconfigure_relay(relay_mode)
+        .await
+        .map_err(|e| format!("Failed to update device relay: {e}"))?;
+
+    Ok(())
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn get_device_info(state: State<'_, AppStateMutex>) -> Result<DeviceInfo, String> {
+    let guard = state.lock().await;
+    let node = guard.node.as_ref().ok_or_else(|| {
+        guard
+            .node_init_error
+            .clone()
+            .unwrap_or_else(|| "Device pairing is not available.".to_string())
+    })?;
+    let info = node.device_info();
+
+    Ok(info)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn set_device_display_name(
+    display_name: String,
+    state: State<'_, AppStateMutex>,
+) -> Result<DeviceInfo, String> {
+    let guard = state.lock().await;
+    let node = require_node(&guard)?;
+    let info = node
+        .set_device_display_name(&display_name)
+        .map_err(|e| e.to_string())?;
+
+    Ok(info)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn rename_paired_device(
+    endpoint_id: String,
+    display_name: String,
+    state: State<'_, AppStateMutex>,
+) -> Result<PairedDevice, String> {
+    let guard = state.lock().await;
+    let node = require_node(&guard)?;
+    let device = node
+        .rename_paired(&endpoint_id, &display_name)
+        .map_err(|e| e.to_string())?;
+
+    Ok(device)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+fn require_node(guard: &crate::state::AppState) -> Result<&NodeService, String> {
+    guard.node.as_deref().ok_or_else(|| {
+        guard
+            .node_init_error
+            .clone()
+            .unwrap_or_else(|| "Device pairing is not available.".to_string())
+    })
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+fn require_node_arc(guard: &crate::state::AppState) -> Result<Arc<NodeService>, String> {
+    guard.node.clone().ok_or_else(|| {
+        guard
+            .node_init_error
+            .clone()
+            .unwrap_or_else(|| "Device pairing is not available.".to_string())
+    })
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn get_pairing_ticket(state: State<'_, AppStateMutex>) -> Result<String, String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    node.pairing_ticket().map_err(|e| e.to_string())
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn start_pairing_host(
+    ttl_secs: Option<u64>,
+    state: State<'_, AppStateMutex>,
+) -> Result<String, String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    let ticket = node
+        .start_pairing_host(ttl_secs)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(ticket)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn stop_pairing_host(state: State<'_, AppStateMutex>) -> Result<(), String> {
+    let node = {
+        let guard = state.lock().await;
+        guard.node.clone()
+    };
+    if let Some(node) = node {
+        node.stop_pairing_host().await;
+    }
+
+    Ok(())
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn join_pairing(ticket: String, state: State<'_, AppStateMutex>) -> Result<(), String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    node.join_pairing(&ticket)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn list_paired_devices(
+    state: State<'_, AppStateMutex>,
+) -> Result<Vec<PairedDeviceInfo>, String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    let devices = node.list_paired().map_err(|e| e.to_string())?;
+
+    Ok(devices)
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn forget_paired_device(
+    endpoint_id: String,
+    state: State<'_, AppStateMutex>,
+) -> Result<(), String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    node.forget_paired(&endpoint_id)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
+}
+
+#[derive(serde::Serialize)]
+pub struct InviteDelivered {
+    pub delivered: bool,
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn invite_paired_device(
+    endpoint_id: String,
+    blob_ticket: String,
+    file_count: u32,
+    total_size: u64,
+    state: State<'_, AppStateMutex>,
+) -> Result<InviteDelivered, String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    let delivered = node
+        .invite_paired_device(&endpoint_id, &blob_ticket, file_count, total_size)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(InviteDelivered { delivered })
+}
+
+#[cfg(any(desktop, target_os = "android"))]
+#[tauri::command]
+pub async fn respond_paired_invite(
+    endpoint_id: String,
+    accepted: bool,
+    state: State<'_, AppStateMutex>,
+) -> Result<(), String> {
+    let node = {
+        let guard = state.lock().await;
+        require_node_arc(&guard)?
+    };
+    node.respond_paired_invite(&endpoint_id, accepted)
+        .await
+        .map_err(|e| e.to_string())?;
+
+    Ok(())
 }
 
 #[cfg(test)]

@@ -3,8 +3,9 @@ import { invoke } from '@/lib/platform-api'
 import {
 	ChevronDown,
 	ChevronRight,
-	FolderPlus,
 	FilePlus,
+	FolderPlus,
+	Plus,
 	Upload,
 	X,
 } from 'lucide-react'
@@ -12,8 +13,8 @@ import { useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import type { DropzoneProps } from '../../types/sender'
 import { getPreviewFileIcon } from '../../lib/fileIcons'
-import { buttonVariants } from '../ui/button'
-import { ScrollArea } from '../ui/scroll-area'
+import { Button } from '../ui/button'
+import { Menu, MenuItem, MenuPopup, MenuTrigger } from '../ui/menu'
 import {
 	Tooltip,
 	TooltipContent,
@@ -253,215 +254,193 @@ export function Dropzone({
 	}
 
 	return (
-		<motion.div
-			layout
-			transition={{ duration: 0.3, ease: 'easeInOut' }}
-			style={getDropzoneStyles()}
-			className="relative border-2 border-dashed rounded-lg text-center cursor-pointer transition-all duration-200 bg-accent text-accent-foreground h-fit min-h-64 border-border overflow-hidden"
-			{...dropzoneDragProps}
-		>
-			{selectedPath && !isLoading && (
-				<TooltipProvider>
-					<div className="absolute top-3 right-3 z-30 hidden sm:flex items-center gap-2 pointer-events-auto">
-						<Tooltip>
-							<TooltipTrigger
-								render={
-									<motion.button
-										key="add-folder-button"
-										type="button"
-										initial={{
-											opacity: 0,
-											filter: 'blur(4px)',
-										}}
-										animate={{
-											opacity: 1,
-											filter: 'blur(0px)',
-										}}
-										onClick={(e) => {
-											e.stopPropagation()
-											void onAddFolders()
-										}}
-										className={buttonVariants({
-											variant: 'ghost',
-											size: 'icon',
-										})}
-										aria-label="Add more folders"
-									>
-										<FolderPlus strokeWidth={1.5} />
-									</motion.button>
-								}
-							></TooltipTrigger>
-							<TooltipContent>
-								<p>{t('common:sender.addMoreFolders')}</p>
-							</TooltipContent>
-						</Tooltip>
-						<Tooltip>
-							<TooltipTrigger
-								render={
-									<motion.button
-										key="add-file-button"
-										type="button"
-										initial={{
-											opacity: 0,
-											filter: 'blur(4px)',
-										}}
-										animate={{
-											opacity: 1,
-											filter: 'blur(0px)',
-										}}
-										onClick={(e) => {
-											e.stopPropagation()
+		<TooltipProvider>
+			<motion.div
+				layout
+				transition={{ duration: 0.3, ease: 'easeInOut' }}
+				style={getDropzoneStyles()}
+				className="relative border-2 border-dashed rounded-lg text-center cursor-pointer transition-all duration-200 bg-accent text-accent-foreground h-fit min-h-64 border-border overflow-hidden"
+				{...dropzoneDragProps}
+			>
+				{hasSelection && !isLoading ? (
+					<>
+						<div
+							className="absolute top-3 left-3 z-30"
+							onClick={(e) => e.stopPropagation()}
+							onKeyDown={(e) => e.stopPropagation()}
+						>
+							<Menu>
+								<MenuTrigger
+									render={
+										<Button
+											type="button"
+											variant="ghost"
+											size="icon-sm"
+											className="text-muted-foreground/70 hover:text-muted-foreground"
+											aria-label={t('common:sender.addMore')}
+											title={t('common:sender.addMore')}
+										/>
+									}
+								>
+									<Plus className="size-4" strokeWidth={1.75} />
+								</MenuTrigger>
+								<MenuPopup align="start" side="bottom" sideOffset={6}>
+									<MenuItem
+										onClick={() => {
 											void onAddFiles()
 										}}
-										className={buttonVariants({
-											variant: 'ghost',
-											size: 'icon',
-										})}
-										aria-label="Add more files"
 									>
-										<FilePlus strokeWidth={1.5} />
-									</motion.button>
+										<FilePlus />
+										{t('common:sender.addFile')}
+									</MenuItem>
+									<MenuItem
+										onClick={() => {
+											void onAddFolders()
+										}}
+									>
+										<FolderPlus />
+										{t('common:sender.addFolder')}
+									</MenuItem>
+								</MenuPopup>
+							</Menu>
+						</div>
+						<Tooltip>
+							<TooltipTrigger
+								render={
+									<Button
+										type="button"
+										variant="ghost"
+										size="icon-sm"
+										onClick={(e) => {
+											e.stopPropagation()
+											onClearSelection()
+										}}
+										className="absolute top-3 right-3 z-30 text-muted-foreground"
+										aria-label={t('common:sender.clearSelection')}
+									>
+										<X />
+									</Button>
 								}
-							></TooltipTrigger>
+							/>
 							<TooltipContent>
-								<p>{t('common:sender.addMoreFiles')}</p>
+								<p>{t('common:sender.clearSelection')}</p>
 							</TooltipContent>
 						</Tooltip>
-						<motion.button
-							key="clear-button"
-							type="button"
-							initial={{ opacity: 0, filter: 'blur(4px)' }}
-							animate={{ opacity: 1, filter: 'blur(0px)' }}
-							onClick={(e) => {
-								e.stopPropagation()
-								onClearSelection()
-							}}
-							className={buttonVariants({
-								variant: 'secondary',
-							})}
-							aria-label="Clear selection"
-						>
-							<X />
-							Clear ({selectedPaths.length})
-						</motion.button>
-					</div>
-				</TooltipProvider>
-			)}
-			<motion.div
-				key={selectedPath ? 'selected' : 'empty'}
-				initial={{ opacity: 0, filter: 'blur(4px)' }}
-				animate={{ opacity: 1, filter: 'blur(0px)' }}
-				exit={{ opacity: 0, filter: 'blur(4px)' }}
-				transition={{ duration: 0.25 }}
-				className="h-full w-full p-4 sm:p-6"
-			>
-				{!hasSelection && (
-					<div className="h-full w-full flex flex-col items-center justify-center space-y-4">
-						<div className="flex justify-center items-center h-16">
-							<Upload
-								className="h-12 w-12 text-foreground/60 data-active:text-accent-foreground transition-transform"
-								data-active={isDragActive ? 'true' : 'false'}
-							/>
-						</div>
+					</>
+				) : null}
+				<motion.div
+					key={selectedPath ? 'selected' : 'empty'}
+					initial={{ opacity: 0, filter: 'blur(4px)' }}
+					animate={{ opacity: 1, filter: 'blur(0px)' }}
+					exit={{ opacity: 0, filter: 'blur(4px)' }}
+					transition={{ duration: 0.25 }}
+					className="h-full w-full p-4 sm:p-6"
+				>
+					{!hasSelection && (
+						<div className="flex h-full min-h-52 w-full flex-col items-center justify-center space-y-4">
+							<div className="flex justify-center items-center h-16">
+								<Upload
+									className="h-12 w-12 text-foreground/60 data-active:text-accent-foreground transition-transform"
+									data-active={isDragActive ? 'true' : 'false'}
+								/>
+							</div>
 
-						<div>
-							<p className=" hidden sm:block text-lg font-medium mb-2 text-accent-foreground">
-								{getStatusText()}
-							</p>
-							<div className="text-sm truncate text-muted-foreground">
-								{getSubText()}
+							<div>
+								<p className=" hidden sm:block text-lg font-medium mb-2 text-accent-foreground">
+									{getStatusText()}
+								</p>
+								<div className="text-sm truncate text-muted-foreground">
+									{getSubText()}
+								</div>
 							</div>
 						</div>
-					</div>
-				)}
-
-				<AnimatePresence initial={false}>
-					{hasSelection && (
-						<motion.div
-							key="selected-files-preview"
-							initial={{ opacity: 0, y: 10 }}
-							animate={{ opacity: 1, y: 0 }}
-							exit={{ opacity: 0, y: 6 }}
-							transition={{ duration: 0.2 }}
-							className="h-full w-full flex flex-col justify-center pt-4 gap-4"
-						>
-							<ScrollArea
-								ref={attachPreviewScroller}
-								className="overflow-x-auto overflow-y-hidden"
-								scrollFade
-								scrollbarGutter
-								onWheel={handlePreviewWheel}
-								aria-orientation="horizontal"
-							>
-								<motion.div
-									layout
-									className="inline-flex min-w-full justify-center gap-3 pr-3 pb-2.5"
-								>
-									<AnimatePresence initial={false}>
-										{selectedPaths.map((path) => {
-											const fileName = getPathBaseName(path)
-											return (
-												<motion.div
-													key={path}
-													layout
-													initial={{
-														opacity: 0,
-														scale: 0.94,
-													}}
-													animate={{
-														opacity: 1,
-														scale: 1,
-													}}
-													exit={{
-														opacity: 0,
-														scale: 0.94,
-													}}
-													transition={{
-														duration: 0.16,
-													}}
-													className="group relative w-44 shrink-0"
-												>
-													<div className="p-1">
-														<div className="relative flex h-36 w-full items-center justify-center overflow-hidden">
-															{renderPathIcon(path)}
-															<Tooltip>
-																<TooltipTrigger
-																	render={
-																		<button
-																			type="button"
-																			onClick={(e) => {
-																				e.stopPropagation()
-																				onRemoveSelectedPath(path)
-																			}}
-																			className="absolute right-2 top-2 z-10 rounded-full border bg-background p-1 text-muted-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
-																			aria-label={`Remove ${fileName}`}
-																		>
-																			<X className="h-3.5 w-3.5" />
-																		</button>
-																	}
-																></TooltipTrigger>
-																<TooltipContent>
-																	<p>
-																		{t('common:sender.removeFromSelection')}
-																	</p>
-																</TooltipContent>
-															</Tooltip>
-														</div>
-													</div>
-
-													<p className="mt-1 truncate text-sm text-muted-foreground">
-														{fileName}
-													</p>
-												</motion.div>
-											)
-										})}
-									</AnimatePresence>
-								</motion.div>
-							</ScrollArea>
-						</motion.div>
 					)}
-				</AnimatePresence>
+
+					<AnimatePresence initial={false}>
+						{hasSelection && (
+							<motion.div
+								key="selected-files-preview"
+								initial={{ opacity: 0, y: 10 }}
+								animate={{ opacity: 1, y: 0 }}
+								exit={{ opacity: 0, y: 6 }}
+								transition={{ duration: 0.2 }}
+								className="flex h-full w-full flex-col items-center justify-center gap-4 pt-4"
+							>
+								<div
+									ref={attachPreviewScroller}
+									className="w-full overflow-x-auto overflow-y-hidden overscroll-x-contain"
+									onWheel={handlePreviewWheel}
+								>
+									<motion.div
+										layout
+										className="inline-flex min-w-full justify-center gap-3 px-1"
+									>
+										<AnimatePresence initial={false}>
+											{selectedPaths.map((path) => {
+												const fileName = getPathBaseName(path)
+												return (
+													<motion.div
+														key={path}
+														layout
+														initial={{
+															opacity: 0,
+															scale: 0.94,
+														}}
+														animate={{
+															opacity: 1,
+															scale: 1,
+														}}
+														exit={{
+															opacity: 0,
+															scale: 0.94,
+														}}
+														transition={{
+															duration: 0.16,
+														}}
+														className="group relative w-44 shrink-0"
+													>
+														<div className="p-1">
+															<div className="relative flex h-36 w-full items-center justify-center overflow-hidden">
+																{renderPathIcon(path)}
+																<Tooltip>
+																	<TooltipTrigger
+																		render={
+																			<button
+																				type="button"
+																				onClick={(e) => {
+																					e.stopPropagation()
+																					onRemoveSelectedPath(path)
+																				}}
+																				className="absolute right-2 top-2 z-10 rounded-full border bg-background p-1 text-muted-foreground opacity-100 transition-opacity sm:opacity-0 sm:group-hover:opacity-100 focus-visible:opacity-100"
+																				aria-label={`Remove ${fileName}`}
+																			>
+																				<X className="h-3.5 w-3.5" />
+																			</button>
+																		}
+																	></TooltipTrigger>
+																	<TooltipContent>
+																		<p>
+																			{t('common:sender.removeFromSelection')}
+																		</p>
+																	</TooltipContent>
+																</Tooltip>
+															</div>
+														</div>
+
+														<p className="mt-1 truncate text-sm text-muted-foreground">
+															{fileName}
+														</p>
+													</motion.div>
+												)
+											})}
+										</AnimatePresence>
+									</motion.div>
+								</div>
+							</motion.div>
+						)}
+					</AnimatePresence>
+				</motion.div>
 			</motion.div>
-		</motion.div>
+		</TooltipProvider>
 	)
 }

@@ -10,6 +10,7 @@ export type CopyProgress = {
 	totalBytes: string
 	progress: number
 	cachedPath?: string
+	error?: string
 }
 
 export class FileSelectedHandler {
@@ -41,10 +42,46 @@ export async function selectDownloadFolder(): Promise<DownloadFolderSelectionRes
 	)
 }
 
-export async function selectSendDocument(
-	onStart: (path: string, size: BigInt) => void,
-	onEvent: (event: CopyProgress) => void,
+/** Open the selected Android SAF download folder in a system file manager. */
+export async function openDownloadFolder(treeUri: string): Promise<void> {
+	if (!IS_TAURI) return
+
+	await invoke<void>('plugin:native-utils|open_download_folder', {
+		treeUri,
+	})
+}
+
+type CopyHandlers = {
+	onStart: (path: string, size: bigint) => void
+	onEvent: (event: CopyProgress) => void
 	onComplete: (path: string) => void
+	onError?: (message: string) => void
+}
+
+function bindCopyChannel(
+	channel: { onmessage: (event: CopyProgress) => void },
+	handlers: CopyHandlers
+) {
+	channel.onmessage = (event: CopyProgress) => {
+		if (event.error) {
+			handlers.onError?.(event.error)
+			return
+		}
+		if (event.cachedPath && (event.progress === 0 || event.progress === 0.0)) {
+			handlers.onStart(event.cachedPath, BigInt(event.totalBytes || '0'))
+		} else if (event.cachedPath && event.progress >= 1) {
+			handlers.onComplete(event.cachedPath)
+		} else {
+			handlers.onEvent(event)
+		}
+	}
+}
+
+export async function selectSendDocument(
+	onStart: (path: string, size: bigint) => void,
+	onEvent: (event: CopyProgress) => void,
+	onComplete: (path: string) => void,
+	onError?: (message: string) => void
 ): Promise<FileSelectedHandler | null> {
 	if (!IS_TAURI) {
 		const selected = await openDialog({ multiple: true, directory: false })
@@ -59,15 +96,7 @@ export async function selectSendDocument(
 
 	const { Channel } = await import('@tauri-apps/api/core')
 	const channel = new Channel<CopyProgress>()
-	channel.onmessage = (event: CopyProgress) => {
-		if (event.progress === 0 && event.cachedPath) {
-			onStart(event.cachedPath, BigInt(event.totalBytes))
-		} else if (event.progress === 1 && event.cachedPath) {
-			onComplete(event.cachedPath)
-		} else {
-			onEvent(event)
-		}
-	}
+	bindCopyChannel(channel, { onStart, onEvent, onComplete, onError })
 	const response = await invoke<boolean | undefined>(
 		'plugin:native-utils|select_send_document',
 		{
@@ -79,9 +108,10 @@ export async function selectSendDocument(
 }
 
 export async function selectSendFolder(
-	onStart: (path: string, size: BigInt) => void,
+	onStart: (path: string, size: bigint) => void,
 	onEvent: (event: CopyProgress) => void,
-	onComplete: (path: string) => void
+	onComplete: (path: string) => void,
+	onError?: (message: string) => void
 ): Promise<FileSelectedHandler | null> {
 	if (!IS_TAURI) {
 		const selected = await openDialog({ multiple: false, directory: true })
@@ -95,15 +125,7 @@ export async function selectSendFolder(
 
 	const { Channel } = await import('@tauri-apps/api/core')
 	const channel = new Channel<CopyProgress>()
-	channel.onmessage = (event: CopyProgress) => {
-		if (event.progress === 0 && event.cachedPath) {
-			onStart(event.cachedPath, BigInt(event.totalBytes))
-		} else if (event.progress === 1 && event.cachedPath) {
-			onComplete(event.cachedPath)
-		} else {
-			onEvent(event)
-		}
-	}
+	bindCopyChannel(channel, { onStart, onEvent, onComplete, onError })
 	const response = await invoke<boolean>(
 		'plugin:native-utils|select_send_folder',
 		{
@@ -112,4 +134,43 @@ export async function selectSendFolder(
 	)
 	if (!response) return null
 	return new FileSelectedHandler(String(channel.id))
+}
+
+/** Consume a pending Android Share-sheet intent (ACTION_SEND). */
+export async function consumeShareIntent(
+	onStart: (path: string, size: bigint) => void,
+	onEvent: (event: CopyProgress) => void,
+	onComplete: (path: string) => void,
+	onError?: (message: string) => void
+): Promise<FileSelectedHandler | null> {
+	if (!IS_TAURI) return null
+
+	const { Channel } = await import('@tauri-apps/api/core')
+	const channel = new Channel<CopyProgress>()
+	bindCopyChannel(channel, { onStart, onEvent, onComplete, onError })
+	const response = await invoke<boolean | undefined>(
+		'plugin:native-utils|consume_share_intent',
+		{ channel }
+	)
+	if (!response) return null
+	return new FileSelectedHandler(String(channel.id))
+}
+
+/** Fired when a share arrives while the app is already open. */
+export async function onShareReceived(
+	handler: () => void
+): Promise<() => void> {
+	if (!IS_TAURI) return () => {}
+
+	const { addPluginListener } = await import('@tauri-apps/api/core')
+	const listener = await addPluginListener(
+		'native-utils',
+		'shareReceived',
+		() => {
+			handler()
+		}
+	)
+	return () => {
+		void listener.unregister()
+	}
 }

@@ -16,8 +16,7 @@ use state::AppState;
 use std::fs;
 use std::sync::Arc;
 
-use tauri::Emitter as _;
-use tauri::Manager as _;
+use tauri::{Emitter as _, Manager as _, RunEvent};
 
 /// Clean up any orphaned .sendme-* directories from previous runs
 fn cleanup_orphaned_directories() {
@@ -94,9 +93,58 @@ pub fn run() {
             verify_relays,
             get_relay_status,
             toggle_context_menu,
+            is_windows_portable,
+            #[cfg(any(desktop, target_os = "android"))]
+            get_node_status,
+            #[cfg(any(desktop, target_os = "android"))]
+            reconfigure_node_relay,
+            #[cfg(any(desktop, target_os = "android"))]
+            get_device_info,
+            #[cfg(any(desktop, target_os = "android"))]
+            set_device_display_name,
+            #[cfg(any(desktop, target_os = "android"))]
+            get_pairing_ticket,
+            #[cfg(any(desktop, target_os = "android"))]
+            start_pairing_host,
+            #[cfg(any(desktop, target_os = "android"))]
+            stop_pairing_host,
+            #[cfg(any(desktop, target_os = "android"))]
+            join_pairing,
+            #[cfg(any(desktop, target_os = "android"))]
+            list_paired_devices,
+            #[cfg(any(desktop, target_os = "android"))]
+            forget_paired_device,
+            #[cfg(any(desktop, target_os = "android"))]
+            rename_paired_device,
+            #[cfg(any(desktop, target_os = "android"))]
+            invite_paired_device,
+            #[cfg(any(desktop, target_os = "android"))]
+            respond_paired_invite,
         ])
         .setup(|app| {
             setup_common(app);
+            #[cfg(any(desktop, target_os = "android"))]
+            {
+                let handle = app.handle().clone();
+                tauri::async_runtime::block_on(async move {
+                    let state = handle.state::<state::AppStateMutex>();
+                    let init_handle = handle.clone();
+                    match init_node_service(init_handle).await {
+                        Ok(()) => {
+                            if let Err(error) = handle.emit("device-node-ready", ()) {
+                                tracing::warn!(%error, "failed to emit device-node-ready");
+                            }
+                        }
+                        Err(error) => {
+                            tracing::error!(%error, "failed to initialize device node");
+                            state.lock().await.node_init_error = Some(error.clone());
+                            if let Err(emit_error) = handle.emit("device-node-failed", error) {
+                                tracing::warn!(%emit_error, "failed to emit device-node-failed");
+                            }
+                        }
+                    }
+                });
+            }
             #[cfg(all(desktop, not(target_os = "macos")))]
             if let Err(error) = tray::setup_tray(&app.handle()) {
                 tracing::warn!(
@@ -126,11 +174,25 @@ pub fn run() {
     builder
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
-        .run(|_app, _event| {
+        .run(|app, event| {
+            if matches!(event, RunEvent::Exit) {
+                #[cfg(any(desktop, target_os = "android"))]
+                {
+                    let state = app.state::<state::AppStateMutex>();
+                    tauri::async_runtime::block_on(async move {
+                        let mut guard = state.lock().await;
+                        if let Some(node) = guard.node.take() {
+                            if let Err(error) = node.shutdown().await {
+                                tracing::warn!(%error, "node shutdown error");
+                            }
+                        }
+                    });
+                }
+            }
             // RunEvent::Reopen only exists on macOS (dock icon re-click)
             #[cfg(target_os = "macos")]
-            if let tauri::RunEvent::Reopen { .. } = _event {
-                tray::open_and_focus(_app);
+            if let RunEvent::Reopen { .. } = event {
+                tray::open_and_focus(app);
             }
         });
 }
@@ -155,5 +217,10 @@ fn setup_common(app: &tauri::App) {
     #[cfg(target_os = "linux")]
     if let Some(window) = app.handle().get_webview_window("main") {
         let _ = window.set_decorations(false);
+    }
+
+    #[cfg(target_os = "windows")]
+    if let Some(window) = app.handle().get_webview_window("main") {
+        platform::windows::window::adjust_initial_window_size(&window);
     }
 }

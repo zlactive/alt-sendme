@@ -37,6 +37,8 @@ pub async fn start_share_items(
 
     ensure!(!paths.is_empty(), "no paths provided for sharing");
 
+    // Ephemeral endpoint: must not reuse the node's persistent identity while
+    // the control endpoint is online, or the relay rejects duplicate endpoint ids.
     let secret_key = get_or_create_secret()?;
     let relay_mode: RelayMode = options.relay_mode.clone().into();
     let mut builder = Endpoint::builder(presets::N0)
@@ -108,7 +110,7 @@ pub async fn start_share_items(
             hash: outcome.hash,
             size: outcome.size,
             entry_type: outcome.entry_type,
-            router: outcome.router,
+            router: outcome.router.expect("ephemeral share router"),
             temp_tag: outcome.temp_tag,
             blobs_data_dir: AutoCleanupDir::new(outcome.cleanup_dir.expect("native cleanup dir")),
             _progress_handle: outcome.progress_handle,

@@ -1,18 +1,17 @@
-import { CheckCircle, Copy, Square } from 'lucide-react'
+import { useState } from 'react'
 import { useTranslation } from '../../i18n/react-i18next-compat'
-import type {
-	SharingControlsProps,
-	TicketDisplayProps,
-} from '../../types/sender'
-import { TransferProgressBar } from '../common/TransferProgressBar'
-import { StatusIndicator } from '../common/StatusIndicator'
-import { Button } from '../ui/button'
-import { InputGroup, InputGroupAddon, InputGroupInput } from '../ui/input-group'
-import { Label } from '../ui/label'
-import { Switch } from '../ui/switch'
-import { toastManager } from '../ui/toast'
-import { Tooltip, TooltipContent, TooltipTrigger } from '../ui/tooltip'
-import { useAppSettingStore } from '../../store/app-setting'
+import type { SharingControlsProps } from '../../types/sender'
+import { IS_PAIRING_CAPABLE } from '@/lib/platform'
+import {
+	Sheet,
+	SheetContent,
+	SheetDescription,
+	SheetHeader,
+	SheetPanel,
+	SheetTitle,
+} from '../ui/sheet'
+import { PairedDevicesPanel } from './PairedDevicesPanel'
+import { ShareLinkPanel } from './ShareLinkPanel'
 
 export function SharingActiveCard({
 	selectedPaths,
@@ -24,202 +23,68 @@ export function SharingActiveCard({
 	isCompleted,
 	isBroadcastMode,
 	activeConnectionCount = 0,
+	pairedDevices = [],
+	isNodeReady = false,
+	isNodeStatusPending = false,
+	pairedInviteStatus = {},
+	onInvitePairedDevice,
 	onCopyTicket,
 	onStopSharing,
-	onSetBroadcast: _onSetBroadcast,
+	onSetBroadcast,
 }: SharingControlsProps) {
 	const { t } = useTranslation()
-	const onSetBroadcast = () => {
-		if (_onSetBroadcast) {
-			const isTurningOn = !isBroadcastMode
-			_onSetBroadcast(isTurningOn)
-			// Only show toast notification when turning broadcast mode ON, not for private sharing
-			if (isTurningOn) {
-				const toastId = crypto.randomUUID()
-				toastManager.add({
-					title: t('common:sender.broadcastMode.on.label'),
-					id: toastId,
-					description: t('common:sender.broadcastMode.on.description'),
-					type: 'info',
-					actionProps: {
-						children: t('common:undo'),
-						onClick: () => {
-							_onSetBroadcast?.(false)
-							toastManager.close(toastId)
-						},
-					},
-				})
-				// Auto-close "You are broadcasting" notification after 1 seconds
-				setTimeout(() => {
-					toastManager.close(toastId)
-				}, 5000)
-			}
-		}
-	}
-
-	const getStatusText = () => {
-		if (isCompleted) return t('common:sender.transferCompleted')
-		if (isTransporting) return t('common:sender.sharingInProgress')
-		return t('common:sender.listeningForConnection')
-	}
-
-	const statusText = getStatusText()
-
-	const clampedProgress = transferProgress
-		? {
-				...transferProgress,
-				bytesTransferred: Math.min(
-					Math.max(transferProgress.bytesTransferred, 0),
-					transferProgress.totalBytes
-				),
-				percentage: Math.min(Math.max(transferProgress.percentage, 0), 100),
-			}
-		: null
-
-	// Default progress object when transferProgress is not yet available
-	const defaultProgress = {
-		bytesTransferred: 0,
-		totalBytes: 0,
-		speedBps: 0,
-		percentage: 0,
-	}
-
-	// Determine which progress object to use
-	const progressToDisplay = isTransporting
-		? clampedProgress || defaultProgress
-		: null
+	const [devicesOpen, setDevicesOpen] = useState(false)
 
 	return (
-		<div className="space-y-4">
-			<div className="p-4 rounded-lg absolute top-0 left-0">
-				<Tooltip disabled={!selectedPath && selectedPaths.length <= 1}>
-					<TooltipTrigger>
-						<p className="text-xs mb-4 max-w-40 sm:max-w-120 truncate">
-							<strong className="mr-1">{t('common:sender.fileLabel')}</strong>{' '}
-							{selectedPaths.length > 1
-								? t('common:sender.multipleFilesSelected', {
-										name: selectedPaths[0]?.split('/').pop() || '',
-										count: selectedPaths.length - 1,
-									})
-								: selectedPath?.split('/').pop()}
-						</p>
-					</TooltipTrigger>
-					<TooltipContent className="max-w-xs" side="inline-end">
-						<ul className="list-disc pl-4 text-left max-h-60 overflow-auto">
-							{selectedPaths.map((path) => (
-								<li key={path} className="text-xs">
-									{path.split('/').pop()}
-								</li>
-							))}
-						</ul>
-					</TooltipContent>
-				</Tooltip>
+		<>
+			<ShareLinkPanel
+				selectedPaths={selectedPaths}
+				selectedPath={selectedPath}
+				ticket={ticket}
+				copySuccess={copySuccess}
+				isTransporting={isTransporting}
+				isCompleted={isCompleted}
+				isBroadcastMode={isBroadcastMode}
+				activeConnectionCount={activeConnectionCount}
+				transferProgress={transferProgress}
+				onCopyTicket={onCopyTicket}
+				onSetBroadcast={onSetBroadcast}
+				onStopSharing={onStopSharing}
+				showPairedDevicesOption={IS_PAIRING_CAPABLE}
+				onOpenPairedDevices={() => setDevicesOpen(true)}
+			/>
 
-				<StatusIndicator
-					isCompleted={isCompleted}
-					isTransporting={isTransporting}
-					statusText={statusText}
-					activeConnectionCount={activeConnectionCount}
-					isBroadcastMode={isBroadcastMode}
-				/>
-			</div>
-
-			<p className="text-xs text-center">{t('common:sender.keepAppOpen')}</p>
-
-			{!isTransporting && ticket && (
-				<TicketDisplay
-					ticket={ticket}
-					copySuccess={copySuccess}
-					onCopyTicket={onCopyTicket}
-					isBroadcastMode={isBroadcastMode}
-					onSetBroadcast={onSetBroadcast}
-				/>
-			)}
-
-			{isTransporting && progressToDisplay && (
-				<TransferProgressBar progress={progressToDisplay} />
-			)}
-
-			<Button
-				size="icon-lg"
-				type="button"
-				onClick={onStopSharing}
-				variant="destructive-outline"
-				className="absolute top-0 right-0 sm:right-6 rounded-full font-medium transition-colors not-disabled:not-active:not-data-pressed:before:shadow-none dark:not-disabled:before:shadow-none dark:not-disabled:not-active:not-data-pressed:before:shadow-none"
-				aria-label="Stop sharing"
-			>
-				<Square className="w-4 h-4" fill="currentColor" />
-			</Button>
-		</div>
-	)
-}
-
-export function TicketDisplay({
-	ticket,
-	copySuccess,
-	onCopyTicket,
-	isBroadcastMode,
-	onSetBroadcast,
-}: TicketDisplayProps & {
-	isBroadcastMode?: boolean
-	onSetBroadcast?: (broadcast: boolean) => void
-}) {
-	const { t } = useTranslation()
-	const showBroadcastToggle = useAppSettingStore(
-		(state) => state.showBroadcastToggle
-	)
-
-	return (
-		<div className="space-y-3">
-			<div className="flex items-center justify-between">
-				<p className="block text-sm font-medium">
-					{t('common:sender.shareThisTicket')}
-				</p>
-				{showBroadcastToggle &&
-					isBroadcastMode !== undefined &&
-					onSetBroadcast && (
-						<div className="flex items-start gap-2">
-							<Label htmlFor={'broadcast-toggle'} className="text-sm">
-								{t('common:sender.broadcastMode.index')}
-							</Label>
-							<Switch
-								checked={isBroadcastMode}
-								onCheckedChange={onSetBroadcast}
+			{IS_PAIRING_CAPABLE ? (
+				<Sheet open={devicesOpen} onOpenChange={setDevicesOpen}>
+					<SheetContent side="right" inset className="sm:max-w-sm">
+						<SheetHeader>
+							<SheetTitle>
+								{t('common:sender.sharingActive.devices.title')}
+							</SheetTitle>
+							<SheetDescription>
+								{t('common:sender.sharingActive.devices.hint')}
+							</SheetDescription>
+						</SheetHeader>
+						<SheetPanel
+							scrollFade={false}
+							className="flex h-full min-h-0 flex-col overflow-hidden !pt-0 !pb-4"
+						>
+							<PairedDevicesPanel
+								pairedDevices={pairedDevices}
+								pairedInviteStatus={pairedInviteStatus}
+								isNodeReady={isNodeReady}
+								isNodeStatusPending={isNodeStatusPending}
+								hasTicket={Boolean(ticket)}
+								onInvitePairedDevice={onInvitePairedDevice}
+								onInviteSuccess={() => setDevicesOpen(false)}
+								showHeader={false}
+								showSearch
+								isOpen={devicesOpen}
 							/>
-						</div>
-					)}
-			</div>
-			<InputGroup>
-				<InputGroupInput
-					type="text"
-					value={ticket}
-					className="overflow-ellipsis"
-					readOnly
-				/>
-				<InputGroupAddon align="inline-end">
-					<Button
-						type="button"
-						size="icon-xs"
-						onClick={onCopyTicket}
-						style={{
-							backgroundColor: copySuccess
-								? 'var(--app-primary)'
-								: 'var(--color-foreground)',
-							border: '1px solid var(--border)',
-						}}
-						title={t('common:sender.copyToClipboard')}
-					>
-						{copySuccess ? (
-							<CheckCircle className="h-4 w-4" />
-						) : (
-							<Copy className="h-4 w-4" />
-						)}
-					</Button>
-				</InputGroupAddon>
-			</InputGroup>
-			<p className="text-xs text-muted-foreground">
-				{t('common:sender.sendThisTicket')}
-			</p>
-		</div>
+						</SheetPanel>
+					</SheetContent>
+				</Sheet>
+			) : null}
+		</>
 	)
 }

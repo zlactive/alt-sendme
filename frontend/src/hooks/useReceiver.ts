@@ -9,7 +9,7 @@ import {
 	supportsWebSaveLocationPicker,
 	type UnlistenFn,
 } from '@/lib/platform-api'
-import { selectDownloadFolder } from '@/plugins/nativeUtils'
+import { selectDownloadFolder, openDownloadFolder } from '@/plugins/nativeUtils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../i18n/react-i18next-compat'
 import { sendSystemNotification } from '../lib/systemNotification'
@@ -27,6 +27,9 @@ import {
 } from '@/lib/web-preview-error'
 import { getRelayConfigArg } from '../lib/relay'
 import { useAppSettingStore } from '@/store/app-setting'
+import { useReceiverActionsStore } from '@/store/receiver-actions-store'
+import { useTransferTabStore } from '@/store/transfer-tab-store'
+import type { PairedInvitePayload } from '@/lib/pairing-api'
 
 interface BackendFileMetadata {
 	file_name: string
@@ -107,6 +110,9 @@ export function useReceiver(): UseReceiverReturn {
 	const [savePath, setSavePath] = useState('')
 	const downloadsPath = useAppSettingStore((state) => state.downloadsPath)
 	const setDownloadsPath = useAppSettingStore((state) => state.setDownloadsPath)
+	const downloadsUri = useAppSettingStore((state) => state.downloadsUri)
+	const setDownloadsUri = useAppSettingStore((state) => state.setDownloadsUri)
+	const downloadsUriRef = useRef(downloadsUri)
 	const [transferMetadata, setTransferMetadata] =
 		useState<TransferMetadata | null>(null)
 	const [transferProgress, setTransferProgress] =
@@ -131,6 +137,9 @@ export function useReceiver(): UseReceiverReturn {
 	const transferStartTimeRef = useRef<number | null>(null)
 	const savePathRef = useRef<string>('')
 	const folderOpenTriggeredRef = useRef(false)
+	// SAF tree URI that can be opened after a successful Android export.
+	// Cleared when receive falls back to the app-private staging folder.
+	const androidOpenUriRef = useRef('')
 	const speedAveragerRef = useRef<SpeedAverager>(new SpeedAverager(10))
 	const previewRequestSeqRef = useRef(0)
 	const previewMetadataRef = useRef<TicketPreviewMetadata | null>(null)
@@ -200,6 +209,10 @@ export function useReceiver(): UseReceiverReturn {
 	useEffect(() => {
 		savePathRef.current = savePath
 	}, [savePath])
+
+	useEffect(() => {
+		downloadsUriRef.current = downloadsUri
+	}, [downloadsUri])
 
 	useEffect(() => {
 		const seq = ++previewRequestSeqRef.current
@@ -372,6 +385,40 @@ export function useReceiver(): UseReceiverReturn {
 				}
 			})
 
+			await registerListener('receive-download-fallback', (event: any) => {
+				if (!IS_ANDROID) return
+				try {
+					const payload = event.payload as
+						| string
+						| { path?: string; reason?: string }
+					const fallbackPath =
+						typeof payload === 'string'
+							? payload.trim()
+							: String(payload?.path ?? '').trim()
+					const reason =
+						typeof payload === 'object' ? payload?.reason : undefined
+					if (!fallbackPath) return
+					androidOpenUriRef.current = ''
+					setSavePath(fallbackPath)
+					setTransferMetadata((prev) =>
+						prev ? { ...prev, downloadPath: fallbackPath } : prev
+					)
+					showAlert(
+						t('common:receiver.downloadFallbackTitle'),
+						reason === 'saf'
+							? t('common:receiver.downloadFallbackSafDescription', {
+									path: fallbackPath,
+								})
+							: t('common:receiver.downloadFallbackDescription', {
+									path: fallbackPath,
+								}),
+						'info'
+					)
+				} catch (error) {
+					console.error('Failed to handle download fallback notice:', error)
+				}
+			})
+
 			await registerListener('receive-conflicts', (event: any) => {
 				if (transferSeqRef.current === 0) return
 				try {
@@ -494,7 +541,7 @@ export function useReceiver(): UseReceiverReturn {
 		setTicket(newTicket)
 	}
 
-	const handleBrowseFolder = async () => {
+	const handleBrowseFolder = useCallback(async () => {
 		if (isReceiving) return
 		try {
 			let selected: string | null
@@ -503,6 +550,7 @@ export function useReceiver(): UseReceiverReturn {
 				if (!response) return
 				selected = response.path
 				setDownloadsPath(selected)
+				setDownloadsUri(response.uri)
 			} else if (IS_WEB) {
 				if (!supportsWebSaveLocationPicker()) {
 					return
@@ -529,57 +577,130 @@ export function useReceiver(): UseReceiverReturn {
 				'error'
 			)
 		}
-	}
+	}, [isReceiving, setDownloadsPath, setDownloadsUri, showAlert, t])
+
+	const receiveWithTicket = useCallback(
+		async (ticketValue: string) => {
+			if (!ticketValue.trim()) return
+
+			try {
+				if (transferItemCountRef.current == null) {
+					transferItemCountRef.current =
+						previewMetadataRef.current?.itemCount ?? previewMetadata?.itemCount
+				}
+				previewRequestSeqRef.current += 1
+				transferSeqRef.current += 1
+				setIsReceiving(true)
+				setIsTransporting(false)
+				setIsCompleted(false)
+				setTransferMetadata(null)
+				setTransferProgress(null)
+				setTransferStartTime(null)
+				setIsPreviewLoading(false)
+				pendingConflictNoticeRef.current = null
+				folderOpenTriggeredRef.current = false
+				androidOpenUriRef.current = IS_ANDROID
+					? downloadsUriRef.current.trim()
+					: ''
+
+				let outputPath = savePathRef.current.trim()
+				if (!outputPath && !IS_WEB && !IS_ANDROID) {
+					outputPath = await downloadDir()
+					setSavePath(outputPath)
+					savePathRef.current = outputPath
+				}
+
+				await invoke<string>('receive_file', {
+					ticket: ticketValue.trim(),
+					outputPath,
+					treeUri: IS_ANDROID ? downloadsUriRef.current.trim() || null : null,
+					relay: getRelayConfigArg(),
+				})
+			} catch (error) {
+				if (
+					String(error) === 'cancelled' ||
+					String(error).endsWith(': cancelled')
+				)
+					return
+
+				console.error('Failed to receive file:', error)
+				showAlert(
+					t('common:errors.receiveFailed'),
+					isWebPreviewError(error)
+						? getWebPreviewErrorMessage(
+								error,
+								t('common:webPreview.transferUnavailable')
+							)
+						: String(error),
+					'error'
+				)
+				setIsReceiving(false)
+				setIsTransporting(false)
+				setIsCompleted(false)
+			}
+		},
+		[previewMetadata, showAlert, t]
+	)
 
 	const handleReceive = async () => {
-		if (!ticket.trim()) return
-
-		try {
-			transferItemCountRef.current = previewMetadata?.itemCount
-			previewRequestSeqRef.current += 1
-			transferSeqRef.current += 1
-			setIsReceiving(true)
-			setIsTransporting(false)
-			setIsCompleted(false)
-			setTransferMetadata(null)
-			setTransferProgress(null)
-			setTransferStartTime(null)
-			setPreviewMetadata(null)
-			setIsPreviewLoading(false)
-			pendingConflictNoticeRef.current = null
-			folderOpenTriggeredRef.current = false
-
-			await invoke<string>('receive_file', {
-				ticket: ticket.trim(),
-				outputPath: savePath,
-				relay: getRelayConfigArg(),
-			})
-		} catch (error) {
-			// "cancelled" is the exact string the backend returns for user-initiated stops.
-			// Check for the exact Tauri-wrapped form so we don't accidentally swallow
-			// unrelated errors whose messages happen to contain the word.
-			if (
-				String(error) === 'cancelled' ||
-				String(error).endsWith(': cancelled')
-			)
-				return
-
-			console.error('Failed to receive file:', error)
-			showAlert(
-				t('common:errors.receiveFailed'),
-				isWebPreviewError(error)
-					? getWebPreviewErrorMessage(
-							error,
-							t('common:webPreview.transferUnavailable')
-						)
-					: String(error),
-				'error'
-			)
-			setIsReceiving(false)
-			setIsTransporting(false)
-			setIsCompleted(false)
-		}
+		await receiveWithTicket(ticket)
 	}
+
+	const acceptPairedInvite = useCallback(
+		async (invite: PairedInvitePayload) => {
+			if (isReceiving || isTransporting) {
+				showAlert(
+					t('common:receiver.receiveBusyTitle'),
+					t('common:receiver.receiveBusyDescription'),
+					'info'
+				)
+				return
+			}
+
+			useTransferTabStore.getState().requestTab('receive')
+
+			const preview: TicketPreviewMetadata = {
+				fileName: invite.sender_name,
+				itemCount: invite.file_count,
+				size: invite.total_size,
+				mimeType:
+					invite.file_count > 1 ? 'application/x-iroh-collection' : undefined,
+			}
+			setTicket(invite.blob_ticket)
+			setPreviewMetadata(preview)
+			previewMetadataRef.current = preview
+			transferItemCountRef.current = invite.file_count
+			previewRequestSeqRef.current += 1
+			setIsPreviewLoading(false)
+
+			await receiveWithTicket(invite.blob_ticket)
+		},
+		[isReceiving, isTransporting, receiveWithTicket, showAlert, t]
+	)
+
+	const registerAcceptPairedInvite = useReceiverActionsStore(
+		(state) => state.registerAcceptPairedInvite
+	)
+	const registerBrowseSaveFolder = useReceiverActionsStore(
+		(state) => state.registerBrowseSaveFolder
+	)
+	const setReceiverSavePath = useReceiverActionsStore(
+		(state) => state.setReceiverSavePath
+	)
+
+	useEffect(() => {
+		registerAcceptPairedInvite(acceptPairedInvite)
+		return () => registerAcceptPairedInvite(null)
+	}, [acceptPairedInvite, registerAcceptPairedInvite])
+
+	useEffect(() => {
+		registerBrowseSaveFolder(handleBrowseFolder)
+		return () => registerBrowseSaveFolder(null)
+	}, [handleBrowseFolder, registerBrowseSaveFolder])
+
+	useEffect(() => {
+		setReceiverSavePath(savePath)
+	}, [savePath, setReceiverSavePath])
 
 	const resetForNewTransfer = async () => {
 		// Zero the seq first so in-flight events from the cancelled transfer are ignored.
@@ -601,21 +722,44 @@ export function useReceiver(): UseReceiverReturn {
 		setIsPreviewLoading(false)
 		pendingConflictNoticeRef.current = null
 		folderOpenTriggeredRef.current = false
+		androidOpenUriRef.current = ''
 		transferItemCountRef.current = undefined
 	}
 
 	const handleOpenFolder = async () => {
-		if (IS_WEB || !savePath || folderOpenTriggeredRef.current) {
+		if (IS_WEB || folderOpenTriggeredRef.current) {
 			return
 		}
 
 		try {
 			folderOpenTriggeredRef.current = true
+
+			if (IS_ANDROID) {
+				const treeUri = androidOpenUriRef.current.trim()
+				if (!treeUri) {
+					folderOpenTriggeredRef.current = false
+					showAlert(
+						t('common:errors.openFolderFailed'),
+						t('common:errors.openFolderUnavailableDesc'),
+						'error'
+					)
+					return
+				}
+				await openDownloadFolder(treeUri)
+				return
+			}
+
+			if (!savePath) {
+				folderOpenTriggeredRef.current = false
+				return
+			}
+
 			const targetPath = await resolveRevealPath(savePath, fileNamesRef.current)
 			if (targetPath) {
 				await revealItemInDir(targetPath)
 			}
 		} catch (error) {
+			folderOpenTriggeredRef.current = false
 			console.error('Failed to open download folder:', error)
 			showAlert(
 				t('common:errors.openFolderFailed'),

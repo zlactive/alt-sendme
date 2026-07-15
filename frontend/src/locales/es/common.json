@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Enviar",
-	"comingSoon": "Próximamente",
+	"webPreview": {
+		"banner": "Modo de vista previa - las transferencias de archivos requieren la app de escritorio.",
+		"transferUnavailable": "La transferencia de archivos no está disponible en la vista previa web. Descarga la app de escritorio para enviar y recibir archivos."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Comunidad",
+		"compare": "Comparar con otras herramientas P2P",
+		"download": "Ver opciones de descarga",
+		"github": "GitHub",
+		"linksLabel": "App de escritorio y enlaces del proyecto",
+		"notice": "La versión web no admite conexiones directas - el tráfico se enruta a través de relays públicos cifrados y la velocidad está limitada. Tus archivos siguen cifrados de todos modos. Usa la app de escritorio/CLI o relays personalizados para una mejor experiencia.",
+		"platforms": "AltSendme está disponible como app de escritorio, Android, CLI y web.",
+		"website": "Sitio web"
+	},
 	"receive": "Recibir",
 	"ok": "OK",
 	"undo": "Deshacer",
@@ -60,6 +74,50 @@
 				"label": "Compartición privada",
 				"description": "Solo la persona con la que compartes el ticket puede descargar el archivo."
 			}
+		},
+		"addFile": "Añadir archivo",
+		"addFolder": "Añadir carpeta",
+		"clearSelection": "Borrar selección",
+		"exitSharing": "Salir del uso compartido",
+		"pairDevice": "Emparejar dispositivo",
+		"pairedDevices": {
+			"connectedTitle": "Dispositivos conectados",
+			"deviceOffline": "El dispositivo está sin conexión - usa el ticket manual.",
+			"deviceUnreachable": "Este dispositivo sigue emparejado. Inténtalo de nuevo cuando esté en línea o usa el ticket manual. Ambos dispositivos pueden necesitar ajustes de relay compatibles.",
+			"failed": "Reintentar",
+			"inviteFailed": "No se pudo contactar con el dispositivo",
+			"inviteSent": "Invitación enviada",
+			"inviteSentDesc": "Puede aceptarla para iniciar la descarga.",
+			"inviteSentTo": "Invitación enviada a {{name}}",
+			"pair": "Emparejar",
+			"send": "Enviar",
+			"sending": "Enviando…",
+			"sent": "Enviado",
+			"statusOffline": "Sin conexión",
+			"statusOnline": "En línea",
+			"statusRePairRequired": "Reemparejamiento necesario",
+			"statusUnpaired": "Desemparejado",
+			"unknownPeer": "Dispositivo desconocido",
+			"yourDevicesTitle": "Enviar a dispositivo emparejado"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Empareja dispositivos en Ajustes y vuelve aquí para enviar sin un enlace.",
+				"emptyTitle": "Aún no hay dispositivos emparejados",
+				"hint": "Elige un dispositivo - la transferencia comienza cuando lo acepte.",
+				"manageInSettings": "Emparejar dispositivos en Ajustes",
+				"nodeUnavailable": "El envío a dispositivos no está disponible ahora. Aún puedes usar Transferencia única en la otra pestaña.",
+				"searchNoResults": "Ningún dispositivo emparejado coincide con tu búsqueda.",
+				"searchPlaceholder": "Buscar dispositivos emparejados",
+				"title": "Enviar a un dispositivo emparejado"
+			},
+			"devicesButton": "Enviar a un dispositivo emparejado",
+			"link": {
+				"hint": "Cualquiera con este enlace puede recibir tus archivos.",
+				"transferInProgress": "Transferencia en curso - abre Transferencia única para ver los detalles.",
+				"waiting": "Esperando a que alguien use tu enlace"
+			},
+			"or": "o"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Descarga completada con conflictos de nombres resueltos",
 		"downloadedFile": "Archivo descargado",
 		"stopReceiving": "Detener recepción",
-		"download": "Descargar"
+		"download": "Descargar",
+		"acceptInvite": "Aceptar",
+		"browserDownloadsFallback": "Carpeta de descargas del navegador",
+		"browserDownloadsHint": "Este navegador no permite elegir una carpeta de guardado. Los archivos se descargarán en tu ubicación de descargas predeterminada.",
+		"declineInvite": "Rechazar",
+		"openReceiveTabHint": "Abre la pestaña Recibir una vez y vuelve a intentarlo.",
+		"pairedInvite": {
+			"changeFolder": "Cambiar carpeta",
+			"saveTo": "Guardar en"
+		},
+		"receiveBusyDescription": "Espera a que termine la descarga actual antes de aceptar otro archivo.",
+		"receiveBusyTitle": "Ya hay una descarga en curso",
+		"receiveFromPairedDescription": "{{sender}} quiere enviarte {{count}} archivo(s) ({{size}}). Acepta para iniciar la descarga.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} quiere enviarte {{count}} archivo(s). Acepta para iniciar la descarga.",
+		"receiveFromPairedTitle": "Archivo entrante de un dispositivo emparejado",
+		"saveLocation": "Ubicación de guardado:"
 	},
 	"transfer": {
 		"progress": "Progreso de la transferencia",
@@ -112,8 +185,8 @@
 		"duration": "Duración",
 		"avgSpeed": "Velocidad media",
 		"multipleFiles": "{{count}} archivos",
-		"donatePrompt": "Mejora AltSendme ",
-		"donateLink": "donando"
+		"donatePrompt": "Si te gustó la experiencia, por favor considera {{link}}. ¡Gracias!",
+		"donateLink": "donar"
 	},
 	"errors": {
 		"sharingFailed": "Error al compartir",
@@ -138,7 +211,8 @@
 			"general": "General",
 			"relay": "Relay",
 			"network": "Red",
-			"notification": "Notificaciones"
+			"notification": "Notificaciones",
+			"devices": "Dispositivos"
 		},
 		"theme": {
 			"description": "Selecciona tu tema preferido",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Has elegido desactivar los relays. Las transferencias de archivos pueden fallar si intentas compartir archivos con alguien fuera de tu red local. Los relays ayudan a los dispositivos a encontrarse y conectarse en condiciones de red difíciles, y tus transferencias siempre permanecen cifradas de extremo a extremo.",
 				"confirmCustomTitle": "¿Usar relays personalizados?",
 				"confirmCustomDescription": "Has elegido usar tus propios relays autoalojados. Si tus relays personalizados no están disponibles, las transferencias volverán automáticamente a los relays públicos y se te notificará. Los relays solo ayudan a tus dispositivos a conectarse en condiciones de red difíciles, y tus transferencias siempre permanecen cifradas de extremo a extremo.",
-				"confirmContinue": "Continuar"
+				"confirmContinue": "Continuar",
+				"confirmCustomDescriptionWithPolicy": "Has elegido usar relays personalizados autoalojados. Si no están disponibles, AltSendme seguirá la política de respaldo seleccionada en los ajustes de Relay. Los relays solo ayudan a tus dispositivos a conectarse en condiciones de red difíciles, y tus transferencias siempre permanecen cifradas de extremo a extremo.",
+				"fallbackDescription": "Elige qué ocurre cuando tu relay personalizado no está disponible.",
+				"fallbackLabel": "Política de respaldo",
+				"fallbackPublic": "Usar relays públicos si es necesario",
+				"fallbackPublicDesc": "Recurre a relays públicos de iroh cuando los relays personalizados no estén disponibles.",
+				"fallbackStrict": "Permanecer en relays personalizados",
+				"fallbackStrictDesc": "Fallar la transferencia en lugar de cambiar a relays públicos. Ideal para configuraciones privadas."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Cancelar emparejamiento",
+			"codePlaceholder": "Pegar código de emparejamiento",
+			"copied": "Código de emparejamiento copiado",
+			"description": "Empareja tus dispositivos una vez y envía archivos sin copiar tickets.",
+			"desktopOnly": "El emparejamiento de dispositivos está disponible en las apps de escritorio y Android.",
+			"deviceName": "Nombre del dispositivo",
+			"deviceNamePlaceholder": "p. ej., MacBook de Tony",
+			"devicePaired": "Dispositivo emparejado",
+			"deviceRemoved": "Dispositivo eliminado",
+			"deviceUnpairedToast": "{{name}} desemparejó este dispositivo",
+			"enterCode": "Introducir código de emparejamiento",
+			"hostExpiresIn": "Caduca en {{seconds}} s.",
+			"hostHint": "Escanea o copia este código en el dispositivo que quieres emparejar. Puedes cerrar este diálogo - el emparejamiento permanece abierto hasta que caduque.",
+			"hostStillOpen": "Esperando a que se una un dispositivo - emparejamiento abierto durante {{seconds}} s.",
+			"joinHint": "Pega el código de emparejamiento de tu otro dispositivo.",
+			"nameSaveFailed": "No se pudo guardar el nombre del dispositivo",
+			"nameSaved": "Nombre del dispositivo guardado",
+			"noPairedDevices": "Aún no hay dispositivos emparejados",
+			"noPairedDevicesHint": "Empareja otro teléfono u ordenador para enviar archivos sin compartir tickets cada vez.",
+			"nodeUnavailableHint": "Los tickets manuales y el uso compartido de archivos siguen funcionando con normalidad.",
+			"nodeUnavailableTitle": "Emparejamiento de dispositivos no disponible",
+			"pairDevice": "Emparejar",
+			"pairFailed": "Error al emparejar",
+			"pairNewDevice": "Emparejar nuevo dispositivo",
+			"pairing": "Emparejando…",
+			"pairingCode": "Código de emparejamiento",
+			"relayChangePairedHint": "Los dispositivos emparejados siguen en la lista. Es posible que el envío emparejado no funcione hasta que ambos dispositivos puedan conectarse con la nueva configuración de red.",
+			"removeDevice": "Eliminar dispositivo",
+			"removeFailed": "No se pudo eliminar el dispositivo",
+			"rename": "Renombrar",
+			"renameDevice": "Renombrar dispositivo emparejado",
+			"renameDeviceHint": "Esto solo cambia el nombre en este dispositivo - no en el otro.",
+			"renameThisDevice": "Renombrar este dispositivo",
+			"renameThisDeviceHint": "Elige un nombre que te ayude a reconocer este ordenador al emparejar.",
+			"saveName": "Guardar nombre",
+			"searchNoResults": "Ningún dispositivo emparejado coincide con tu búsqueda.",
+			"searchPlaceholder": "Buscar dispositivos emparejados",
+			"showQrCode": "Mostrar código de emparejamiento",
+			"statusOffline": "Sin conexión",
+			"statusOnline": "En línea",
+			"statusRePairRequired": "Reemparejamiento necesario",
+			"statusUnpaired": "Desemparejado",
+			"thisDevice": "Este dispositivo",
+			"thisDeviceHint": "Nombre mostrado a los dispositivos con los que te emparejas. El sistema operativo y el tipo de dispositivo se detectan automáticamente.",
+			"title": "Dispositivos emparejados",
+			"unpairedHint": "Este dispositivo eliminó el emparejamiento. Quítalo de tu lista."
 		}
 	},
 	"updater": {
@@ -253,8 +382,8 @@
 			"unavailableHeading": "Relay no disponible",
 			"fellBackToPublic": "Relay personalizado inaccesible, usando relay público en su lugar.",
 			"fellBackToastTitle": "Usando relay público",
-			"fellBackToastSend": "Tu relay personalizado no estaba accesible — esta transferencia usa un relay público en su lugar.",
-			"fellBackToastReceive": "Tu relay personalizado no estaba accesible — esta descarga usa un relay público en su lugar.",
+			"fellBackToastSend": "Tu relay personalizado no estaba accesible - esta transferencia usa un relay público en su lugar.",
+			"fellBackToastReceive": "Tu relay personalizado no estaba accesible - esta descarga usa un relay público en su lugar.",
 			"dialogDescription": "Muestra qué servidor relay usa actualmente esta app para las conexiones.",
 			"connectedRelay": "Relay conectado",
 			"checking": "Comprobando conexión…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "Las transferencias siempre están cifradas de extremo a extremo, por lo que los relays nunca ven tus archivos.",
 			"disabledNote": "Los relays están desactivados. Solo conexiones directas, por lo que las transferencias pueden fallar con firewalls o NAT estrictos."
 		}
-	}
+	},
+	"comingSoon": "Próximamente"
 }

@@ -50,9 +50,33 @@ impl<R: Runtime> NativeUtils<R> {
 }
 
 impl<R: Runtime> NativeUtils<R> {
+    pub fn consume_share_intent(&self, channel: Channel) -> crate::Result<bool> {
+        self.0
+            .run_mobile_plugin("consume_share_intent", SelectItemArgs { channel })
+            .map_err(Into::into)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
     pub fn cancel_job(&self, job: AsyncJob) -> crate::Result<()> {
         self.0
             .run_mobile_plugin("cancel_job", job)
+            .map_err(Into::into)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn export_to_tree(&self, args: ExportToTreeArgs) -> crate::Result<ExportToTreeResult> {
+        self.0
+            .run_mobile_plugin("export_to_tree", args)
+            .map_err(Into::into)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn open_download_folder(&self, args: OpenDownloadFolderArgs) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("open_download_folder", args)
             .map_err(Into::into)
     }
 }

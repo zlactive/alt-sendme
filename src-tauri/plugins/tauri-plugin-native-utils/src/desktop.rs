@@ -32,7 +32,25 @@ impl<R: Runtime> NativeUtils<R> {
 }
 
 impl<R: Runtime> NativeUtils<R> {
+    pub fn consume_share_intent(&self, _: Channel) -> crate::Result<bool> {
+        Ok(false)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
     pub fn cancel_job(&self, _: AsyncJob) -> crate::Result<()> {
+        Err(crate::Error::UnsupportedPlafrormError)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn export_to_tree(&self, _: ExportToTreeArgs) -> crate::Result<ExportToTreeResult> {
+        Err(crate::Error::UnsupportedPlafrormError)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn open_download_folder(&self, _: OpenDownloadFolderArgs) -> crate::Result<()> {
         Err(crate::Error::UnsupportedPlafrormError)
     }
 }

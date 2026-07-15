@@ -1,6 +1,6 @@
 import { Info } from 'lucide-react'
 import { useEffect, useState } from 'react'
-import { useReceiver } from '../../hooks/useReceiver'
+import { useReceiverContext } from './ReceiverProvider'
 import { useTranslation } from '../../i18n/react-i18next-compat'
 import { PulseAnimation } from '../common/PulseAnimation'
 import { TransferSuccessScreen } from '../common/TransferSuccessScreen'
@@ -15,6 +15,7 @@ import {
 } from '../ui/alert-dialog'
 import { ReceivingActiveCard } from './ReceivingActiveCard'
 import { TicketInput } from './TicketInput'
+import { ReceiveSaveLocationPicker } from './ReceiveSaveLocationPicker'
 import { Button } from '../ui/button'
 
 interface ReceiverProps {
@@ -43,7 +44,7 @@ export function Receiver({ onTransferStateChange }: ReceiverProps) {
 		handleOpenFolder,
 		closeAlert,
 		resetForNewTransfer,
-	} = useReceiver()
+	} = useReceiverContext()
 
 	useEffect(() => {
 		onTransferStateChange(isReceiving)
@@ -74,14 +75,17 @@ export function Receiver({ onTransferStateChange }: ReceiverProps) {
 					</div>
 
 					<div className="space-y-4 flex-1 flex flex-col">
+						<ReceiveSaveLocationPicker
+							savePath={savePath}
+							disabled={isReceiving}
+							onBrowseFolder={handleBrowseFolder}
+						/>
 						<TicketInput
 							ticket={ticket}
 							isReceiving={isReceiving}
-							savePath={savePath}
 							previewMetadata={previewMetadata}
 							isPreviewLoading={isPreviewLoading}
 							onTicketChange={handleTicketChange}
-							onBrowseFolder={handleBrowseFolder}
 							onReceive={handleReceive}
 						/>
 					</div>

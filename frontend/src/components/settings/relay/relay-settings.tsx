@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type ChangeEvent } from 'react'
 import { invoke } from '@/lib/platform-api'
 import { AlertCircle, Check, Loader2, Minus, Plus } from 'lucide-react'
-import ReactCountryFlag from 'react-country-flag'
+import { CountryFlag } from '@/components/CountryFlag'
 import { useTranslation } from '../../../i18n'
 import { IS_WEB } from '../../../lib/platform'
 import { useAppSettingStore } from '../../../store/app-setting'
@@ -345,9 +345,8 @@ export function RelaySettings() {
 										<div className="flex items-center gap-2">
 											<div className="relative flex-1">
 												{region && (
-													<ReactCountryFlag
+													<CountryFlag
 														countryCode={region.countryCode}
-														svg
 														title={region.regionCode.toUpperCase()}
 														aria-label={region.regionCode.toUpperCase()}
 														className="pointer-events-none absolute top-1/2 left-2 z-10 -translate-y-1/2 rounded-[0.2em]"

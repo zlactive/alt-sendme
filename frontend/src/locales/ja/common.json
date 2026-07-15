@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "送信",
-	"comingSoon": "近日公開",
+	"webPreview": {
+		"banner": "プレビューモード - ファイル転送にはデスクトップアプリが必要です。",
+		"transferUnavailable": "Web プレビューではファイル転送は利用できません。デスクトップアプリをダウンロードしてファイルの送受信を行ってください。"
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "コミュニティ",
+		"compare": "他の P2P ツールと比較",
+		"download": "ダウンロードオプションを見る",
+		"github": "GitHub",
+		"linksLabel": "デスクトップアプリとプロジェクトリンク",
+		"notice": "Web 版は直接接続に対応していません - トラフィックは暗号化されたパブリックリレーを経由し、速度は制限されます。いずれにしてもファイルは暗号化されたままです。より快適にご利用いただくには、デスクトップ/CLI アプリまたはカスタムリレーをご利用ください。",
+		"platforms": "AltSendme はデスクトップ、Android、CLI、Web で利用できます。",
+		"website": "ウェブサイト"
+	},
 	"receive": "受信",
 	"ok": "OK",
 	"undo": "元に戻す",
@@ -60,6 +74,50 @@
 				"label": "プライベート共有",
 				"description": "チケットを共有した相手のみがファイルをダウンロードできます。"
 			}
+		},
+		"addFile": "ファイルを追加",
+		"addFolder": "フォルダを追加",
+		"clearSelection": "選択をクリア",
+		"exitSharing": "共有を終了",
+		"pairDevice": "デバイスをペアリング",
+		"pairedDevices": {
+			"connectedTitle": "接続中のデバイス",
+			"deviceOffline": "デバイスがオフラインです - 手動チケットをご利用ください。",
+			"deviceUnreachable": "このデバイスはまだペアリングされています。オンラインになったら再試行するか、手動チケットをご利用ください。両方のデバイスで互換性のあるリレー設定が必要な場合があります。",
+			"failed": "再試行",
+			"inviteFailed": "デバイスに接続できませんでした",
+			"inviteSent": "招待を送信しました",
+			"inviteSentDesc": "相手が承認するとダウンロードが始まります。",
+			"inviteSentTo": "{{name}} に招待を送信しました",
+			"pair": "ペアリング",
+			"send": "送信",
+			"sending": "送信中…",
+			"sent": "送信済み",
+			"statusOffline": "オフライン",
+			"statusOnline": "オンライン",
+			"statusRePairRequired": "再ペアリングが必要",
+			"statusUnpaired": "ペアリング解除済み",
+			"unknownPeer": "不明なデバイス",
+			"yourDevicesTitle": "ペアリング済みデバイスに送信"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "設定でデバイスをペアリングしてから、ここに戻ってリンクなしで送信できます。",
+				"emptyTitle": "ペアリング済みデバイスがありません",
+				"hint": "デバイスを選択してください - 相手が承認すると転送が始まります。",
+				"manageInSettings": "設定でデバイスをペアリング",
+				"nodeUnavailable": "現在デバイス送信は利用できません。別のタブの「ワンタイム転送」は引き続きご利用いただけます。",
+				"searchNoResults": "検索条件に一致するペアリング済みデバイスがありません。",
+				"searchPlaceholder": "ペアリング済みデバイスを検索",
+				"title": "ペアリング済みデバイスに送信"
+			},
+			"devicesButton": "ペアリング済みデバイスに送信",
+			"link": {
+				"hint": "このリンクを知っている人なら誰でもファイルを受け取れます。",
+				"transferInProgress": "転送中 - 詳細は「ワンタイム転送」タブを開いてください。",
+				"waiting": "リンクの使用を待っています"
+			},
+			"or": "または"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "ダウンロード完了（名前の競合を解決済み）",
 		"downloadedFile": "ダウンロードしたファイル",
 		"stopReceiving": "受信を停止",
-		"download": "ダウンロード"
+		"download": "ダウンロード",
+		"acceptInvite": "承認",
+		"browserDownloadsFallback": "ブラウザのダウンロードフォルダ",
+		"browserDownloadsHint": "このブラウザでは保存先フォルダを選択できません。ファイルは既定のダウンロード先に保存されます。",
+		"declineInvite": "拒否",
+		"openReceiveTabHint": "一度「受信」タブを開いてから、もう一度お試しください。",
+		"pairedInvite": {
+			"changeFolder": "フォルダを変更",
+			"saveTo": "保存先"
+		},
+		"receiveBusyDescription": "別のファイルを受け入れる前に、現在のダウンロードが完了するまでお待ちください。",
+		"receiveBusyTitle": "ダウンロードが進行中です",
+		"receiveFromPairedDescription": "{{sender}} から {{count}} 件のファイル（{{size}}）が届きます。承認するとダウンロードが始まります。",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} から {{count}} 件のファイルが届きます。承認するとダウンロードが始まります。",
+		"receiveFromPairedTitle": "ペアリング済みデバイスからファイルが届きました",
+		"saveLocation": "保存先："
 	},
 	"transfer": {
 		"progress": "転送の進行状況",
@@ -112,8 +185,8 @@
 		"duration": "所要時間",
 		"avgSpeed": "平均速度",
 		"multipleFiles": "{{count}} 件のファイル",
-		"donatePrompt": "AltSendmeをより良くするために",
-		"donateLink": "寄付する"
+		"donatePrompt": "この体験が気に入ったら、ぜひ{{link}}をご検討ください。ありがとうございます！",
+		"donateLink": "寄付"
 	},
 	"errors": {
 		"sharingFailed": "共有に失敗しました",
@@ -138,7 +211,8 @@
 			"general": "一般",
 			"relay": "リレー",
 			"network": "ネットワーク",
-			"notification": "通知"
+			"notification": "通知",
+			"devices": "デバイス"
 		},
 		"theme": {
 			"description": "希望のテーマを選択してください",
@@ -223,14 +297,69 @@
 				"confirmDisableDescription": "リレーを無効にすることを選択しました。ローカルネットワーク外の相手とファイルを共有しようとすると、ファイル転送が失敗する場合があります。リレーは、困難なネットワーク状況でデバイスが互いを見つけて接続するのを助け、転送は常にエンドツーエンドで暗号化されたままです。",
 				"confirmCustomTitle": "カスタムリレーを使用しますか?",
 				"confirmCustomDescription": "自分でホストするカスタムリレーを使用することを選択しました。カスタムリレーに接続できない場合、転送は自動的に公開リレーにフォールバックし、通知されます。リレーは困難なネットワーク状況でデバイスが接続するのを助けるだけで、転送は常にエンドツーエンドで暗号化されたままです。",
-				"confirmContinue": "続行"
+				"confirmContinue": "続行",
+				"confirmCustomDescriptionWithPolicy": "カスタムのセルフホスト型リレーを使用する設定です。リレーに接続できない場合、AltSendme はリレー設定で選択したフォールバックポリシーに従います。リレーは困難なネットワーク環境でデバイス同士の接続を支援するだけで、転送は常にエンドツーエンドで暗号化されます。",
+				"fallbackDescription": "カスタムリレーに接続できない場合の動作を選択してください。",
+				"fallbackLabel": "フォールバックポリシー",
+				"fallbackPublic": "必要に応じてパブリックリレーを使用",
+				"fallbackPublicDesc": "カスタムリレーに接続できない場合、パブリックの iroh リレーにフォールバックします。",
+				"fallbackStrict": "カスタムリレーのみを使用",
+				"fallbackStrictDesc": "パブリックリレーに切り替えず、転送を失敗させます。プライベート環境に最適です。"
 			}
+		},
+		"devices": {
+			"cancelPairing": "ペアリングをキャンセル",
+			"codePlaceholder": "ペアリングコードを貼り付け",
+			"copied": "ペアリングコードをコピーしました",
+			"description": "デバイスを一度ペアリングすれば、チケットをコピーせずにファイルを送信できます。",
+			"desktopOnly": "デバイスのペアリングはデスクトップおよび Android アプリで利用できます。",
+			"deviceName": "デバイス名",
+			"deviceNamePlaceholder": "例：Tony の MacBook",
+			"devicePaired": "デバイスをペアリングしました",
+			"deviceRemoved": "デバイスを削除しました",
+			"deviceUnpairedToast": "{{name}} がこのデバイスのペアリングを解除しました",
+			"enterCode": "ペアリングコードを入力",
+			"hostExpiresIn": "あと {{seconds}} 秒で期限切れです。",
+			"hostHint": "ペアリングしたいデバイスでこのコードをスキャンまたはコピーしてください。このダイアログを閉じても、期限切れまでペアリングは有効です。",
+			"hostStillOpen": "デバイスの参加を待っています - ペアリングはあと {{seconds}} 秒間有効です。",
+			"joinHint": "他のデバイスからペアリングコードを貼り付けてください。",
+			"nameSaveFailed": "デバイス名を保存できませんでした",
+			"nameSaved": "デバイス名を保存しました",
+			"noPairedDevices": "ペアリング済みデバイスがありません",
+			"noPairedDevicesHint": "別のスマートフォンやパソコンをペアリングすると、毎回チケットを共有せずにファイルを送信できます。",
+			"nodeUnavailableHint": "手動チケットとファイル共有は通常どおりご利用いただけます。",
+			"nodeUnavailableTitle": "デバイスのペアリングは利用できません",
+			"pairDevice": "ペアリング",
+			"pairFailed": "ペアリングに失敗しました",
+			"pairNewDevice": "新しいデバイスをペアリング",
+			"pairing": "ペアリング中…",
+			"pairingCode": "ペアリングコード",
+			"relayChangePairedHint": "ペアリング済みデバイスは一覧に残ります。新しいネットワーク設定で両方のデバイスが接続できるようになるまで、ペアリング送信は動作しない場合があります。",
+			"removeDevice": "デバイスを削除",
+			"removeFailed": "デバイスを削除できませんでした",
+			"rename": "名前を変更",
+			"renameDevice": "ペアリング済みデバイスの名前を変更",
+			"renameDeviceHint": "このデバイス上の表示名のみ変更されます - 相手側の名前は変更されません。",
+			"renameThisDevice": "このデバイスの名前を変更",
+			"renameThisDeviceHint": "ペアリング時にこのパソコンを識別しやすい名前を選んでください。",
+			"saveName": "名前を保存",
+			"searchNoResults": "検索条件に一致するペアリング済みデバイスがありません。",
+			"searchPlaceholder": "ペアリング済みデバイスを検索",
+			"showQrCode": "ペアリングコードを表示",
+			"statusOffline": "オフライン",
+			"statusOnline": "オンライン",
+			"statusRePairRequired": "再ペアリングが必要",
+			"statusUnpaired": "ペアリング解除済み",
+			"thisDevice": "このデバイス",
+			"thisDeviceHint": "ペアリング相手に表示される名前です。OS とデバイスの種類は自動的に検出されます。",
+			"title": "ペアリング済みデバイス",
+			"unpairedHint": "このデバイスがペアリングを解除しました。一覧から削除してください。"
 		}
 	},
 	"updater": {
 		"newUpdateTitle": "新しいアップデートがあります",
 		"newVersionAvailable": "バージョン {{version}} が利用できます。",
-		"newVersionAvailableInline": "新しいバージョンがあります — {{version}}",
+		"newVersionAvailableInline": "新しいバージョンがあります - {{version}}",
 		"updateNow": "今すぐ更新",
 		"later": "後で",
 		"checkForUpdates": "更新を確認",
@@ -253,8 +382,8 @@
 			"unavailableHeading": "リレー利用不可",
 			"fellBackToPublic": "カスタムリレーに到達できません。代わりに公開リレーを使用しています。",
 			"fellBackToastTitle": "公開リレーを使用中",
-			"fellBackToastSend": "カスタムリレーに到達できませんでした — この転送は公開リレーを使用しています。",
-			"fellBackToastReceive": "カスタムリレーに到達できませんでした — このダウンロードは公開リレーを使用しています。",
+			"fellBackToastSend": "カスタムリレーに到達できませんでした - この転送は公開リレーを使用しています。",
+			"fellBackToastReceive": "カスタムリレーに到達できませんでした - このダウンロードは公開リレーを使用しています。",
 			"dialogDescription": "このアプリが現在接続に使用しているリレーサーバーを表示します。",
 			"connectedRelay": "接続中のリレー",
 			"checking": "接続を確認中…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "転送は常にエンドツーエンドで暗号化されているため、リレーがファイルを見ることはありません。",
 			"disabledNote": "リレーは無効です。直接接続のみのため、厳格なファイアウォールや NAT では転送が失敗することがあります。"
 		}
-	}
+	},
+	"comingSoon": "近日公開"
 }

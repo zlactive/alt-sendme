@@ -3,7 +3,6 @@ import { StopCircleIcon } from 'lucide-react'
 import { DragDrop } from './DragDrop'
 import { ShareActionCard } from './ShareActionCard'
 import { SharingActiveCard } from './SharingActiveCard'
-import { PulseAnimation } from '../common/PulseAnimation'
 import { TransferSuccessScreen } from '../common/TransferSuccessScreen'
 import {
 	AlertDialog,
@@ -39,6 +38,11 @@ export function Sender({ onTransferStateChange }: SenderProps) {
 		transferProgress,
 		isBroadcastMode,
 		activeConnectionCount,
+		pairedDevices,
+		isNodeReady,
+		isNodeStatusPending,
+		pairedInviteStatus,
+		onInvitePairedDevice,
 		handleFileSelect,
 		handleFilesSelect,
 		clearSelectedPath,
@@ -113,37 +117,31 @@ export function Sender({ onTransferStateChange }: SenderProps) {
 			{(((viewState === 'SHARING' || viewState === 'TRANSPORTING') &&
 				!isBroadcastMode) ||
 				(viewState === 'SHARING' && isBroadcastMode)) && (
-				<>
-					<div className="text-center mt-18 sm:mt-0">
-						<PulseAnimation
-							isTransporting={isTransporting && !isBroadcastMode}
-							hasActiveConnections={
-								isBroadcastMode && activeConnectionCount > 0
-							}
-							className="mx-auto my-4 flex items-center justify-center"
-						/>
-					</div>
-					<div className="flex-1 flex flex-col">
-						<SharingActiveCard
-							isSharing={isSharing}
-							isLoading={isLoading}
-							isTransporting={isTransporting && !isBroadcastMode}
-							isCompleted={false}
-							selectedPaths={selectedPaths}
-							selectedPath={selectedPath}
-							pathType={pathType}
-							ticket={ticket}
-							copySuccess={copySuccess}
-							transferProgress={transferProgress}
-							isBroadcastMode={isBroadcastMode}
-							activeConnectionCount={activeConnectionCount}
-							onStartSharing={startSharing}
-							onStopSharing={stopSharing}
-							onCopyTicket={copyTicket}
-							onSetBroadcast={setIsBroadcastMode}
-						/>
-					</div>
-				</>
+				<div className="flex-1 flex flex-col">
+					<SharingActiveCard
+						isSharing={isSharing}
+						isLoading={isLoading}
+						isTransporting={isTransporting && !isBroadcastMode}
+						isCompleted={false}
+						selectedPaths={selectedPaths}
+						selectedPath={selectedPath}
+						pathType={pathType}
+						ticket={ticket}
+						copySuccess={copySuccess}
+						transferProgress={transferProgress}
+						isBroadcastMode={isBroadcastMode}
+						activeConnectionCount={activeConnectionCount}
+						pairedDevices={pairedDevices}
+						isNodeReady={isNodeReady}
+						isNodeStatusPending={isNodeStatusPending}
+						pairedInviteStatus={pairedInviteStatus}
+						onInvitePairedDevice={onInvitePairedDevice}
+						onStartSharing={startSharing}
+						onStopSharing={stopSharing}
+						onCopyTicket={copyTicket}
+						onSetBroadcast={setIsBroadcastMode}
+					/>
+				</div>
 			)}
 
 			{/* Fallback: Show debug info if no view matches */}

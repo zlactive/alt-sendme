@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Envoyer",
-	"comingSoon": "Bientôt disponible",
+	"webPreview": {
+		"banner": "Mode aperçu - les transferts de fichiers nécessitent l’application de bureau.",
+		"transferUnavailable": "Le transfert de fichiers n’est pas disponible dans l’aperçu web. Téléchargez l’application de bureau pour envoyer et recevoir des fichiers."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Communauté",
+		"compare": "Comparer avec d’autres outils P2P",
+		"download": "Voir les options de téléchargement",
+		"github": "GitHub",
+		"linksLabel": "Application de bureau et liens du projet",
+		"notice": "La version web ne prend pas en charge les connexions directes - le trafic passe par des relais publics chiffrés et la vitesse est limitée. Vos fichiers restent chiffrés dans tous les cas. Utilisez l’application de bureau/CLI ou des relais personnalisés pour une meilleure expérience.",
+		"platforms": "AltSendme est disponible en version bureau, Android, CLI et web.",
+		"website": "Site web"
+	},
 	"receive": "Recevoir",
 	"ok": "OK",
 	"undo": "Annuler l’action",
@@ -60,6 +74,50 @@
 				"label": "Partage privé",
 				"description": "Seule la personne avec qui vous partagez le ticket peut télécharger le fichier."
 			}
+		},
+		"addFile": "Ajouter un fichier",
+		"addFolder": "Ajouter un dossier",
+		"clearSelection": "Effacer la sélection",
+		"exitSharing": "Quitter le partage",
+		"pairDevice": "Associer un appareil",
+		"pairedDevices": {
+			"connectedTitle": "Appareils connectés",
+			"deviceOffline": "L’appareil est hors ligne - utilisez plutôt le ticket manuel.",
+			"deviceUnreachable": "Cet appareil reste associé. Réessayez lorsqu’il est en ligne, ou utilisez le ticket manuel. Les deux appareils peuvent nécessiter des paramètres relais compatibles.",
+			"failed": "Réessayer",
+			"inviteFailed": "Impossible de joindre l’appareil",
+			"inviteSent": "Invitation envoyée",
+			"inviteSentDesc": "La personne peut l’accepter pour lancer le téléchargement.",
+			"inviteSentTo": "Invitation envoyée à {{name}}",
+			"pair": "Associer",
+			"send": "Envoyer",
+			"sending": "Envoi…",
+			"sent": "Envoyé",
+			"statusOffline": "Hors ligne",
+			"statusOnline": "En ligne",
+			"statusRePairRequired": "Réassociation requise",
+			"statusUnpaired": "Dissocié",
+			"unknownPeer": "Appareil inconnu",
+			"yourDevicesTitle": "Envoyer à un appareil associé"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Associez des appareils dans les Réglages, puis revenez ici pour envoyer sans lien.",
+				"emptyTitle": "Aucun appareil associé pour l’instant",
+				"hint": "Choisissez un appareil - le transfert démarre lorsqu’il accepte.",
+				"manageInSettings": "Associer des appareils dans les Réglages",
+				"nodeUnavailable": "L’envoi vers un appareil n’est pas disponible pour le moment. Vous pouvez toujours utiliser Transfert unique dans l’autre onglet.",
+				"searchNoResults": "Aucun appareil associé ne correspond à votre recherche.",
+				"searchPlaceholder": "Rechercher des appareils associés",
+				"title": "Envoyer à un appareil associé"
+			},
+			"devicesButton": "Envoyer à un appareil associé",
+			"link": {
+				"hint": "Toute personne disposant de ce lien peut recevoir vos fichiers.",
+				"transferInProgress": "Transfert en cours - ouvrez Transfert unique pour voir les détails.",
+				"waiting": "En attente que quelqu’un utilise votre lien"
+			},
+			"or": "ou"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Téléchargement terminé, conflits de noms résolus",
 		"downloadedFile": "Fichier téléchargé",
 		"stopReceiving": "Arrêter la réception",
-		"download": "Télécharger"
+		"download": "Télécharger",
+		"acceptInvite": "Accepter",
+		"browserDownloadsFallback": "Dossier Téléchargements du navigateur",
+		"browserDownloadsHint": "Ce navigateur ne permet pas de choisir un dossier d’enregistrement. Les fichiers seront téléchargés dans votre emplacement de téléchargements par défaut.",
+		"declineInvite": "Refuser",
+		"openReceiveTabHint": "Ouvrez une fois l’onglet Réception, puis réessayez.",
+		"pairedInvite": {
+			"changeFolder": "Changer de dossier",
+			"saveTo": "Enregistrer dans"
+		},
+		"receiveBusyDescription": "Attendez la fin du téléchargement en cours avant d’accepter un autre fichier.",
+		"receiveBusyTitle": "Téléchargement déjà en cours",
+		"receiveFromPairedDescription": "{{sender}} souhaite vous envoyer {{count}} fichier(s) ({{size}}). Acceptez pour lancer le téléchargement.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} souhaite vous envoyer {{count}} fichier(s). Acceptez pour lancer le téléchargement.",
+		"receiveFromPairedTitle": "Fichier entrant depuis un appareil associé",
+		"saveLocation": "Emplacement d’enregistrement :"
 	},
 	"transfer": {
 		"progress": "Progression du transfert",
@@ -112,8 +185,8 @@
 		"duration": "Durée",
 		"avgSpeed": "Vitesse moyenne",
 		"multipleFiles": "{{count}} fichiers",
-		"donatePrompt": "Améliorez AltSendme en ",
-		"donateLink": "faisant un don"
+		"donatePrompt": "Si vous aimez l'expérience, pensez s'il vous plaît à {{link}}. Merci !",
+		"donateLink": "faire un don"
 	},
 	"errors": {
 		"sharingFailed": "Échec du partage",
@@ -138,7 +211,8 @@
 			"general": "Général",
 			"relay": "Relais",
 			"network": "Réseau",
-			"notification": "Notifications"
+			"notification": "Notifications",
+			"devices": "Appareils"
 		},
 		"theme": {
 			"description": "Sélectionnez votre thème préféré",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Vous avez choisi de désactiver les relais. Les transferts de fichiers peuvent échouer si vous essayez de partager des fichiers avec quelqu'un en dehors de votre réseau local. Les relais aident les appareils à se trouver et à se connecter dans des conditions réseau difficiles, et vos transferts restent toujours chiffrés de bout en bout.",
 				"confirmCustomTitle": "Utiliser des relais personnalisés ?",
 				"confirmCustomDescription": "Vous avez choisi d'utiliser vos propres relais auto-hébergés. Si vos relais personnalisés sont injoignables, les transferts basculeront automatiquement vers les relais publics et vous serez averti. Les relais aident uniquement vos appareils à se connecter dans des conditions réseau difficiles, et vos transferts restent toujours chiffrés de bout en bout.",
-				"confirmContinue": "Continuer"
+				"confirmContinue": "Continuer",
+				"confirmCustomDescriptionWithPolicy": "Vous avez choisi d’utiliser vos propres relais auto-hébergés. S’ils sont injoignables, AltSendme suivra la politique de repli sélectionnée dans les réglages Relais. Les relais aident uniquement vos appareils à se connecter dans des conditions réseau difficiles, et vos transferts restent toujours chiffrés de bout en bout.",
+				"fallbackDescription": "Choisissez ce qui se passe lorsque votre relais personnalisé est injoignable.",
+				"fallbackLabel": "Politique de repli",
+				"fallbackPublic": "Utiliser les relais publics si nécessaire",
+				"fallbackPublicDesc": "Basculer vers les relais publics iroh lorsque les relais personnalisés sont injoignables.",
+				"fallbackStrict": "Rester sur les relais personnalisés",
+				"fallbackStrictDesc": "Échouer le transfert au lieu de basculer vers les relais publics. Idéal pour les configurations privées."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Annuler l’association",
+			"codePlaceholder": "Coller le code d’association",
+			"copied": "Code d’association copié",
+			"description": "Associez vos appareils une fois, puis envoyez des fichiers sans copier de tickets.",
+			"desktopOnly": "L’association d’appareils est disponible dans les applications bureau et Android.",
+			"deviceName": "Nom de l’appareil",
+			"deviceNamePlaceholder": "p. ex. MacBook de Tony",
+			"devicePaired": "Appareil associé",
+			"deviceRemoved": "Appareil supprimé",
+			"deviceUnpairedToast": "{{name}} a dissocié cet appareil",
+			"enterCode": "Saisir le code d’association",
+			"hostExpiresIn": "Expire dans {{seconds}} s.",
+			"hostHint": "Scannez ou copiez ce code sur l’appareil que vous souhaitez associer. Vous pouvez fermer cette fenêtre - l’association reste ouverte jusqu’à expiration.",
+			"hostStillOpen": "En attente qu’un appareil se joigne - association ouverte pendant {{seconds}} s.",
+			"joinHint": "Collez le code d’association depuis votre autre appareil.",
+			"nameSaveFailed": "Impossible d’enregistrer le nom de l’appareil",
+			"nameSaved": "Nom de l’appareil enregistré",
+			"noPairedDevices": "Aucun appareil associé pour l’instant",
+			"noPairedDevicesHint": "Associez un autre téléphone ou ordinateur pour envoyer des fichiers sans partager de tickets à chaque fois.",
+			"nodeUnavailableHint": "Les tickets manuels et le partage de fichiers fonctionnent toujours normalement.",
+			"nodeUnavailableTitle": "Association d’appareils indisponible",
+			"pairDevice": "Associer",
+			"pairFailed": "Échec de l’association",
+			"pairNewDevice": "Associer un nouvel appareil",
+			"pairing": "Association…",
+			"pairingCode": "Code d’association",
+			"relayChangePairedHint": "Les appareils associés restent listés. L’envoi associé peut ne pas fonctionner tant que les deux appareils ne peuvent pas se joindre avec la nouvelle configuration réseau.",
+			"removeDevice": "Supprimer l’appareil",
+			"removeFailed": "Impossible de supprimer l’appareil",
+			"rename": "Renommer",
+			"renameDevice": "Renommer l’appareil associé",
+			"renameDeviceHint": "Cela ne modifie le nom que sur cet appareil - pas de l’autre côté.",
+			"renameThisDevice": "Renommer cet appareil",
+			"renameThisDeviceHint": "Choisissez un nom qui vous aide à reconnaître cet ordinateur lors de l’association.",
+			"saveName": "Enregistrer le nom",
+			"searchNoResults": "Aucun appareil associé ne correspond à votre recherche.",
+			"searchPlaceholder": "Rechercher des appareils associés",
+			"showQrCode": "Afficher le code d’association",
+			"statusOffline": "Hors ligne",
+			"statusOnline": "En ligne",
+			"statusRePairRequired": "Réassociation requise",
+			"statusUnpaired": "Dissocié",
+			"thisDevice": "Cet appareil",
+			"thisDeviceHint": "Nom affiché aux appareils avec lesquels vous vous associez. Le système d’exploitation et le type d’appareil sont détectés automatiquement.",
+			"title": "Appareils associés",
+			"unpairedHint": "Cet appareil a supprimé l’association. Retirez-le de votre liste."
 		}
 	},
 	"updater": {
@@ -253,8 +382,8 @@
 			"unavailableHeading": "Relais indisponible",
 			"fellBackToPublic": "Relais personnalisé inaccessible, utilisation d’un relais public à la place.",
 			"fellBackToastTitle": "Utilisation d’un relais public",
-			"fellBackToastSend": "Votre relais personnalisé était inaccessible — ce transfert utilise un relais public à la place.",
-			"fellBackToastReceive": "Votre relais personnalisé était inaccessible — ce téléchargement utilise un relais public à la place.",
+			"fellBackToastSend": "Votre relais personnalisé était inaccessible - ce transfert utilise un relais public à la place.",
+			"fellBackToastReceive": "Votre relais personnalisé était inaccessible - ce téléchargement utilise un relais public à la place.",
 			"dialogDescription": "Indique quel serveur relais cette application utilise actuellement pour les connexions.",
 			"connectedRelay": "Relais connecté",
 			"checking": "Vérification de la connexion…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "Les transferts sont toujours chiffrés de bout en bout, les relais ne voient donc jamais vos fichiers.",
 			"disabledNote": "Les relais sont désactivés. Connexions directes uniquement, les transferts peuvent donc échouer derrière des pare-feu ou NAT stricts."
 		}
-	}
+	},
+	"comingSoon": "Bientôt disponible"
 }

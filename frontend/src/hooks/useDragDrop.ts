@@ -1,10 +1,16 @@
 import { getCurrentWindow, invoke, openDialog } from '@/lib/platform-api'
 import { processWebDataTransfer } from '@/lib/web-drag-drop'
-import { selectSendDocument, selectSendFolder } from '@/plugins/nativeUtils'
+import {
+	consumeShareIntent,
+	onShareReceived,
+	selectSendDocument,
+	selectSendFolder,
+} from '@/plugins/nativeUtils'
 import { useCallback, useEffect, useRef, useState, type DragEvent } from 'react'
 import { useTranslation } from '../i18n/react-i18next-compat'
 import type { AlertDialogState, AlertType } from '../types/ui'
 import { IS_ANDROID, IS_TAURI, IS_WEB } from '@/lib/platform'
+import { useTransferTabStore } from '@/store/transfer-tab-store'
 
 export interface UseDragDropReturn {
 	isDragActive: boolean
@@ -156,33 +162,78 @@ export function useDragDrop(
 		}
 	}, [])
 
+	const beginAndroidCacheCopy = useCallback(
+		async (
+			startCopy: (
+				onStart: (path: string, size: bigint) => void,
+				onEvent: (event: { progress: number }) => void,
+				onComplete: (path: string) => void,
+				onError?: (message: string) => void
+			) => Promise<{ cancelJob: () => Promise<void> } | null>,
+			pathType: 'file' | 'directory'
+		) => {
+			const handler = await startCopy(
+				(path, size) => {
+					setCopyFileName(path.split(/[/\\]/).filter(Boolean).pop() || path)
+					setCopyTotalBytes(size.toString())
+					setCopyProgress(0)
+					setIsCopying(true)
+				},
+				(event) => {
+					setCopyProgress(event.progress)
+				},
+				async (path) => {
+					setIsCopying(false)
+					setCopyProgress(0)
+					setCopyFileName('')
+					setCopyTotalBytes('0')
+					cancelRef.current = null
+					await triggerFilesSelect([path], pathType)
+				},
+				(message) => {
+					setIsCopying(false)
+					setCopyProgress(0)
+					setCopyFileName('')
+					setCopyTotalBytes('0')
+					cancelRef.current = null
+					showAlert(t('common:errors.fileDialogFailed'), message, 'error')
+				}
+			)
+
+			if (handler) {
+				cancelRef.current = () => handler.cancelJob()
+			}
+
+			return Boolean(handler)
+		},
+		[showAlert, t, triggerFilesSelect]
+	)
+
+	const consumeAndroidShare = useCallback(async (): Promise<boolean> => {
+		try {
+			useTransferTabStore.getState().requestTab('send')
+			if (cancelRef.current) {
+				await cancelCopy()
+			}
+			return await beginAndroidCacheCopy(consumeShareIntent, 'file')
+		} catch (error) {
+			console.error('Failed to consume Android share intent:', error)
+			showAlert(
+				t('common:errors.fileDialogFailed'),
+				`${t('common:errors.fileDialogFailedDesc')}: ${error}`,
+				'error'
+			)
+			return false
+		}
+	}, [beginAndroidCacheCopy, cancelCopy, showAlert, t])
+
+	const consumeAndroidShareRef = useRef(consumeAndroidShare)
+	consumeAndroidShareRef.current = consumeAndroidShare
+
 	const browseFile = useCallback(async () => {
 		try {
 			if (IS_ANDROID) {
-				const handler = await selectSendDocument(
-					(path, size) => {
-						setCopyFileName(path.split(/[/\\]/).filter(Boolean).pop() || path)
-						setCopyTotalBytes(size.toString())
-						setCopyProgress(0)
-						setIsCopying(true)
-					},
-					(event) => {
-						setCopyProgress(event.progress)
-					},
-					async (path) => {
-						setIsCopying(false)
-						setCopyProgress(0)
-						setCopyFileName('')
-						setCopyTotalBytes('0')
-						cancelRef.current = null
-						await triggerFilesSelect([path], 'file')
-					}
-				)
-
-				if (handler) {
-					cancelRef.current = () => handler.cancelJob()
-				}
-
+				await beginAndroidCacheCopy(selectSendDocument, 'file')
 				return
 			} else {
 				const selected = await openDialog({
@@ -203,35 +254,12 @@ export function useDragDrop(
 				'error'
 			)
 		}
-	}, [showAlert, t, triggerFilesSelect])
+	}, [beginAndroidCacheCopy, showAlert, t, triggerFilesSelect])
 
 	const browseFolder = useCallback(async () => {
 		try {
 			if (IS_ANDROID) {
-				const handler = await selectSendFolder(
-					(path, size) => {
-						setCopyFileName(path.split(/[/\\]/).filter(Boolean).pop() || path)
-						setCopyTotalBytes(size.toString())
-						setCopyProgress(0)
-						setIsCopying(true)
-					},
-					(event) => {
-						setCopyProgress(event.progress)
-					},
-					async (path) => {
-						setIsCopying(false)
-						setCopyProgress(0)
-						setCopyFileName('')
-						setCopyTotalBytes('0')
-						cancelRef.current = null
-						await triggerFilesSelect([path], 'directory')
-					}
-				)
-
-				if (handler) {
-					cancelRef.current = () => handler.cancelJob()
-				}
-
+				await beginAndroidCacheCopy(selectSendFolder, 'directory')
 				return
 			} else {
 				const selected = await openDialog({
@@ -254,7 +282,7 @@ export function useDragDrop(
 				'error'
 			)
 		}
-	}, [showAlert, t, triggerFilesSelect])
+	}, [beginAndroidCacheCopy, showAlert, t, triggerFilesSelect])
 
 	const handleWebDragEnter = useCallback((event: DragEvent<HTMLElement>) => {
 		event.preventDefault()
@@ -408,53 +436,58 @@ export function useDragDrop(
 	}, [browseFile])
 
 	const addMoreFolders = useCallback(async () => {
-		try {
-			if (IS_ANDROID) {
-				const handler = await selectSendFolder(
-					(path, size) => {
-						setCopyFileName(path.split(/[/\\]/).filter(Boolean).pop() || path)
-						setCopyTotalBytes(size.toString())
-						setCopyProgress(0)
-						setIsCopying(true)
-					},
-					(event) => {
-						setCopyProgress(event.progress)
-					},
-					async (path) => {
-						setIsCopying(false)
-						setCopyProgress(0)
-						setCopyFileName('')
-						setCopyTotalBytes('0')
-						cancelRef.current = null
-						await triggerFilesSelect([path], 'directory')
-					}
-				)
+		await browseFolder()
+	}, [browseFolder])
 
-				if (handler) {
-					cancelRef.current = () => handler.cancelJob()
-				}
+	// Android Share sheet → cache copy → Send tab selection
+	useEffect(() => {
+		if (!IS_ANDROID) {
+			return
+		}
 
+		let disposed = false
+		let unlistenShare: (() => void) | undefined
+		let settled = false
+		const retryTimers: number[] = []
+		// Widened window: cold-start IPC-bridge readiness can vary a lot across
+		// devices, so keep polling for several seconds rather than giving up early.
+		const retryDelaysMs = [400, 1000, 2000, 3500, 5500, 8000]
+
+		const run = async () => {
+			if (disposed || settled) return
+			const consumed = await consumeAndroidShareRef.current()
+			if (consumed) {
+				settled = true
+			}
+		}
+
+		const setup = async () => {
+			unlistenShare = await onShareReceived(() => {
+				void run()
+			})
+			if (disposed) {
+				unlistenShare()
 				return
 			}
-
-			const selected = await openDialog({
-				multiple: true,
-				directory: true,
-			})
-
-			if (!selected) return
-
-			const paths = Array.isArray(selected) ? selected : [selected]
-			await triggerFilesSelect(paths, 'directory')
-		} catch (error) {
-			console.error('Failed to open folders dialog:', error)
-			showAlert(
-				t('common:errors.folderDialogFailed'),
-				`${t('common:errors.folderDialogFailedDesc')}: ${error}`,
-				'error'
-			)
+			// Cold start: intent may already be pending before listeners registered.
+			void run()
+			// Native load() posts shareReceived after WebView is ready; these retries
+			// cover the case where the first consume ran before the URI was stashed.
+			for (const delay of retryDelaysMs) {
+				retryTimers.push(window.setTimeout(() => void run(), delay))
+			}
 		}
-	}, [showAlert, t, triggerFilesSelect])
+
+		void setup()
+
+		return () => {
+			disposed = true
+			unlistenShare?.()
+			for (const id of retryTimers) {
+				window.clearTimeout(id)
+			}
+		}
+	}, [])
 
 	return {
 		isDragActive,

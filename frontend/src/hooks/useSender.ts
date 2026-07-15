@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { invoke, listen, type UnlistenFn } from '@/lib/platform-api'
 import {
 	getWebPreviewErrorMessage,
@@ -10,6 +10,22 @@ import type { TransferMetadata, TransferProgress } from '../types/transfer'
 import { SpeedAverager, calculateETA } from '../utils/etaUtils'
 import { getRelayConfigArg } from '../lib/relay'
 import { useSenderStore } from '../store/sender-store'
+import { IS_PAIRING_CAPABLE } from '@/lib/platform'
+import {
+	invitePairedDevice,
+	isPairedDeviceActive,
+	listPairedDevices,
+	type PairedDevice,
+} from '@/lib/pairing-api'
+import { incrementPairedSendCount } from '@/lib/paired-send-counts'
+import { useNodeCapability } from '@/hooks/useNodeCapability'
+import {
+	applyPresencePatch,
+	usePairedDeviceEvents,
+} from '@/hooks/usePairedDeviceEvents'
+import { toastManager } from '../components/ui/toast'
+
+export type PairedInviteStatus = 'sending' | 'sent' | 'failed'
 
 export interface UseSenderReturn {
 	// View state (replaces isSharing, isTransporting, isCompleted)
@@ -31,6 +47,11 @@ export interface UseSenderReturn {
 	transferProgress: TransferProgress | null
 	isBroadcastMode: boolean
 	activeConnectionCount: number
+	pairedDevices: PairedDevice[]
+	isNodeReady: boolean
+	isNodeStatusPending?: boolean
+	pairedInviteStatus: Record<string, PairedInviteStatus>
+	onInvitePairedDevice: (endpointId: string) => Promise<boolean>
 
 	handleFileSelect: (
 		path: string,
@@ -85,6 +106,57 @@ export function useSender(): UseSenderReturn {
 		setActiveConnectionCount,
 	} = useSenderStore()
 
+	const [pairedDevices, setPairedDevices] = useState<PairedDevice[]>([])
+	const [pairedInviteStatus, setPairedInviteStatus] = useState<
+		Record<string, PairedInviteStatus>
+	>({})
+	const { isNodeReady, isNodeStatusPending } = useNodeCapability()
+
+	const setInviteStatus = useCallback(
+		(endpointId: string, status: PairedInviteStatus | null) => {
+			setPairedInviteStatus((prev) => {
+				if (status === null) {
+					if (!(endpointId in prev)) return prev
+					const next = { ...prev }
+					delete next[endpointId]
+					return next
+				}
+				return { ...prev, [endpointId]: status }
+			})
+		},
+		[]
+	)
+
+	const refreshPairedDevices = useCallback(async () => {
+		if (!IS_PAIRING_CAPABLE) {
+			setPairedDevices([])
+			return
+		}
+		try {
+			setPairedDevices(await listPairedDevices())
+		} catch (error) {
+			console.error('Failed to load paired devices:', error)
+		}
+	}, [])
+
+	useEffect(() => {
+		void refreshPairedDevices()
+	}, [refreshPairedDevices])
+
+	useEffect(() => {
+		if (!ticket) {
+			setPairedInviteStatus({})
+		}
+	}, [ticket])
+
+	usePairedDeviceEvents({
+		onPresence: useCallback((payload) => {
+			applyPresencePatch(setPairedDevices, payload)
+		}, []),
+		onUnpaired: useCallback(() => {}, []),
+		onRefresh: refreshPairedDevices,
+	})
+
 	// Refs for event listeners
 	const latestProgressRef = useRef<TransferProgress | null>(null)
 	const transferStartTimeRef = useRef<number | null>(null)
@@ -116,6 +188,8 @@ export function useSender(): UseSenderReturn {
 		let unlistenComplete: UnlistenFn | undefined
 		let unlistenFailed: UnlistenFn | undefined
 		let unlistenActiveCount: UnlistenFn | undefined
+		let unlistenDevicePaired: UnlistenFn | undefined
+		let unlistenInviteResponse: UnlistenFn | undefined
 
 		const safeUnlisten = (unlisten?: UnlistenFn) => {
 			if (unlisten) {
@@ -145,6 +219,42 @@ export function useSender(): UseSenderReturn {
 				nextUnlistenActiveCount()
 			} else {
 				unlistenActiveCount = nextUnlistenActiveCount
+			}
+
+			const nextUnlistenDevicePaired = await listen('device-paired', () => {
+				void refreshPairedDevices()
+			})
+			if (disposed) {
+				nextUnlistenDevicePaired()
+			} else {
+				unlistenDevicePaired = nextUnlistenDevicePaired
+			}
+
+			const nextUnlistenInviteResponse = await listen(
+				'paired-invite-response',
+				(event: { payload: unknown }) => {
+					try {
+						const payload =
+							typeof event.payload === 'string'
+								? (JSON.parse(event.payload) as {
+										endpoint_id: string
+										response: string
+									})
+								: (event.payload as {
+										endpoint_id: string
+										response: string
+									})
+						if (!payload?.endpoint_id) return
+						setInviteStatus(payload.endpoint_id, null)
+					} catch {
+						// Ignore malformed invite response payloads
+					}
+				}
+			)
+			if (disposed) {
+				nextUnlistenInviteResponse()
+			} else {
+				unlistenInviteResponse = nextUnlistenInviteResponse
 			}
 
 			const nextUnlistenStart = await listen('transfer-started', () => {
@@ -531,11 +641,15 @@ export function useSender(): UseSenderReturn {
 			safeUnlisten(unlistenComplete)
 			safeUnlisten(unlistenFailed)
 			safeUnlisten(unlistenActiveCount)
+			safeUnlisten(unlistenDevicePaired)
+			safeUnlisten(unlistenInviteResponse)
 			unlistenStart = undefined
 			unlistenProgress = undefined
 			unlistenComplete = undefined
 			unlistenFailed = undefined
 			unlistenActiveCount = undefined
+			unlistenDevicePaired = undefined
+			unlistenInviteResponse = undefined
 		}
 	}, [
 		setViewState,
@@ -543,6 +657,8 @@ export function useSender(): UseSenderReturn {
 		setTransferProgress,
 		resetForBroadcast,
 		setActiveConnectionCount,
+		refreshPairedDevices,
+		setInviteStatus,
 	])
 
 	const handleFilesSelect = async (
@@ -792,6 +908,90 @@ export function useSender(): UseSenderReturn {
 		await stopSharing()
 	}
 
+	const resolveShareTotalSize = async (): Promise<number> => {
+		if (transferMetadata?.fileSize) return transferMetadata.fileSize
+		try {
+			const sizes = await Promise.all(
+				selectedPaths.map((path) =>
+					invoke<number>('get_file_size', { path }).catch(() => 0)
+				)
+			)
+			return sizes.reduce((sum, size) => sum + size, 0)
+		} catch {
+			return 0
+		}
+	}
+
+	const onInvitePairedDevice = async (endpointId: string): Promise<boolean> => {
+		if (!ticket) {
+			return false
+		}
+		if (!isNodeReady) {
+			toastManager.add({
+				title: t('common:settings.devices.nodeUnavailableTitle'),
+				description: t('common:settings.devices.nodeUnavailableHint'),
+				type: 'error',
+			})
+			return false
+		}
+		if (pairedInviteStatus[endpointId] === 'sending') return false
+		const anotherInviteInFlight = Object.entries(pairedInviteStatus).some(
+			([id, status]) =>
+				id !== endpointId && (status === 'sending' || status === 'sent')
+		)
+		if (anotherInviteInFlight || pairedInviteStatus[endpointId] === 'sent') {
+			return false
+		}
+
+		const device =
+			pairedDevices.find((d) => d.endpoint_id === endpointId) ?? null
+		const deviceName =
+			device?.display_name ?? t('common:sender.pairedDevices.unknownPeer')
+		if (device && (!isPairedDeviceActive(device) || !device.online)) {
+			return false
+		}
+		incrementPairedSendCount(endpointId)
+		const fileCount = Math.max(selectedPaths.length, 1)
+		setInviteStatus(endpointId, 'sending')
+		try {
+			const totalSize = await resolveShareTotalSize()
+			const delivered = await invitePairedDevice(
+				endpointId,
+				ticket,
+				fileCount,
+				totalSize
+			)
+			if (delivered) {
+				setInviteStatus(endpointId, 'sent')
+				toastManager.add({
+					title: t('common:sender.pairedDevices.inviteSentTo', {
+						name: deviceName,
+					}),
+					description: t('common:sender.pairedDevices.inviteSentDesc'),
+					type: 'success',
+				})
+				return true
+			}
+			setInviteStatus(endpointId, 'failed')
+			toastManager.add({
+				title: t('common:sender.pairedDevices.inviteFailed'),
+				description: t('common:sender.pairedDevices.deviceUnreachable'),
+				type: 'error',
+			})
+			setTimeout(() => setInviteStatus(endpointId, null), 4000)
+			return false
+		} catch (error) {
+			setInviteStatus(endpointId, 'failed')
+			toastManager.add({
+				title: t('common:sender.pairedDevices.inviteFailed'),
+				description: String(error),
+				type: 'error',
+			})
+			setTimeout(() => setInviteStatus(endpointId, null), 4000)
+			return false
+		}
+	}
+
 	const copyTicket = async () => {
 		if (ticket) {
 			try {
@@ -830,6 +1030,11 @@ export function useSender(): UseSenderReturn {
 		transferProgress,
 		isBroadcastMode,
 		activeConnectionCount,
+		pairedDevices,
+		isNodeReady,
+		isNodeStatusPending,
+		pairedInviteStatus,
+		onInvitePairedDevice,
 
 		handleFileSelect,
 		handleFilesSelect,

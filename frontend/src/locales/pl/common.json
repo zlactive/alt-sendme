@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Wyślij",
-	"comingSoon": "Wkrótce",
+	"webPreview": {
+		"banner": "Tryb podglądu - transfer plików wymaga aplikacji desktopowej.",
+		"transferUnavailable": "Transfer plików nie jest dostępny w podglądzie webowym. Pobierz aplikację desktopową, aby wysyłać i odbierać pliki."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Postaw mi kawę",
+		"community": "Społeczność",
+		"compare": "Porównaj z innymi narzędziami P2P",
+		"download": "Zobacz opcje pobierania",
+		"github": "GitHub",
+		"linksLabel": "Pobierz aplikację desktopową i linki do projektu",
+		"notice": "Wersja webowa nie obsługuje bezpośrednich połączeń - ruch jest przekierowywany przez szyfrowane publiczne relay, a prędkości są ograniczane. Twoje pliki pozostają zaszyfrowane w każdym przypadku. Użyj aplikacji desktopowej/CLI lub niestandardowych relay, aby uzyskać lepsze doświadczenie.",
+		"platforms": "AltSendme jest dostępne jako aplikacja desktopowa, Android, CLI i web.",
+		"website": "Strona internetowa"
+	},
 	"receive": "Odbierz",
 	"ok": "OK",
 	"undo": "Cofnij",
@@ -60,6 +74,50 @@
 				"label": "Prywatne udostępnianie",
 				"description": "Tylko osoba, z którą udostępniasz bilet, może pobrać plik."
 			}
+		},
+		"addFile": "Dodaj plik",
+		"addFolder": "Dodaj folder",
+		"clearSelection": "Wyczyść wybór",
+		"exitSharing": "Zakończ udostępnianie",
+		"pairDevice": "Sparuj urządzenie",
+		"pairedDevices": {
+			"connectedTitle": "Połączone urządzenia",
+			"deviceOffline": "Urządzenie jest offline - użyj zamiast tego ręcznego biletu.",
+			"deviceUnreachable": "To urządzenie nadal jest sparowane. Spróbuj ponownie, gdy będzie online, lub użyj ręcznego biletu. Oba urządzenia mogą wymagać zgodnych ustawień relay.",
+			"failed": "Ponów",
+			"inviteFailed": "Nie udało się połączyć z urządzeniem",
+			"inviteSent": "Zaproszenie wysłane",
+			"inviteSentDesc": "Odbiorca może je zaakceptować, aby rozpocząć pobieranie.",
+			"inviteSentTo": "Zaproszenie wysłane do {{name}}",
+			"pair": "Sparuj",
+			"send": "Wyślij",
+			"sending": "Wysyłanie…",
+			"sent": "Wysłano",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Wymagane ponowne sparowanie",
+			"statusUnpaired": "Niesparowane",
+			"unknownPeer": "Nieznane urządzenie",
+			"yourDevicesTitle": "Wyślij do sparowanego urządzenia"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Sparuj urządzenia w Ustawieniach, a następnie wróć tutaj, aby wysyłać bez linku.",
+				"emptyTitle": "Brak sparowanych urządzeń",
+				"hint": "Wybierz urządzenie - transfer rozpocznie się po akceptacji.",
+				"manageInSettings": "Sparuj urządzenia w Ustawieniach",
+				"nodeUnavailable": "Wysyłanie na urządzenie jest teraz niedostępne. Nadal możesz użyć transferu jednorazowego z innej karty.",
+				"searchNoResults": "Żadne sparowane urządzenia nie pasują do wyszukiwania.",
+				"searchPlaceholder": "Szukaj sparowanych urządzeń",
+				"title": "Wyślij do sparowanego urządzenia"
+			},
+			"devicesButton": "Wyślij do sparowanego urządzenia",
+			"link": {
+				"hint": "Każdy z tym linkiem może odebrać Twoje pliki.",
+				"transferInProgress": "Transfer w toku - otwórz transfer jednorazowy, aby zobaczyć szczegóły.",
+				"waiting": "Oczekiwanie, aż ktoś użyje Twojego linku"
+			},
+			"or": "lub"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Pobieranie zakończone, konflikty nazw rozwiązane",
 		"downloadedFile": "Pobrany plik",
 		"stopReceiving": "Zatrzymaj odbieranie",
-		"download": "Pobierz"
+		"download": "Pobierz",
+		"acceptInvite": "Akceptuj",
+		"browserDownloadsFallback": "Folder pobierania przeglądarki",
+		"browserDownloadsHint": "Ta przeglądarka nie pozwala wybrać folderu zapisu. Pliki zostaną pobrane do domyślnej lokalizacji pobierania.",
+		"declineInvite": "Odrzuć",
+		"openReceiveTabHint": "Otwórz kartę Odbierz raz, a następnie spróbuj ponownie.",
+		"pairedInvite": {
+			"changeFolder": "Zmień folder",
+			"saveTo": "Zapisz w"
+		},
+		"receiveBusyDescription": "Poczekaj, aż bieżące pobieranie się zakończy, zanim zaakceptujesz kolejny plik.",
+		"receiveBusyTitle": "Pobieranie już trwa",
+		"receiveFromPairedDescription": "{{sender}} chce wysłać Ci {{count}} plik(ów) ({{size}}). Zaakceptuj, aby rozpocząć pobieranie.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} chce wysłać Ci {{count}} plik(ów). Zaakceptuj, aby rozpocząć pobieranie.",
+		"receiveFromPairedTitle": "Przychodzący plik ze sparowanego urządzenia",
+		"saveLocation": "Lokalizacja zapisu:"
 	},
 	"transfer": {
 		"progress": "Postęp transferu",
@@ -112,7 +185,7 @@
 		"duration": "Czas trwania",
 		"avgSpeed": "Średnia prędkość",
 		"multipleFiles": "{{count}} plików",
-		"donatePrompt": "Ulepsz AltSendme poprzez ",
+		"donatePrompt": "Jeśli podoba Ci się to doświadczenie, rozważ proszę {{link}}. Dziękujemy!",
 		"donateLink": "wsparcie"
 	},
 	"errors": {
@@ -138,7 +211,8 @@
 			"general": "Ogólne",
 			"relay": "Relay",
 			"network": "Sieć",
-			"notification": "Powiadomienia"
+			"notification": "Powiadomienia",
+			"devices": "Urządzenia"
 		},
 		"theme": {
 			"description": "Wybierz preferowany motyw",
@@ -223,14 +297,69 @@
 				"confirmDisableDescription": "Wybrano wyłączenie relay. Przesyłanie plików może się nie powieść, jeśli spróbujesz udostępnić pliki komuś spoza Twojej sieci lokalnej. Relay pomagają urządzeniom odnaleźć się i połączyć w trudnych warunkach sieciowych, a Twoje transfery zawsze pozostają szyfrowane end-to-end.",
 				"confirmCustomTitle": "Użyć niestandardowych relay?",
 				"confirmCustomDescription": "Wybrano korzystanie z własnych, samodzielnie hostowanych relay. Jeśli Twoje niestandardowe relay będą nieosiągalne, transfery automatycznie powrócą do publicznych relay i otrzymasz powiadomienie. Relay pomagają tylko Twoim urządzeniom połączyć się w trudnych warunkach sieciowych, a Twoje transfery zawsze pozostają szyfrowane end-to-end.",
-				"confirmContinue": "Kontynuuj"
+				"confirmContinue": "Kontynuuj",
+				"confirmCustomDescriptionWithPolicy": "Wybrałeś korzystanie z własnych, samodzielnie hostowanych relay. Jeśli będą niedostępne, AltSendme zastosuje politykę zapasową wybraną w ustawieniach relay. Relay pomagają tylko Twoim urządzeniom połączyć się w trudnych warunkach sieciowych, a Twoje transfery zawsze pozostają szyfrowane end-to-end.",
+				"fallbackDescription": "Wybierz, co ma się stać, gdy niestandardowy relay będzie niedostępny.",
+				"fallbackLabel": "Polityka zapasowa",
+				"fallbackPublic": "W razie potrzeby użyj publicznych relay",
+				"fallbackPublicDesc": "Przełącz się na publiczne relay iroh, gdy niestandardowe relay są niedostępne.",
+				"fallbackStrict": "Pozostań przy niestandardowych relay",
+				"fallbackStrictDesc": "Przerwij transfer zamiast przełączać się na publiczne relay. Najlepsze dla prywatnych konfiguracji."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Anuluj parowanie",
+			"codePlaceholder": "Wklej kod parowania",
+			"copied": "Kod parowania skopiowany",
+			"description": "Sparuj urządzenia raz, a potem wysyłaj pliki bez kopiowania biletów.",
+			"desktopOnly": "Parowanie urządzeń jest dostępne w aplikacji desktopowej i Android.",
+			"deviceName": "Nazwa urządzenia",
+			"deviceNamePlaceholder": "np. MacBook Tony’ego",
+			"devicePaired": "Urządzenie sparowane",
+			"deviceRemoved": "Urządzenie usunięte",
+			"deviceUnpairedToast": "{{name}} rozparował(a) to urządzenie",
+			"enterCode": "Wprowadź kod parowania",
+			"hostExpiresIn": "Wygasa za {{seconds}} s.",
+			"hostHint": "Zeskanuj lub skopiuj ten kod na urządzeniu, które chcesz sparować. Możesz zamknąć to okno - parowanie pozostanie aktywne do momentu wygaśnięcia.",
+			"hostStillOpen": "Oczekiwanie na dołączenie urządzenia - parowanie otwarte przez {{seconds}} s.",
+			"joinHint": "Wklej kod parowania z drugiego urządzenia.",
+			"nameSaveFailed": "Nie udało się zapisać nazwy urządzenia",
+			"nameSaved": "Nazwa urządzenia zapisana",
+			"noPairedDevices": "Brak sparowanych urządzeń",
+			"noPairedDevicesHint": "Sparuj inny telefon lub komputer, aby wysyłać pliki bez udostępniania biletów za każdym razem.",
+			"nodeUnavailableHint": "Ręczne bilety i udostępnianie plików nadal działają normalnie.",
+			"nodeUnavailableTitle": "Parowanie urządzeń jest niedostępne",
+			"pairDevice": "Sparuj",
+			"pairFailed": "Parowanie nie powiodło się",
+			"pairNewDevice": "Sparuj nowe urządzenie",
+			"pairing": "Parowanie…",
+			"pairingCode": "Kod parowania",
+			"relayChangePairedHint": "Sparowane urządzenia pozostają na liście. Wysyłanie na sparowane urządzenia może nie działać, dopóki oba urządzenia nie będą mogły się połączyć w nowej konfiguracji sieci.",
+			"removeDevice": "Usuń urządzenie",
+			"removeFailed": "Nie udało się usunąć urządzenia",
+			"rename": "Zmień nazwę",
+			"renameDevice": "Zmień nazwę sparowanego urządzenia",
+			"renameDeviceHint": "To zmienia nazwę tylko na tym urządzeniu - nie zmienia nazwy po drugiej stronie.",
+			"renameThisDevice": "Zmień nazwę tego urządzenia",
+			"renameThisDeviceHint": "Wybierz nazwę, która pomoże Ci rozpoznać ten komputer podczas parowania.",
+			"saveName": "Zapisz nazwę",
+			"searchNoResults": "Żadne sparowane urządzenia nie pasują do wyszukiwania.",
+			"searchPlaceholder": "Szukaj sparowanych urządzeń",
+			"showQrCode": "Pokaż kod parowania",
+			"statusOffline": "Offline",
+			"statusOnline": "Online",
+			"statusRePairRequired": "Wymagane ponowne sparowanie",
+			"statusUnpaired": "Niesparowane",
+			"thisDevice": "To urządzenie",
+			"thisDeviceHint": "Nazwa widoczna dla urządzeń, z którymi się parujesz. System operacyjny i typ urządzenia są wykrywane automatycznie.",
+			"title": "Sparowane urządzenia",
+			"unpairedHint": "To urządzenie usunęło parowanie. Usuń je ze swojej listy."
 		}
 	},
 	"updater": {
 		"newUpdateTitle": "Nowa aktualizacja!",
 		"newVersionAvailable": "Dostępna jest wersja {{version}}.",
-		"newVersionAvailableInline": "Dostępna jest nowa wersja — {{version}}",
+		"newVersionAvailableInline": "Dostępna jest nowa wersja - {{version}}",
 		"updateNow": "Aktualizuj teraz",
 		"later": "Później",
 		"checkForUpdates": "Sprawdź aktualizacje",
@@ -253,8 +382,8 @@
 			"unavailableHeading": "Relay niedostępne",
 			"fellBackToPublic": "Niestandardowe relay niedostępne, używane jest publiczne relay.",
 			"fellBackToastTitle": "Używane publiczne relay",
-			"fellBackToastSend": "Twoje niestandardowe relay było niedostępne — ten transfer używa publicznego relay.",
-			"fellBackToastReceive": "Twoje niestandardowe relay było niedostępne — to pobieranie używa publicznego relay.",
+			"fellBackToastSend": "Twoje niestandardowe relay było niedostępne - ten transfer używa publicznego relay.",
+			"fellBackToastReceive": "Twoje niestandardowe relay było niedostępne - to pobieranie używa publicznego relay.",
 			"dialogDescription": "Pokazuje, którego serwera relay aplikacja obecnie używa do połączeń.",
 			"connectedRelay": "Połączone relay",
 			"checking": "Sprawdzanie połączenia…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "Transfery są zawsze szyfrowane od końca do końca, więc relay nigdy nie widzą Twoich plików.",
 			"disabledNote": "Relay są wyłączone. Tylko połączenia bezpośrednie, więc transfery mogą się nie powieść przy restrykcyjnych zaporach lub NAT."
 		}
-	}
+	},
+	"comingSoon": "Wkrótce"
 }

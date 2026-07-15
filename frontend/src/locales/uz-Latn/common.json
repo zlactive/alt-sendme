@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Yuborish",
-	"comingSoon": "Tez orada",
+	"webPreview": {
+		"banner": "Ko'rib chiqish rejimi - fayl uzatish desktop ilovasini talab qiladi.",
+		"transferUnavailable": "Veb ko'rib chiqishda fayl uzatish mavjud emas. Fayl yuborish va qabul qilish uchun desktop ilovasini yuklab oling."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Jamiyat",
+		"compare": "Boshqa P2P vositalar bilan solishtirish",
+		"download": "Yuklab olish variantlarini ko'rish",
+		"github": "GitHub",
+		"linksLabel": "Desktop ilova va loyiha havolalari",
+		"notice": "Veb versiyasi to'g'ridan-to'g'ri ulanishlarni qo'llab-quvvatlamaydi - trafik shifrlangan ommaviy relay'lar orqali o'tadi va tezlik cheklangan. Fayllaringiz har qanday holatda shifrlangan qoladi. Yaxshiroq tajriba uchun desktop/CLI ilova yoki maxsus relay'lardan foydalaning.",
+		"platforms": "AltSendme desktop, Android, CLI va veb sifatida mavjud.",
+		"website": "Veb-sayt"
+	},
 	"receive": "Qabul qilish",
 	"ok": "OK",
 	"undo": "Ortga qaytarish",
@@ -60,6 +74,50 @@
 				"label": "Shaxsiy ulashish",
 				"description": "Faqat ticketni ulashgan odam faylni yuklab olishi mumkin."
 			}
+		},
+		"addFile": "Fayl qo'shish",
+		"addFolder": "Papka qo'shish",
+		"clearSelection": "Tanlovni tozalash",
+		"exitSharing": "Ulashishdan chiqish",
+		"pairDevice": "Qurilmani juftlash",
+		"pairedDevices": {
+			"connectedTitle": "Ulangan qurilmalar",
+			"deviceOffline": "Qurilma oflayn - o'rniga qo'lda ticketdan foydalaning.",
+			"deviceUnreachable": "Bu qurilma hali juftlangan. Onlayn bo'lganda qayta urinib ko'ring yoki qo'lda ticketdan foydalaning. Ikkala qurilma ham mos relay sozlamalariga muhtoj bo'lishi mumkin.",
+			"failed": "Qayta urinish",
+			"inviteFailed": "Qurilmaga ulanib bo'lmadi",
+			"inviteSent": "Taklif yuborildi",
+			"inviteSentDesc": "Ular qabul qilsa, yuklab olish boshlanadi.",
+			"inviteSentTo": "{{name}} ga taklif yuborildi",
+			"pair": "Juftlash",
+			"send": "Yuborish",
+			"sending": "Yuborilmoqda…",
+			"sent": "Yuborildi",
+			"statusOffline": "Oflayn",
+			"statusOnline": "Onlayn",
+			"statusRePairRequired": "Qayta juftlash kerak",
+			"statusUnpaired": "Juftlanmagan",
+			"unknownPeer": "Noma'lum qurilma",
+			"yourDevicesTitle": "Juftlangan qurilmaga yuborish"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Sozlamalarda qurilmalarni juftlang, keyin havolasiz yuborish uchun bu yerga qayting.",
+				"emptyTitle": "Hali juftlangan qurilmalar yo'q",
+				"hint": "Qurilma tanlang - qabul qilinganda uzatish boshlanadi.",
+				"manageInSettings": "Sozlamalarda qurilmalarni juftlash",
+				"nodeUnavailable": "Qurilmaga yuborish hozir mavjud emas. Boshqa tabdagi bir martalik uzatishdan foydalanishingiz mumkin.",
+				"searchNoResults": "Qidiruvga mos juftlangan qurilmalar topilmadi.",
+				"searchPlaceholder": "Juftlangan qurilmalarni qidirish",
+				"title": "Juftlangan qurilmaga yuborish"
+			},
+			"devicesButton": "Juftlangan qurilmaga yuborish",
+			"link": {
+				"hint": "Bu havolaga ega bo'lgan har kim fayllaringizni qabul qilishi mumkin.",
+				"transferInProgress": "Uzatish davom etmoqda - tafsilotlar uchun bir martalik uzatishni oching.",
+				"waiting": "Kimdir havolangizdan foydalanishini kutmoqda"
+			},
+			"or": "yoki"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Yuklab olish tugadi, nom ziddiyatlari hal qilindi",
 		"downloadedFile": "Yuklab olingan fayl",
 		"stopReceiving": "Qabul qilishni to'xtatish",
-		"download": "Yuklab olish"
+		"download": "Yuklab olish",
+		"acceptInvite": "Qabul qilish",
+		"browserDownloadsFallback": "Brauzer yuklab olish papkasi",
+		"browserDownloadsHint": "Bu brauzer saqlash papkasini tanlay olmaydi. Fayllar standart yuklab olish joyingizga saqlanadi.",
+		"declineInvite": "Rad etish",
+		"openReceiveTabHint": "Qabul qilish tabini bir marta oching, keyin qayta urinib ko'ring.",
+		"pairedInvite": {
+			"changeFolder": "Papkani o'zgartirish",
+			"saveTo": "Saqlash joyi"
+		},
+		"receiveBusyDescription": "Boshqa faylni qabul qilishdan oldin joriy yuklab olish tugashini kuting.",
+		"receiveBusyTitle": "Yuklab olish allaqachon davom etmoqda",
+		"receiveFromPairedDescription": "{{sender}} sizga {{count}} ta fayl ({{size}}) yubormoqchi. Yuklab olishni boshlash uchun qabul qiling.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} sizga {{count}} ta fayl yubormoqchi. Yuklab olishni boshlash uchun qabul qiling.",
+		"receiveFromPairedTitle": "Juftlangan qurilmadan kiruvchi fayl",
+		"saveLocation": "Saqlash joyi:"
 	},
 	"transfer": {
 		"progress": "Uzatish jarayoni",
@@ -112,8 +185,8 @@
 		"duration": "Davomiyligi",
 		"avgSpeed": "O'rtacha tezlik",
 		"multipleFiles": "{{count}} ta fayl",
-		"donatePrompt": "AltSendme-ni yaxshilang, ",
-		"donateLink": "xayriya qiling"
+		"donatePrompt": "Agar tajriba yoqsa, iltimos {{link}} haqida o‘ylab ko‘ring. Rahmat!",
+		"donateLink": "xayriya qilish"
 	},
 	"errors": {
 		"sharingFailed": "Ulashish muvaffaqiyatsiz",
@@ -138,7 +211,8 @@
 			"general": "Umumiy",
 			"relay": "Relay",
 			"network": "Tarmoq",
-			"notification": "Bildirishnomalar"
+			"notification": "Bildirishnomalar",
+			"devices": "Qurilmalar"
 		},
 		"theme": {
 			"description": "Afzal ko‘rgan mavzuingizni tanlang",
@@ -223,8 +297,63 @@
 				"confirmDisableDescription": "Siz relay'larni o'chirishni tanladingiz. Agar siz fayllarni mahalliy tarmog'ingizdan tashqaridagi kimdir bilan ulashmoqchi bo'lsangiz, fayl uzatishlar muvaffaqiyatsiz tugashi mumkin. Relay'lar qurilmalarga murakkab tarmoq sharoitlarida bir-birini topish va ulanishda yordam beradi, va uzatishlaringiz har doim uchma-uch shifrlangan bo'lib qoladi.",
 				"confirmCustomTitle": "Maxsus relay'lar ishlatilsinmi?",
 				"confirmCustomDescription": "Siz o'zingiz joylashtirgan maxsus relay'lardan foydalanishni tanladingiz. Agar maxsus relay'laringiz mavjud bo'lmasa, uzatishlar avtomatik ravishda ommaviy relay'larga qaytadi va sizga xabar beriladi. Relay'lar faqat qurilmalaringizga murakkab tarmoq sharoitlarida ulanishda yordam beradi, va uzatishlaringiz har doim uchma-uch shifrlangan bo'lib qoladi.",
-				"confirmContinue": "Davom etish"
+				"confirmContinue": "Davom etish",
+				"confirmCustomDescriptionWithPolicy": "Siz maxsus self-hosted relay'lardan foydalanishni tanladingiz. Agar ularga ulanib bo'lmasa, AltSendme Relay sozlamalarida tanlangan fallback siyosatiga amal qiladi. Relay'lar faqat murakkab tarmoq sharoitida qurilmalaringizni ulashga yordam beradi va uzatishlaringiz har doim uchma-uch shifrlangan bo'lib qoladi.",
+				"fallbackDescription": "Maxsus relay'ingizga ulanib bo'lmaganda nima bo'lishini tanlang.",
+				"fallbackLabel": "Fallback siyosati",
+				"fallbackPublic": "Kerak bo'lsa ommaviy relay'lardan foydalanish",
+				"fallbackPublicDesc": "Maxsus relay'larga ulanib bo'lmaganda ommaviy iroh relay'lariga qaytish.",
+				"fallbackStrict": "Maxsus relay'larda qolish",
+				"fallbackStrictDesc": "Ommaviy relay'larga o'tmasdan uzatishni muvaffaqiyatsiz qilish. Maxfiy sozlamalar uchun eng yaxshi."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Juftlashni bekor qilish",
+			"codePlaceholder": "Juftlash kodini qo'ying",
+			"copied": "Juftlash kodi nusxalandi",
+			"description": "Qurilmalaringizni bir marta juftlang, keyin ticketlarni nusxalamasdan fayl yuboring.",
+			"desktopOnly": "Qurilma juftlash desktop va Android ilovalarida mavjud.",
+			"deviceName": "Qurilma nomi",
+			"deviceNamePlaceholder": "masalan, Tony'ning MacBook'i",
+			"devicePaired": "Qurilma juftlandi",
+			"deviceRemoved": "Qurilma olib tashlandi",
+			"deviceUnpairedToast": "{{name}} bu qurilmaning juftligini bekor qildi",
+			"enterCode": "Juftlash kodini kiriting",
+			"hostExpiresIn": "{{seconds}} soniyada muddati tugaydi.",
+			"hostHint": "Juftlamoqchi bo'lgan qurilmada bu kodni skanerlang yoki nusxalang. Bu oynani yopishingiz mumkin - muddati tugaguncha juftlash ochiq qoladi.",
+			"hostStillOpen": "Qurilma qo'shilishini kutmoqda - juftlash {{seconds}} soniya ochiq.",
+			"joinHint": "Boshqa qurilmangizdan juftlash kodini qo'ying.",
+			"nameSaveFailed": "Qurilma nomi saqlanmadi",
+			"nameSaved": "Qurilma nomi saqlandi",
+			"noPairedDevices": "Hali juftlangan qurilmalar yo'q",
+			"noPairedDevicesHint": "Har safar ticket ulashmasdan fayl yuborish uchun boshqa telefon yoki kompyuterni juftlang.",
+			"nodeUnavailableHint": "Qo'lda ticketlar va fayl ulashish odatdagidek ishlaydi.",
+			"nodeUnavailableTitle": "Qurilma juftlash mavjud emas",
+			"pairDevice": "Juftlash",
+			"pairFailed": "Juftlash muvaffaqiyatsiz",
+			"pairNewDevice": "Yangi qurilmani juftlash",
+			"pairing": "Juftlanmoqda…",
+			"pairingCode": "Juftlash kodi",
+			"relayChangePairedHint": "Juftlangan qurilmalar ro'yxatda qoladi. Yangi tarmoq sozlamasida ikkala qurilma ham bir-biriga yetguncha juftlangan yuborish ishlamasligi mumkin.",
+			"removeDevice": "Qurilmani olib tashlash",
+			"removeFailed": "Qurilma olib tashlanmadi",
+			"rename": "Nomini o'zgartirish",
+			"renameDevice": "Juftlangan qurilma nomini o'zgartirish",
+			"renameDeviceHint": "Bu faqat shu qurilmadagi nomni o'zgartiradi - boshqa tomondagi nom o'zgarmaydi.",
+			"renameThisDevice": "Bu qurilma nomini o'zgartirish",
+			"renameThisDeviceHint": "Juftlashda bu kompyuterni tanib olishga yordam beradigan nom tanlang.",
+			"saveName": "Nomni saqlash",
+			"searchNoResults": "Qidiruvga mos juftlangan qurilmalar topilmadi.",
+			"searchPlaceholder": "Juftlangan qurilmalarni qidirish",
+			"showQrCode": "Juftlash kodini ko'rsatish",
+			"statusOffline": "Oflayn",
+			"statusOnline": "Onlayn",
+			"statusRePairRequired": "Qayta juftlash kerak",
+			"statusUnpaired": "Juftlanmagan",
+			"thisDevice": "Bu qurilma",
+			"thisDeviceHint": "Juftlagan qurilmalaringizga ko'rsatiladigan nom. OS va qurilma turi avtomatik aniqlanadi.",
+			"title": "Juftlangan qurilmalar",
+			"unpairedHint": "Bu qurilma juftlikni bekor qildi. Ro'yxatdan olib tashlang."
 		}
 	},
 	"updater": {
@@ -253,8 +382,8 @@
 			"unavailableHeading": "Relay mavjud emas",
 			"fellBackToPublic": "Maxsus relay'ga ulanib bo'lmadi, buning o'rniga ommaviy relay ishlatilmoqda.",
 			"fellBackToastTitle": "Ommaviy relay ishlatilmoqda",
-			"fellBackToastSend": "Maxsus relay'ingizga ulanib bo'lmadi — bu uzatish ommaviy relay ishlatmoqda.",
-			"fellBackToastReceive": "Maxsus relay'ingizga ulanib bo'lmadi — bu yuklab olish ommaviy relay ishlatmoqda.",
+			"fellBackToastSend": "Maxsus relay'ingizga ulanib bo'lmadi - bu uzatish ommaviy relay ishlatmoqda.",
+			"fellBackToastReceive": "Maxsus relay'ingizga ulanib bo'lmadi - bu yuklab olish ommaviy relay ishlatmoqda.",
 			"dialogDescription": "Ilova hozir ulanishlar uchun qaysi relay serverdan foydalanayotganini ko'rsatadi.",
 			"connectedRelay": "Ulangan relay",
 			"checking": "Ulanish tekshirilmoqda…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "Uzatishlar har doim uchma-uch shifrlangan, shuning uchun relay'lar fayllaringizni hech qachon ko'rmaydi.",
 			"disabledNote": "Relay'lar o'chirilgan. Faqat to'g'ridan-to'g'ri ulanishlar, shuning uchun qattiq fayervol yoki NAT orqali uzatishlar muvaffaqiyatsiz bo'lishi mumkin."
 		}
-	}
+	},
+	"comingSoon": "Tez orada"
 }

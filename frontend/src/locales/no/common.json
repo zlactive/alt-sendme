@@ -1,7 +1,21 @@
 {
 	"appTitle": "AltSendme",
 	"send": "Send",
-	"comingSoon": "Kommer snart",
+	"webPreview": {
+		"banner": "Forhåndsvisningsmodus - filoverføringer krever skrivebordsappen.",
+		"transferUnavailable": "Filoverføring er ikke tilgjengelig i nettforhåndsvisningen. Last ned skrivebordsappen for å sende og motta filer."
+	},
+	"webPromo": {
+		"buyMeACoffee": "Buy me a coffee",
+		"community": "Fellesskap",
+		"compare": "Sammenlign med andre P2P-verktøy",
+		"download": "Se nedlastingsalternativer",
+		"github": "GitHub",
+		"linksLabel": "Skrivebordsapp og prosjektlenker",
+		"notice": "Nettversjonen støtter ikke direkte tilkoblinger - trafikk sendes via krypterte offentlige relays, og hastigheten er begrenset. Filene dine forblir kryptert uansett. Bruk skrivebords-/CLI-appen eller tilpassede relays for en bedre opplevelse.",
+		"platforms": "AltSendme er tilgjengelig som skrivebordsapp, Android, CLI og web.",
+		"website": "Nettsted"
+	},
 	"receive": "Motta",
 	"ok": "OK",
 	"undo": "Angre",
@@ -60,6 +74,50 @@
 				"label": "Privat deling",
 				"description": "Bare personen du deler nøkkelen med kan laste ned filen."
 			}
+		},
+		"addFile": "Legg til fil",
+		"addFolder": "Legg til mappe",
+		"clearSelection": "Tøm utvalg",
+		"exitSharing": "Avslutt deling",
+		"pairDevice": "Koble sammen enhet",
+		"pairedDevices": {
+			"connectedTitle": "Tilkoblede enheter",
+			"deviceOffline": "Enheten er frakoblet - bruk den manuelle nøkkelen i stedet.",
+			"deviceUnreachable": "Denne enheten er fortsatt sammenkoblet. Prøv igjen når den er tilkoblet, eller bruk den manuelle nøkkelen. Begge enheter kan trenge kompatible relay-innstillinger.",
+			"failed": "Prøv igjen",
+			"inviteFailed": "Kunne ikke nå enheten",
+			"inviteSent": "Invitasjon sendt",
+			"inviteSentDesc": "Mottakeren kan godta den for å starte nedlastingen.",
+			"inviteSentTo": "Invitasjon sendt til {{name}}",
+			"pair": "Koble sammen",
+			"send": "Send",
+			"sending": "Sender…",
+			"sent": "Sendt",
+			"statusOffline": "Frakoblet",
+			"statusOnline": "Tilkoblet",
+			"statusRePairRequired": "Ny sammenkobling kreves",
+			"statusUnpaired": "Ikke sammenkoblet",
+			"unknownPeer": "Ukjent enhet",
+			"yourDevicesTitle": "Send til sammenkoblet enhet"
+		},
+		"sharingActive": {
+			"devices": {
+				"emptyHint": "Koble sammen enheter i Innstillinger, og kom tilbake hit for å sende uten en lenke.",
+				"emptyTitle": "Ingen sammenkoblede enheter ennå",
+				"hint": "Velg en enhet - overføringen starter når den godtas.",
+				"manageInSettings": "Koble sammen enheter i Innstillinger",
+				"nodeUnavailable": "Sending til enheter er ikke tilgjengelig akkurat nå. Du kan fortsatt bruke Engangsoverføring i den andre fanen.",
+				"searchNoResults": "Ingen sammenkoblede enheter samsvarer med søket.",
+				"searchPlaceholder": "Søk etter sammenkoblede enheter",
+				"title": "Send til sammenkoblet enhet"
+			},
+			"devicesButton": "Send til sammenkoblet enhet",
+			"link": {
+				"hint": "Alle med denne lenken kan motta filene dine.",
+				"transferInProgress": "Overføring pågår - åpne Engangsoverføring for detaljer.",
+				"waiting": "Venter på at noen bruker lenken din"
+			},
+			"or": "eller"
 		}
 	},
 	"receiver": {
@@ -87,7 +145,22 @@
 		"downloadCompletedWithConflicts": "Nedlasting fullført, navnekonflikter løst",
 		"downloadedFile": "Nedlastet fil",
 		"stopReceiving": "Stopp overføring",
-		"download": "Last ned"
+		"download": "Last ned",
+		"acceptInvite": "Godta",
+		"browserDownloadsFallback": "Nettleserens nedlastingsmappe",
+		"browserDownloadsHint": "Denne nettleseren kan ikke velge lagringsmappe. Filer lastes ned til standard nedlastingssted.",
+		"declineInvite": "Avslå",
+		"openReceiveTabHint": "Åpne fanen Motta én gang, og prøv igjen.",
+		"pairedInvite": {
+			"changeFolder": "Endre mappe",
+			"saveTo": "Lagre i"
+		},
+		"receiveBusyDescription": "Vent til den pågående nedlastingen er ferdig før du godtar en ny fil.",
+		"receiveBusyTitle": "Nedlasting pågår allerede",
+		"receiveFromPairedDescription": "{{sender}} vil sende deg {{count}} fil(er) ({{size}}). Godta for å starte nedlastingen.",
+		"receiveFromPairedDescriptionNoSize": "{{sender}} vil sende deg {{count}} fil(er). Godta for å starte nedlastingen.",
+		"receiveFromPairedTitle": "Innkommende fil fra sammenkoblet enhet",
+		"saveLocation": "Lagringssted:"
 	},
 	"transfer": {
 		"progress": "Status",
@@ -112,7 +185,7 @@
 		"duration": "Varighet",
 		"avgSpeed": "Gjennomsnittlig hastighet",
 		"multipleFiles": "{{count}} filer",
-		"donatePrompt": "Gjør AltSendme bedre ved å ",
+		"donatePrompt": "Hvis du likte opplevelsen, vurder gjerne å {{link}}. Takk!",
 		"donateLink": "donere"
 	},
 	"errors": {
@@ -138,7 +211,8 @@
 			"general": "Generelt",
 			"relay": "Relay",
 			"network": "Nettverk",
-			"notification": "Varsler"
+			"notification": "Varsler",
+			"devices": "Enheter"
 		},
 		"theme": {
 			"description": "Velg ønsket tema",
@@ -223,14 +297,69 @@
 				"confirmDisableDescription": "Du har valgt å deaktivere relay. Filoverføringer kan mislykkes hvis du prøver å dele filer med noen utenfor det lokale nettverket ditt. Relay hjelper enheter å finne og koble til hverandre under vanskelige nettverksforhold, og overføringene dine forblir alltid ende-til-ende-kryptert.",
 				"confirmCustomTitle": "Bruke egendefinerte relay?",
 				"confirmCustomDescription": "Du har valgt å bruke dine egne selvhostede relay. Hvis dine egendefinerte relay er utilgjengelige, går overføringene automatisk tilbake til offentlige relay, og du blir varslet. Relay hjelper bare enhetene dine å koble til under vanskelige nettverksforhold, og overføringene dine forblir alltid ende-til-ende-kryptert.",
-				"confirmContinue": "Fortsett"
+				"confirmContinue": "Fortsett",
+				"confirmCustomDescriptionWithPolicy": "Du har valgt å bruke egne, selvhostede relays. Hvis de er utilgjengelige, følger AltSendme reservepolicyen valgt i Relay-innstillingene. Relays hjelper bare enhetene dine med å koble til under vanskelige nettverksforhold, og overføringene dine forblir alltid ende-til-ende-kryptert.",
+				"fallbackDescription": "Velg hva som skjer når din tilpassede relay ikke kan nås.",
+				"fallbackLabel": "Reservepolicy",
+				"fallbackPublic": "Bruk offentlige relays ved behov",
+				"fallbackPublicDesc": "Fall tilbake til offentlige iroh-relays når tilpassede relays er utilgjengelige.",
+				"fallbackStrict": "Hold deg til tilpassede relays",
+				"fallbackStrictDesc": "Avbryt overføringen i stedet for å bytte til offentlige relays. Best for private oppsett."
 			}
+		},
+		"devices": {
+			"cancelPairing": "Avbryt sammenkobling",
+			"codePlaceholder": "Lim inn sammenkoblingskode",
+			"copied": "Sammenkoblingskode kopiert",
+			"description": "Koble sammen enhetene dine én gang, og send filer uten å kopiere nøkler.",
+			"desktopOnly": "Enhetssammenkobling er tilgjengelig i skrivebords- og Android-appen.",
+			"deviceName": "Enhetsnavn",
+			"deviceNamePlaceholder": "f.eks. Tonys MacBook",
+			"devicePaired": "Enhet sammenkoblet",
+			"deviceRemoved": "Enhet fjernet",
+			"deviceUnpairedToast": "{{name}} brøt sammenkoblingen med denne enheten",
+			"enterCode": "Skriv inn sammenkoblingskode",
+			"hostExpiresIn": "Utløper om {{seconds}} s.",
+			"hostHint": "Skann eller kopier denne koden på enheten du vil koble sammen. Du kan lukke denne dialogen - sammenkoblingen forblir åpen til den utløper.",
+			"hostStillOpen": "Venter på at en enhet kobler til - sammenkobling åpen i {{seconds}} s.",
+			"joinHint": "Lim inn sammenkoblingskoden fra den andre enheten din.",
+			"nameSaveFailed": "Kunne ikke lagre enhetsnavn",
+			"nameSaved": "Enhetsnavn lagret",
+			"noPairedDevices": "Ingen sammenkoblede enheter ennå",
+			"noPairedDevicesHint": "Koble sammen en annen telefon eller datamaskin for å sende filer uten å dele nøkler hver gang.",
+			"nodeUnavailableHint": "Manuelle nøkler og fildeling fungerer fortsatt som normalt.",
+			"nodeUnavailableTitle": "Enhetssammenkobling er utilgjengelig",
+			"pairDevice": "Koble sammen",
+			"pairFailed": "Sammenkobling mislyktes",
+			"pairNewDevice": "Koble sammen ny enhet",
+			"pairing": "Kobler sammen…",
+			"pairingCode": "Sammenkoblingskode",
+			"relayChangePairedHint": "Sammenkoblede enheter forblir i listen. Sammenkoblet sending fungerer kanskje ikke før begge enheter kan nå hverandre med det nye nettverksoppsettet.",
+			"removeDevice": "Fjern enhet",
+			"removeFailed": "Kunne ikke fjerne enhet",
+			"rename": "Gi nytt navn",
+			"renameDevice": "Gi nytt navn til sammenkoblet enhet",
+			"renameDeviceHint": "Dette endrer bare navnet på denne enheten - ikke på den andre siden.",
+			"renameThisDevice": "Gi nytt navn til denne enheten",
+			"renameThisDeviceHint": "Velg et navn som hjelper deg å gjenkjenne denne datamaskinen ved sammenkobling.",
+			"saveName": "Lagre navn",
+			"searchNoResults": "Ingen sammenkoblede enheter samsvarer med søket.",
+			"searchPlaceholder": "Søk etter sammenkoblede enheter",
+			"showQrCode": "Vis sammenkoblingskode",
+			"statusOffline": "Frakoblet",
+			"statusOnline": "Tilkoblet",
+			"statusRePairRequired": "Ny sammenkobling kreves",
+			"statusUnpaired": "Ikke sammenkoblet",
+			"thisDevice": "Denne enheten",
+			"thisDeviceHint": "Navn som vises for enheter du kobler sammen med. OS og enhetstype oppdages automatisk.",
+			"title": "Sammenkoblede enheter",
+			"unpairedHint": "Denne enheten brøt sammenkoblingen. Fjern den fra listen din."
 		}
 	},
 	"updater": {
 		"newUpdateTitle": "Ny oppdatering!",
 		"newVersionAvailable": "Versjon {{version}} er tilgjengelig.",
-		"newVersionAvailableInline": "En ny versjon er tilgjengelig — {{version}}",
+		"newVersionAvailableInline": "En ny versjon er tilgjengelig - {{version}}",
 		"updateNow": "Oppdater nå",
 		"later": "Senere",
 		"checkForUpdates": "Se etter oppdateringer",
@@ -253,8 +382,8 @@
 			"unavailableHeading": "Relay utilgjengelig",
 			"fellBackToPublic": "Tilpasset relay utilgjengelig, bruker offentlig relay i stedet.",
 			"fellBackToastTitle": "Bruker offentlig relay",
-			"fellBackToastSend": "Din tilpassede relay var utilgjengelig — denne overføringen bruker offentlig relay.",
-			"fellBackToastReceive": "Din tilpassede relay var utilgjengelig — denne nedlastingen bruker offentlig relay.",
+			"fellBackToastSend": "Din tilpassede relay var utilgjengelig - denne overføringen bruker offentlig relay.",
+			"fellBackToastReceive": "Din tilpassede relay var utilgjengelig - denne nedlastingen bruker offentlig relay.",
 			"dialogDescription": "Viser hvilken relay-server appen bruker for tilkoblinger.",
 			"connectedRelay": "Tilkoblet relay",
 			"checking": "Sjekker tilkobling…",
@@ -270,5 +399,6 @@
 			"encryptedNote": "Overføringer er alltid ende-til-ende-kryptert, så relayer ser aldri filene dine.",
 			"disabledNote": "Relayer er av. Kun direkte tilkoblinger, så overføringer kan mislykkes gjennom strenge brannmurer eller NAT-er."
 		}
-	}
+	},
+	"comingSoon": "Kommer snart"
 }

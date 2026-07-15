@@ -1,16 +1,29 @@
 import { useThemeStore } from '../store'
 import { useEffect } from 'react'
+import { isNamedTheme, resolveColorMode, type AppTheme } from '../types/app'
+
 type Props = {
 	children: React.ReactNode
 }
 
-function resolveTheme(theme: string): 'dark' | 'light' {
-	if (theme === 'auto') {
-		return window.matchMedia('(prefers-color-scheme: dark)').matches
-			? 'dark'
-			: 'light'
+function prefersDarkScheme() {
+	return window.matchMedia('(prefers-color-scheme: dark)').matches
+}
+
+function applyTheme(theme: AppTheme, setIsDark: (isDark: boolean) => void) {
+	const resolved = resolveColorMode(theme, prefersDarkScheme())
+	const root = document.documentElement
+
+	root.classList.toggle('dark', resolved === 'dark')
+	root.classList.toggle('light', resolved === 'light')
+
+	if (isNamedTheme(theme)) {
+		root.dataset.theme = theme
+	} else {
+		delete root.dataset.theme
 	}
-	return theme as 'dark' | 'light'
+
+	setIsDark(resolved === 'dark')
 }
 
 export function AppThemeProvider({ children }: Props) {
@@ -18,19 +31,11 @@ export function AppThemeProvider({ children }: Props) {
 	const setIsDark = useThemeStore((state) => state.setIsDark)
 
 	useEffect(() => {
-		const apply = (resolved: 'dark' | 'light') => {
-			document.documentElement.classList.toggle('dark', resolved === 'dark')
-			document.documentElement.classList.toggle('light', resolved === 'light')
-			setIsDark(resolved === 'dark')
-		}
-
-		apply(resolveTheme(theme))
+		applyTheme(theme, setIsDark)
 
 		if (theme === 'auto') {
 			const mq = window.matchMedia('(prefers-color-scheme: dark)')
-			const handler = (e: MediaQueryListEvent) => {
-				apply(e.matches ? 'dark' : 'light')
-			}
+			const handler = () => applyTheme('auto', setIsDark)
 			mq.addEventListener('change', handler)
 			return () => mq.removeEventListener('change', handler)
 		}

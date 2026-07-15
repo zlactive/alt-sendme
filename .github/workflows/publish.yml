@@ -22,7 +22,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -42,47 +42,13 @@ jobs:
           node scripts/validate-version.js
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
 
-      - name: Generate release notes from commits
+      - name: Generate release notes
         id: release_notes
         shell: bash
         env:
           CURRENT_TAG: ${{ github.ref_name }}
-        run: |
-          git fetch --tags --force --prune origin
-
-          PREVIOUS_TAG=$(git tag --sort=-v:refname | grep -v "^${CURRENT_TAG}$" | head -n 1 || true)
-
-          if [ -z "$PREVIOUS_TAG" ]; then
-            echo "No previous tag found, showing all commits"
-            COMMIT_RANGE="HEAD"
-          else
-            echo "Comparing ${PREVIOUS_TAG}...${CURRENT_TAG}"
-            COMMIT_RANGE="${PREVIOUS_TAG}..HEAD"
-          fi
-
-          CHANGELOG=$(git log -50 ${COMMIT_RANGE} --pretty=format:"- %s (%h)" --no-merges)
-
-          {
-            echo "## What's Changed"
-            echo ""
-            if [ -z "$CHANGELOG" ]; then
-              echo "- Initial release"
-            else
-              echo "$CHANGELOG"
-            fi
-            echo ""
-            if [ -n "$PREVIOUS_TAG" ]; then
-              echo "**Full Changelog**: https://github.com/${{ github.repository }}/compare/${PREVIOUS_TAG}...${CURRENT_TAG}"
-            fi
-            echo ""
-            echo "---"
-            echo ""
-            echo "See the assets below to download and install this version."
-          } > release_notes.txt
-
-          echo "notes<<EOF" >> "$GITHUB_OUTPUT"
-          cat release_notes.txt >> "$GITHUB_OUTPUT"
-          echo "EOF" >> "$GITHUB_OUTPUT"
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: node scripts/generate-release-notes.js
 
       - name: Create or resolve draft GitHub release
         id: release
@@ -173,7 +139,7 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -183,10 +149,10 @@ jobs:
           node-version: '24.x'
           cache: pnpm
 
+      # Pin encodes toolchain 1.91.0; `toolchain:` is not a valid input on this action form.
       - name: Install Rust
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           components: rustfmt
           targets: "${{ matrix.platform == 'macos-latest' && 'aarch64-apple-darwin,x86_64-apple-darwin' || matrix.rust_target }}"
 
@@ -207,6 +173,30 @@ jobs:
         run: |
           $env:Path = "C:\Program Files (x86)\NSIS;" + $env:Path
           echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+
+      # WiX light.exe needs the VBSCRIPT optional feature (often missing on newer Windows images).
+      # Without it MSI bundling fails with a bare "failed to run ...\light.exe".
+      - name: Enable VBSCRIPT for WiX MSI (Windows x64 only)
+        if: matrix.platform == 'windows-latest' && matrix.arch == 'x86_64'
+        shell: pwsh
+        run: |
+          $caps = @(Get-WindowsCapability -Online | Where-Object { $_.Name -like 'VBSCRIPT*' })
+          if ($caps.Count -eq 0) {
+            Write-Host 'No VBSCRIPT* capability found; trying VBSCRIPT~~~~'
+            Add-WindowsCapability -Online -Name 'VBSCRIPT~~~~'
+          } else {
+            foreach ($cap in $caps) {
+              Write-Host ("{0} state={1}" -f $cap.Name, $cap.State)
+              if ($cap.State -ne 'Installed') {
+                Write-Host ("Installing {0}..." -f $cap.Name)
+                Add-WindowsCapability -Online -Name $cap.Name
+              }
+            }
+          }
+          Get-WindowsCapability -Online | Where-Object { $_.Name -like 'VBSCRIPT*' } | Format-Table Name, State
+          if (-not (Test-Path "$env:SystemRoot\System32\vbscript.dll") -and -not (Test-Path "$env:SystemRoot\SysWOW64\vbscript.dll")) {
+            Write-Warning 'vbscript.dll still missing after capability install — MSI light.exe may fail'
+          }
 
       - name: Rust cache
         uses: swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
@@ -231,6 +221,7 @@ jobs:
         run: |
           set -eux
           if [ "${{ matrix.platform }}" = "macos-latest" ]; then
+            brew untap aws/tap 2>/dev/null || true
             brew install llvm
             echo "CC=$(brew --prefix llvm)/bin/clang" >> "$GITHUB_ENV"
           fi
@@ -292,7 +283,10 @@ jobs:
           fi
           echo "All notarization secrets present"
 
-      - uses: tauri-apps/tauri-action@84b9d35b5fc46c1e45415bdb6144030364f7ebc5
+      # Retries only help transient latest.json upload races. Keep low — each attempt
+      # re-runs the full tauri build (wasm + frontend + rust + bundles), which turned a
+      # deterministic WiX/MSI failure into ~40+ minutes of useless rebuilds.
+      - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           APPLE_SIGNING_IDENTITY: "Developer ID Application: Tony Antony (9H7RVQAP36)"
@@ -313,7 +307,19 @@ jobs:
           args: ${{ matrix.args }}
           releaseDraft: true
           prerelease: false
-          includeUpdaterJson: true
+          uploadUpdaterJson: true
+          retryAttempts: 2
+
+      - name: Package Windows portable ZIP
+        if: matrix.platform == 'windows-latest'
+        shell: bash
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          RELEASE_ID: ${{ needs.prepare-release.outputs.release_id }}
+          RUST_TARGET: ${{ matrix.rust_target }}
+          VERSION: ${{ needs.prepare-release.outputs.version }}
+        run: node scripts/package-windows-portable.js
 
       - name: Patch Linux .deb dependencies (ubuntu only)
         if: contains(matrix.platform, 'ubuntu')
@@ -336,7 +342,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -347,13 +353,13 @@ jobs:
           cache: pnpm
 
       - name: Set up JDK 17
-        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9
+        uses: actions/setup-java@0f481fcb613427c0f801b606911222b5b6f3083a # v5.5.0
         with:
           distribution: 'temurin'
           java-version: '17'
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@9fc6c4e9069bf8d3d10b2204b1fb8f6ef7065407
+        uses: android-actions/setup-android@40fd30fb8d7440372e1316f5d1809ec01dcd3699 # v4.0.1
         with:
           packages: build-tools;36.0.0 platform-tools platforms;android-36
 
@@ -378,9 +384,8 @@ jobs:
           fi
 
       - name: Set Rust 1.91 and Android targets
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           components: rustfmt
           targets: aarch64-linux-android,armv7-linux-androideabi
 
@@ -463,7 +468,7 @@ jobs:
     steps:
       - uses: actions/checkout@93cb6efe18208431cddfb8368fd83d5badbf9bfd
 
-      - uses: pnpm/action-setup@v4
+      - uses: pnpm/action-setup@0ebf47130e4866e96fce0953f49152a61190b271 # v6.0.9
         with:
           version: 10.12.1
 
@@ -474,9 +479,8 @@ jobs:
           cache: pnpm
 
       - name: Set up Rust (WASM)
-        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249
+        uses: dtolnay/rust-toolchain@3056ad9b1fc916cb9a55f7f72ae4a848b7d50249 # 1.91.0
         with:
-          toolchain: 1.91.0
           targets: wasm32-unknown-unknown
 
       - name: Ensure wasm32 target

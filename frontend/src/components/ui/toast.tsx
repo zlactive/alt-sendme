@@ -38,10 +38,11 @@ interface ToastProviderProps extends Toast.Provider.Props {
 function ToastProvider({
 	children,
 	position = 'bottom-right',
+	timeout = 3000,
 	...props
 }: ToastProviderProps) {
 	return (
-		<Toast.Provider toastManager={toastManager} {...props}>
+		<Toast.Provider toastManager={toastManager} timeout={timeout} {...props}>
 			{children}
 			<Toasts position={position} />
 		</Toast.Provider>
@@ -56,7 +57,7 @@ function Toasts({ position = 'bottom-right' }: { position: ToastPosition }) {
 		<Toast.Portal data-slot="toast-portal">
 			<Toast.Viewport
 				className={cn(
-					'fixed z-50 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-90 [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]',
+					'fixed z-100 mx-auto flex w-[calc(100%-var(--toast-inset)*2)] max-w-90 [--toast-inset:--spacing(4)] sm:[--toast-inset:--spacing(8)]',
 					// Vertical positioning
 					'data-[position*=top]:top-(--toast-inset)',
 					'data-[position*=bottom]:bottom-(--toast-inset)',
@@ -166,9 +167,17 @@ function Toasts({ position = 'bottom-right' }: { position: ToastPosition }) {
 	)
 }
 
-function AnchoredToastProvider({ children, ...props }: Toast.Provider.Props) {
+function AnchoredToastProvider({
+	children,
+	timeout = 3000,
+	...props
+}: Toast.Provider.Props) {
 	return (
-		<Toast.Provider toastManager={anchoredToastManager} {...props}>
+		<Toast.Provider
+			toastManager={anchoredToastManager}
+			timeout={timeout}
+			{...props}
+		>
 			{children}
 			<AnchoredToasts />
 		</Toast.Provider>

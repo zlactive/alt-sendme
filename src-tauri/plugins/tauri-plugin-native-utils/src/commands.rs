@@ -29,9 +29,34 @@ pub(crate) async fn select_send_folder<R: Runtime>(
 }
 
 #[command]
+pub(crate) async fn consume_share_intent<R: Runtime>(
+    app: AppHandle<R>,
+    channel: Channel,
+) -> Result<bool> {
+    app.native_utils().consume_share_intent(channel)
+}
+
+#[command]
 pub(crate) async fn cancel_job<R: Runtime>(
     app: tauri::AppHandle<R>,
     job: AsyncJob,
 ) -> Result<()> {
     app.native_utils().cancel_job(job)
+}
+
+#[command]
+pub(crate) async fn export_to_tree<R: Runtime>(
+    app: AppHandle<R>,
+    args: ExportToTreeArgs,
+) -> Result<ExportToTreeResult> {
+    app.native_utils().export_to_tree(args)
+}
+
+#[command]
+pub(crate) async fn open_download_folder<R: Runtime>(
+    app: AppHandle<R>,
+    tree_uri: String,
+) -> Result<()> {
+    app.native_utils()
+        .open_download_folder(OpenDownloadFolderArgs { tree_uri })
 }

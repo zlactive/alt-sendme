@@ -3,7 +3,7 @@ import {
 	persist,
 	// createJSONStorage
 } from 'zustand/middleware'
-import type { AppTheme } from '../types/app'
+import { APP_THEMES, type AppTheme } from '../types/app'
 import { IS_WEB } from '../lib/platform'
 
 export type IThemeStore = {
@@ -21,7 +21,7 @@ type PersistedThemeState = {
 export const useThemeStore = create<IThemeStore>()(
 	persist(
 		(set) => ({
-			themes: ['dark', 'light', 'auto'],
+			themes: APP_THEMES,
 			activeTheme: IS_WEB ? 'light' : 'auto',
 			setTheme: (activeTheme: AppTheme) => set(() => ({ activeTheme })),
 			isDark: false,
@@ -29,7 +29,7 @@ export const useThemeStore = create<IThemeStore>()(
 		}),
 		{
 			name: 'active-theme',
-			version: 1,
+			version: 2,
 			// storage: createJSONStorage(() => sessionStorage),
 			partialize: (state) =>
 				Object.fromEntries(
