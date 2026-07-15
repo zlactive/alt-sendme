@@ -46,6 +46,11 @@ class ExportToTreeArgs {
     var sourceDir: String = ""
 }
 
+@InvokeArg
+class OpenDownloadFolderArgs {
+    var treeUri: String = ""
+}
+
 @Keep
 data class DownloadFolderSelectionResponse(
     val uri: String,
@@ -129,6 +134,39 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
             } catch (e: Exception) {
                 invoke.reject(e.message ?: "Failed to export to selected folder")
             }
+        }
+    }
+
+    @Command
+    fun open_download_folder(invoke: Invoke) {
+        val args = invoke.parseArgs(OpenDownloadFolderArgs::class.java)
+        val treeUriString = args.treeUri.trim()
+        if (treeUriString.isEmpty()) {
+            return invoke.reject("No download folder URI available")
+        }
+
+        try {
+            val treeUri = Uri.parse(treeUriString)
+            if (!DocumentsContract.isTreeUri(treeUri)) {
+                return invoke.reject("Invalid download folder URI")
+            }
+
+            val docId = DocumentsContract.getTreeDocumentId(treeUri)
+            val documentUri = DocumentsContract.buildDocumentUriUsingTree(treeUri, docId)
+            val intent = Intent(Intent.ACTION_VIEW).apply {
+                setDataAndType(documentUri, DocumentsContract.Document.MIME_TYPE_DIR)
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+            }
+
+            try {
+                activity.startActivity(intent)
+            } catch (_: android.content.ActivityNotFoundException) {
+                activity.startActivity(Intent.createChooser(intent, null))
+            }
+            invoke.resolve()
+        } catch (e: Exception) {
+            invoke.reject(e.message ?: "Failed to open download folder")
         }
     }
 

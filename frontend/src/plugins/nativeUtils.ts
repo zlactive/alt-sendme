@@ -41,6 +41,15 @@ export async function selectDownloadFolder(): Promise<DownloadFolderSelectionRes
 	)
 }
 
+/** Open the selected Android SAF download folder in a system file manager. */
+export async function openDownloadFolder(treeUri: string): Promise<void> {
+	if (!IS_TAURI) return
+
+	await invoke<void>('plugin:native-utils|open_download_folder', {
+		treeUri,
+	})
+}
+
 type CopyHandlers = {
 	onStart: (path: string, size: bigint) => void
 	onEvent: (event: CopyProgress) => void

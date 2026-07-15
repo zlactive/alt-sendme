@@ -72,3 +72,11 @@ impl<R: Runtime> NativeUtils<R> {
             .map_err(Into::into)
     }
 }
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn open_download_folder(&self, args: OpenDownloadFolderArgs) -> crate::Result<()> {
+        self.0
+            .run_mobile_plugin("open_download_folder", args)
+            .map_err(Into::into)
+    }
+}

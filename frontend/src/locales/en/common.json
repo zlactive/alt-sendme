@@ -211,7 +211,8 @@
 		"receiveFailed": "Receive Failed",
 		"receiveFailedDesc": "Failed to receive file",
 		"openFolderFailed": "Open Folder Failed",
-		"openFolderFailedDesc": "Failed to open download folder"
+		"openFolderFailedDesc": "Failed to open download folder",
+		"openFolderUnavailableDesc": "Files were saved to the app's private folder, which cannot be opened in a file manager. Choose a download folder before receiving to open it here."
 	},
 	"settings": {
 		"title": "Settings",

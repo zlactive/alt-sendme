@@ -48,3 +48,9 @@ impl<R: Runtime> NativeUtils<R> {
         Err(crate::Error::UnsupportedPlafrormError)
     }
 }
+
+impl<R: Runtime> NativeUtils<R> {
+    pub fn open_download_folder(&self, _: OpenDownloadFolderArgs) -> crate::Result<()> {
+        Err(crate::Error::UnsupportedPlafrormError)
+    }
+}

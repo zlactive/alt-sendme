@@ -5,6 +5,7 @@ const COMMANDS: &[&str] = &[
     "consume_share_intent",
     "cancel_job",
     "export_to_tree",
+    "open_download_folder",
 ];
 
 fn main() {

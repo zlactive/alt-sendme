@@ -9,7 +9,7 @@ import {
 	supportsWebSaveLocationPicker,
 	type UnlistenFn,
 } from '@/lib/platform-api'
-import { selectDownloadFolder } from '@/plugins/nativeUtils'
+import { selectDownloadFolder, openDownloadFolder } from '@/plugins/nativeUtils'
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useTranslation } from '../i18n/react-i18next-compat'
 import { sendSystemNotification } from '../lib/systemNotification'
@@ -137,6 +137,9 @@ export function useReceiver(): UseReceiverReturn {
 	const transferStartTimeRef = useRef<number | null>(null)
 	const savePathRef = useRef<string>('')
 	const folderOpenTriggeredRef = useRef(false)
+	// SAF tree URI that can be opened after a successful Android export.
+	// Cleared when receive falls back to the app-private staging folder.
+	const androidOpenUriRef = useRef('')
 	const speedAveragerRef = useRef<SpeedAverager>(new SpeedAverager(10))
 	const previewRequestSeqRef = useRef(0)
 	const previewMetadataRef = useRef<TicketPreviewMetadata | null>(null)
@@ -395,6 +398,7 @@ export function useReceiver(): UseReceiverReturn {
 					const reason =
 						typeof payload === 'object' ? payload?.reason : undefined
 					if (!fallbackPath) return
+					androidOpenUriRef.current = ''
 					setSavePath(fallbackPath)
 					setTransferMetadata((prev) =>
 						prev ? { ...prev, downloadPath: fallbackPath } : prev
@@ -595,6 +599,9 @@ export function useReceiver(): UseReceiverReturn {
 				setIsPreviewLoading(false)
 				pendingConflictNoticeRef.current = null
 				folderOpenTriggeredRef.current = false
+				androidOpenUriRef.current = IS_ANDROID
+					? downloadsUriRef.current.trim()
+					: ''
 
 				let outputPath = savePathRef.current.trim()
 				if (!outputPath && !IS_WEB && !IS_ANDROID) {
@@ -717,21 +724,44 @@ export function useReceiver(): UseReceiverReturn {
 		setIsPreviewLoading(false)
 		pendingConflictNoticeRef.current = null
 		folderOpenTriggeredRef.current = false
+		androidOpenUriRef.current = ''
 		transferItemCountRef.current = undefined
 	}
 
 	const handleOpenFolder = async () => {
-		if (IS_WEB || !savePath || folderOpenTriggeredRef.current) {
+		if (IS_WEB || folderOpenTriggeredRef.current) {
 			return
 		}
 
 		try {
 			folderOpenTriggeredRef.current = true
+
+			if (IS_ANDROID) {
+				const treeUri = androidOpenUriRef.current.trim()
+				if (!treeUri) {
+					folderOpenTriggeredRef.current = false
+					showAlert(
+						t('common:errors.openFolderFailed'),
+						t('common:errors.openFolderUnavailableDesc'),
+						'error'
+					)
+					return
+				}
+				await openDownloadFolder(treeUri)
+				return
+			}
+
+			if (!savePath) {
+				folderOpenTriggeredRef.current = false
+				return
+			}
+
 			const targetPath = await resolveRevealPath(savePath, fileNamesRef.current)
 			if (targetPath) {
 				await revealItemInDir(targetPath)
 			}
 		} catch (error) {
+			folderOpenTriggeredRef.current = false
 			console.error('Failed to open download folder:', error)
 			showAlert(
 				t('common:errors.openFolderFailed'),

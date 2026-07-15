@@ -51,3 +51,12 @@ pub(crate) async fn export_to_tree<R: Runtime>(
 ) -> Result<ExportToTreeResult> {
     app.native_utils().export_to_tree(args)
 }
+
+#[command]
+pub(crate) async fn open_download_folder<R: Runtime>(
+    app: AppHandle<R>,
+    tree_uri: String,
+) -> Result<()> {
+    app.native_utils()
+        .open_download_folder(OpenDownloadFolderArgs { tree_uri })
+}

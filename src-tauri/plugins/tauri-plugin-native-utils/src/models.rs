@@ -28,6 +28,12 @@ pub struct ExportToTreeArgs {
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(rename_all = "camelCase")]
+pub struct OpenDownloadFolderArgs {
+    pub tree_uri: String,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(rename_all = "camelCase")]
 pub struct ExportToTreeConflict {
     pub original: String,
     pub resolved: String,

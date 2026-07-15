@@ -252,6 +252,7 @@ function invokeWebStub<T>(cmd: string, args?: Record<string, unknown>): T {
 		case 'plugin:native-utils|select_send_folder':
 		case 'plugin:native-utils|consume_share_intent':
 		case 'plugin:native-utils|cancel_job':
+		case 'plugin:native-utils|open_download_folder':
 			return null as T
 		default:
 			console.warn(`[web] unhandled invoke: ${cmd}`)
