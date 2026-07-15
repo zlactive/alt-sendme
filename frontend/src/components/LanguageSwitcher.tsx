@@ -1,5 +1,5 @@
 import type { ButtonProps } from '@base-ui/react'
-import ReactCountryFlag from 'react-country-flag'
+import { CountryFlag } from '@/components/CountryFlag'
 import {
 	Combobox,
 	ComboboxEmpty,
@@ -104,9 +104,8 @@ export function LanguageSwitcher(props: ButtonProps) {
 					{(item: { value: string; label: string; countryCode?: string }) => (
 						<ComboboxItem key={item.value} value={item}>
 							{item.countryCode && (
-								<ReactCountryFlag
+								<CountryFlag
 									countryCode={item.countryCode}
-									svg
 									style={{
 										width: '1.5em',
 										height: '1.5em',

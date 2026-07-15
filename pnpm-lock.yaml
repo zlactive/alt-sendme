@@ -50,6 +50,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      country-flag-icons:
+        specifier: ^1.6.20
+        version: 1.6.20
       framer-motion:
         specifier: ^12.23.24
         version: 12.42.0(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
@@ -68,9 +71,6 @@ importers:
       react:
         specifier: ^18.2.0
         version: 18.3.1
-      react-country-flag:
-        specifier: ^3.1.0
-        version: 3.1.0(react@18.3.1)
       react-dom:
         specifier: ^18.2.0
         version: 18.3.1(react@18.3.1)
@@ -1295,6 +1295,9 @@ packages:
     resolution: {integrity: sha512-ei8Aos7ja0weRpFzJnEA9UHJ/7XQmqglbRwnf2ATjcB9Wq874VKH9kfjjirM6UhU2/E5fFYadylyhFldcqSidQ==}
     engines: {node: '>=18'}
 
+  country-flag-icons@1.6.20:
+    resolution: {integrity: sha512-py8JiEKzjhYw6HPJ0L7SxLgCYim36UPRTZX43/kqGueUCZLSvnrqAiwW8HtQibur7mdkFQUkjOgdK+o/9FBtaw==}
+
   csstype@3.2.3:
     resolution: {integrity: sha512-z1HGKcYy2xA8AGQfwrn0PAy+PB7X/GSj3UVJW9qKyn43xWa+gl5nXmU4qqLMRzWVLFC8KusUX8T/0kCiOYpAIQ==}
 
@@ -1501,12 +1504,6 @@ packages:
         optional: true
       '@types/react-dom':
         optional: true
-
-  react-country-flag@3.1.0:
-    resolution: {integrity: sha512-JWQFw1efdv9sTC+TGQvTKXQg1NKbDU2mBiAiRWcKM9F1sK+/zjhP2yGmm8YDddWyZdXVkR8Md47rPMJmo4YO5g==}
-    engines: {node: '>=12'}
-    peerDependencies:
-      react: '>=16'
 
   react-dom@18.3.1:
     resolution: {integrity: sha512-5m4nQKp+rZRb09LNH59GM4BxTh9251/ylbKIbpe7TpGxfJ+9kv6BLkLBXIjjspbgbnIBNqlI23tRnTWT0snUIw==}
@@ -2824,6 +2821,8 @@ snapshots:
 
   cookie@1.1.1: {}
 
+  country-flag-icons@1.6.20: {}
+
   csstype@3.2.3: {}
 
   detect-libc@2.1.2: {}
@@ -3028,10 +3027,6 @@ snapshots:
     optionalDependencies:
       '@types/react': 18.3.31
       '@types/react-dom': 18.3.7(@types/react@18.3.31)
-
-  react-country-flag@3.1.0(react@18.3.1):
-    dependencies:
-      react: 18.3.1
 
   react-dom@18.3.1(react@18.3.1):
     dependencies:
