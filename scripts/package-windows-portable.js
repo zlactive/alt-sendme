@@ -65,19 +65,31 @@ function archLabel(rustTarget) {
 	throw new Error(`Unsupported RUST_TARGET for portable ZIP: ${rustTarget}`)
 }
 
+/** Cargo package name → binary; Tauri may also rename via mainBinaryName / productName. */
+const EXE_CANDIDATES = [`${PRODUCT_NAME}.exe`, 'alt-sendme.exe']
+
+function findBuiltExe(releaseDir) {
+	for (const name of EXE_CANDIDATES) {
+		const exe = path.join(releaseDir, name)
+		if (fs.existsSync(exe)) {
+			return exe
+		}
+	}
+	return null
+}
+
 function findReleaseDir(rustTarget) {
 	const candidates = [
 		path.join(repoRoot, 'src-tauri', 'target', rustTarget, 'release'),
 		path.join(repoRoot, 'src-tauri', 'target', 'release'),
 	]
 	for (const dir of candidates) {
-		const exe = path.join(dir, `${PRODUCT_NAME}.exe`)
-		if (fs.existsSync(exe)) {
+		if (findBuiltExe(dir)) {
 			return dir
 		}
 	}
 	throw new Error(
-		`Could not find ${PRODUCT_NAME}.exe under target/${rustTarget}/release or target/release. Run the Windows Tauri build first.`
+		`Could not find ${EXE_CANDIDATES.join(' or ')} under target/${rustTarget}/release or target/release. Run the Windows Tauri build first.`
 	)
 }
 
@@ -103,8 +115,19 @@ function stagePortablePayload(releaseDir, stagingAppDir) {
 	fs.rmSync(stagingAppDir, { recursive: true, force: true })
 	fs.mkdirSync(stagingAppDir, { recursive: true })
 
+	const builtExe = findBuiltExe(releaseDir)
+	if (!builtExe) {
+		throw new Error(
+			`Missing Windows binary in ${releaseDir} (looked for ${EXE_CANDIDATES.join(', ')})`
+		)
+	}
+
+	// Always ship as AltSendme.exe for a stable portable layout / README.
 	const exeName = `${PRODUCT_NAME}.exe`
-	copyFile(path.join(releaseDir, exeName), path.join(stagingAppDir, exeName))
+	copyFile(builtExe, path.join(stagingAppDir, exeName))
+	if (path.basename(builtExe) !== exeName) {
+		console.log(`Renamed ${path.basename(builtExe)} → ${exeName} for portable ZIP`)
+	}
 
 	const loader = path.join(releaseDir, 'WebView2Loader.dll')
 	if (fs.existsSync(loader)) {
@@ -114,7 +137,7 @@ function stagePortablePayload(releaseDir, stagingAppDir) {
 	const resources = path.join(releaseDir, 'resources')
 	if (!fs.existsSync(resources)) {
 		throw new Error(
-			`Missing resources/ next to ${PRODUCT_NAME}.exe at ${releaseDir}. The portable ZIP must include the same resources as the installer.`
+			`Missing resources/ next to ${path.basename(builtExe)} at ${releaseDir}. The portable ZIP must include the same resources as the installer.`
 		)
 	}
 	copyDir(resources, path.join(stagingAppDir, 'resources'))

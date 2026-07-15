@@ -174,6 +174,30 @@ jobs:
           $env:Path = "C:\Program Files (x86)\NSIS;" + $env:Path
           echo "C:\Program Files (x86)\NSIS" | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
 
+      # WiX light.exe needs the VBSCRIPT optional feature (often missing on newer Windows images).
+      # Without it MSI bundling fails with a bare "failed to run ...\light.exe".
+      - name: Enable VBSCRIPT for WiX MSI (Windows x64 only)
+        if: matrix.platform == 'windows-latest' && matrix.arch == 'x86_64'
+        shell: pwsh
+        run: |
+          $caps = @(Get-WindowsCapability -Online | Where-Object { $_.Name -like 'VBSCRIPT*' })
+          if ($caps.Count -eq 0) {
+            Write-Host 'No VBSCRIPT* capability found; trying VBSCRIPT~~~~'
+            Add-WindowsCapability -Online -Name 'VBSCRIPT~~~~'
+          } else {
+            foreach ($cap in $caps) {
+              Write-Host ("{0} state={1}" -f $cap.Name, $cap.State)
+              if ($cap.State -ne 'Installed') {
+                Write-Host ("Installing {0}..." -f $cap.Name)
+                Add-WindowsCapability -Online -Name $cap.Name
+              }
+            }
+          }
+          Get-WindowsCapability -Online | Where-Object { $_.Name -like 'VBSCRIPT*' } | Format-Table Name, State
+          if (-not (Test-Path "$env:SystemRoot\System32\vbscript.dll") -and -not (Test-Path "$env:SystemRoot\SysWOW64\vbscript.dll")) {
+            Write-Warning 'vbscript.dll still missing after capability install — MSI light.exe may fail'
+          }
+
       - name: Rust cache
         uses: swatinem/rust-cache@e18b497796c12c097a38f9edb9d0641fb99eee32
         with:
@@ -259,7 +283,9 @@ jobs:
           fi
           echo "All notarization secrets present"
 
-      # v1.0.0: jittered retries for parallel latest.json uploads (already_exists races).
+      # Retries only help transient latest.json upload races. Keep low — each attempt
+      # re-runs the full tauri build (wasm + frontend + rust + bundles), which turned a
+      # deterministic WiX/MSI failure into ~40+ minutes of useless rebuilds.
       - uses: tauri-apps/tauri-action@1deb371b0cd8bd54025b384f1cd735e725c4060f # action-v1.0.0
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -282,7 +308,7 @@ jobs:
           releaseDraft: true
           prerelease: false
           uploadUpdaterJson: true
-          retryAttempts: 8
+          retryAttempts: 2
 
       - name: Package Windows portable ZIP
         if: matrix.platform == 'windows-latest'
