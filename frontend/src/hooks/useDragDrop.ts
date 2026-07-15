@@ -2,7 +2,6 @@ import { getCurrentWindow, invoke, openDialog } from '@/lib/platform-api'
 import { processWebDataTransfer } from '@/lib/web-drag-drop'
 import {
 	consumeShareIntent,
-	debugShareSnapshot,
 	onShareReceived,
 	selectSendDocument,
 	selectSendFolder,
@@ -458,29 +457,6 @@ export function useDragDrop(
 		// devices, so keep polling for several seconds rather than giving up early.
 		const retryDelaysMs = [400, 1000, 2000, 3500, 5500, 8000]
 
-		// Temporary diagnostic: if we still haven't consumed anything by the time
-		// retries run out, show what the native side actually saw on-screen (no
-		// adb/chrome://inspect required to see this).
-		const reportIfUnresolved = async () => {
-			if (disposed || settled) return
-			const snapshot = await debugShareSnapshot()
-			if (disposed || settled || !snapshot) return
-			if (snapshot.action !== 'android.intent.action.SEND') return
-			showAlert(
-				'Share debug',
-				[
-					`action=${snapshot.action}`,
-					`type=${snapshot.type}`,
-					`hasStream=${snapshot.hasStream}`,
-					`hasClipData=${snapshot.hasClipData}`,
-					`dataString=${snapshot.dataString}`,
-					`extractedUri=${snapshot.extractedUri}`,
-					`pendingUriPresent=${snapshot.pendingUriPresent}`,
-				].join(' | '),
-				'info'
-			)
-		}
-
 		const run = async () => {
 			if (disposed || settled) return
 			const consumed = await consumeAndroidShareRef.current()
@@ -504,12 +480,6 @@ export function useDragDrop(
 			for (const delay of retryDelaysMs) {
 				retryTimers.push(window.setTimeout(() => void run(), delay))
 			}
-			retryTimers.push(
-				window.setTimeout(
-					() => void reportIfUnresolved(),
-					retryDelaysMs[retryDelaysMs.length - 1] + 500
-				)
-			)
 		}
 
 		void setup()
@@ -521,7 +491,7 @@ export function useDragDrop(
 				window.clearTimeout(id)
 			}
 		}
-	}, [showAlert])
+	}, [])
 
 	return {
 		isDragActive,

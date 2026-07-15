@@ -319,18 +319,6 @@
           "markdownDescription": "Denies the consume_share_intent command without any pre-configured scope."
         },
         {
-          "description": "Enables the debug_share_snapshot command without any pre-configured scope.",
-          "type": "string",
-          "const": "allow-debug-share-snapshot",
-          "markdownDescription": "Enables the debug_share_snapshot command without any pre-configured scope."
-        },
-        {
-          "description": "Denies the debug_share_snapshot command without any pre-configured scope.",
-          "type": "string",
-          "const": "deny-debug-share-snapshot",
-          "markdownDescription": "Denies the debug_share_snapshot command without any pre-configured scope."
-        },
-        {
           "description": "Enables the export_to_tree command without any pre-configured scope.",
           "type": "string",
           "const": "allow-export-to-tree",
@@ -391,10 +379,10 @@
           "markdownDescription": "Denies the select_send_folder command without any pre-configured scope."
         },
         {
-          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-select-download-folder`\n- `allow-select-send-document`\n- `allow-select-send-folder`\n- `allow-consume-share-intent`\n- `allow-debug-share-snapshot`\n- `allow-cancel-job`\n- `allow-export-to-tree`\n- `allow-open-download-folder`",
+          "description": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-select-download-folder`\n- `allow-select-send-document`\n- `allow-select-send-folder`\n- `allow-consume-share-intent`\n- `allow-cancel-job`\n- `allow-export-to-tree`\n- `allow-open-download-folder`",
           "type": "string",
           "const": "default",
-          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-select-download-folder`\n- `allow-select-send-document`\n- `allow-select-send-folder`\n- `allow-consume-share-intent`\n- `allow-debug-share-snapshot`\n- `allow-cancel-job`\n- `allow-export-to-tree`\n- `allow-open-download-folder`"
+          "markdownDescription": "Default permissions for the plugin\n#### This default permission set includes:\n\n- `allow-select-download-folder`\n- `allow-select-send-document`\n- `allow-select-send-folder`\n- `allow-consume-share-intent`\n- `allow-cancel-job`\n- `allow-export-to-tree`\n- `allow-open-download-folder`"
         }
       ]
     }

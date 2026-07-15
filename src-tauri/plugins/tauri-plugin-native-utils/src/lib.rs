@@ -40,7 +40,6 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::select_send_document,
             commands::select_send_folder,
             commands::consume_share_intent,
-            commands::debug_share_snapshot,
             commands::cancel_job,
             commands::export_to_tree,
             commands::open_download_folder,

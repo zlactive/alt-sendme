@@ -5,7 +5,6 @@ permissions = [
     "allow-select-send-document",
     "allow-select-send-folder",
     "allow-consume-share-intent",
-    "allow-debug-share-snapshot",
     "allow-cancel-job",
     "allow-export-to-tree",
     "allow-open-download-folder"
