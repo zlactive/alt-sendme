@@ -50,6 +50,14 @@ impl<R: Runtime> NativeUtils<R> {
 }
 
 impl<R: Runtime> NativeUtils<R> {
+    pub fn consume_share_intent(&self, channel: Channel) -> crate::Result<bool> {
+        self.0
+            .run_mobile_plugin("consume_share_intent", SelectItemArgs { channel })
+            .map_err(Into::into)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
     pub fn cancel_job(&self, job: AsyncJob) -> crate::Result<()> {
         self.0
             .run_mobile_plugin("cancel_job", job)

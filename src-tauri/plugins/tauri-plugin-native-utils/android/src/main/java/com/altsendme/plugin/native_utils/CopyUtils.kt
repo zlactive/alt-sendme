@@ -3,6 +3,7 @@ package com.altsendme.plugin.native_utils
 import android.content.Context
 import android.net.Uri
 import android.provider.DocumentsContract
+import android.provider.OpenableColumns
 import androidx.annotation.Keep
 import androidx.documentfile.provider.DocumentFile
 import app.tauri.plugin.JSObject
@@ -15,6 +16,39 @@ import java.io.File
 import java.io.IOException
 
 const val BUFFER_SIZE = 1024 * 1024
+
+fun resolveDisplayName(context: Context, uri: Uri): String {
+    DocumentFile.fromSingleUri(context, uri)?.name?.takeIf { it.isNotBlank() }?.let { return it }
+
+    context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)
+        ?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
+                if (index >= 0) {
+                    cursor.getString(index)?.takeIf { it.isNotBlank() }?.let { return it }
+                }
+            }
+        }
+
+    val lastSegment = uri.lastPathSegment?.substringAfterLast('/')?.takeIf { it.isNotBlank() }
+    return lastSegment ?: "shared-file-${System.currentTimeMillis()}"
+}
+
+fun resolveContentLength(context: Context, uri: Uri): Long {
+    DocumentFile.fromSingleUri(context, uri)?.length()?.takeIf { it >= 0 }?.let { return it }
+
+    context.contentResolver.query(uri, arrayOf(OpenableColumns.SIZE), null, null, null)
+        ?.use { cursor ->
+            if (cursor.moveToFirst()) {
+                val index = cursor.getColumnIndex(OpenableColumns.SIZE)
+                if (index >= 0 && !cursor.isNull(index)) {
+                    return cursor.getLong(index).coerceAtLeast(0L)
+                }
+            }
+        }
+
+    return 0L
+}
 
 @Keep
 data class CopyProgress(
@@ -63,9 +97,8 @@ fun copyUri(
         )
     }
 
-    val source = DocumentFile.fromSingleUri(context, uri)
-    val fileName = source?.name
-        ?: throw IOException("Cannot get file name for $uri")
+    val fileName = resolveDisplayName(context, uri)
+    val totalBytes = resolveContentLength(context, uri)
 
     val target = destination.resolve(fileName)
     target.parentFile?.mkdirs()
@@ -74,13 +107,12 @@ fun copyUri(
     emit(
         CopyProgress(
             copiedBytes = 0,
-            totalBytes = source.length(),
+            totalBytes = totalBytes,
             target.absolutePath,
         )
     )
 
     var copiedBytes = 0L
-    val totalBytes = source.length()
 
     context.contentResolver.openInputStream(uri)?.use { input ->
         target.outputStream().use { output ->
@@ -99,12 +131,13 @@ fun copyUri(
                 )
             }
         }
-    } ?: throw IOException("Cannot open stream for: $source")
+    } ?: throw IOException("Cannot open stream for: $uri")
 
+    val finalTotal = if (totalBytes > 0) totalBytes else copiedBytes
     emit(
         CopyProgress(
-            copiedBytes = totalBytes,
-            totalBytes = totalBytes,
+            copiedBytes = finalTotal,
+            totalBytes = finalTotal,
             target.absolutePath,
         )
     )

@@ -3,6 +3,7 @@ package com.altsendme.plugin.native_utils
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
+import android.os.Build
 import android.os.Environment
 import android.provider.DocumentsContract
 import android.webkit.WebView
@@ -14,6 +15,7 @@ import app.tauri.annotation.InvokeArg
 import app.tauri.annotation.TauriPlugin
 import app.tauri.plugin.Channel
 import app.tauri.plugin.Invoke
+import app.tauri.plugin.JSObject
 import app.tauri.plugin.Plugin
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.CoroutineStart
@@ -26,6 +28,7 @@ import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.util.concurrent.ConcurrentHashMap
+import java.util.concurrent.atomic.AtomicReference
 
 @InvokeArg
 class SelectorArgs {
@@ -47,10 +50,12 @@ data class DownloadFolderSelectionResponse(
 class NativeUtils(private val activity: Activity) : Plugin(activity) {
     private val scope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private val jobs = ConcurrentHashMap<Long, Pair<Job, String>>()
+    private val pendingShareUri = AtomicReference<Uri?>(null)
 
     companion object {
         private const val RW_PERMISSION_FLAGS =
             Intent.FLAG_GRANT_WRITE_URI_PERMISSION or Intent.FLAG_GRANT_READ_URI_PERMISSION
+        private const val SHARE_RECEIVED_EVENT = "shareReceived"
     }
 
     @Command
@@ -75,6 +80,17 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
         Intent(Intent.ACTION_OPEN_DOCUMENT_TREE),
         this::handleSendSelection.name
     )
+
+    @Command
+    fun consume_share_intent(invoke: Invoke) {
+        val args = invoke.parseArgs(SelectorArgs::class.java)
+        val uri = pendingShareUri.getAndSet(null)
+            ?: takeShareUri(activity.intent)
+            ?: return invoke.resolveObject(false)
+
+        startUriCopy(uri, args.channel)
+        invoke.resolveObject(true)
+    }
 
     @Command
     fun cancel_job(invoke: Invoke) {
@@ -131,13 +147,51 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
 
         val uri = result.data?.data ?: return invoke.resolveObject(false)
 
+        startUriCopy(uri, channel)
+        invoke.resolveObject(true)
+    }
+
+    override fun load(webView: WebView) {
+        super.load(webView)
+
+        // Cold start: capture share URI before the frontend mounts and asks to consume it.
+        // Skip wiping file_cache when a share is pending so cleanup cannot race the copy.
+        val shareUri = takeShareUri(activity.intent)
+        if (shareUri != null) {
+            pendingShareUri.set(shareUri)
+        } else {
+            scope.launch {
+                activity.cacheDir.resolve("file_cache").deleteRecursively()
+            }
+        }
+    }
+
+    override fun onNewIntent(intent: Intent) {
+        super.onNewIntent(intent)
+        val uri = takeShareUri(intent) ?: return
+        pendingShareUri.set(uri)
+        trigger(SHARE_RECEIVED_EVENT, JSObject())
+    }
+
+    override fun onDestroy() {
+        jobs.forEach { _, (job, tempFolder) ->
+            try {
+                job.cancel()
+                File(tempFolder).deleteRecursively()
+            } catch (_: Exception) {
+            }
+        }
+
+        scope.cancel()
+        super.onDestroy()
+    }
+
+    private fun startUriCopy(uri: Uri, channel: Channel) {
         val path = listOf(
             activity.cacheDir.absolutePath,
             "file_cache",
             System.currentTimeMillis().toString(),
         ).joinToString(File.separator)
-
-        invoke.resolveObject(true)
 
         val tempFolder = File(path)
 
@@ -160,25 +214,39 @@ class NativeUtils(private val activity: Activity) : Plugin(activity) {
         job.start()
     }
 
-    override fun load(webView: WebView) {
-        super.load(webView)
-
-        scope.launch {
-            activity.cacheDir.resolve("file_cache").deleteRecursively()
+    private fun takeShareUri(intent: Intent?): Uri? {
+        if (intent == null || intent.action != Intent.ACTION_SEND) {
+            return null
         }
+
+        val uri = extractShareUri(intent) ?: return null
+
+        // Prevent the same intent from being consumed again after process/activity recreation.
+        intent.removeExtra(Intent.EXTRA_STREAM)
+        intent.clipData = null
+        intent.action = Intent.ACTION_MAIN
+
+        return uri
     }
 
-    override fun onDestroy() {
-        jobs.forEach { _, (job, tempFolder) ->
-            try {
-                job.cancel()
-                File(tempFolder).deleteRecursively()
-            } catch (_: Exception) {
-            }
+    private fun extractShareUri(intent: Intent): Uri? {
+        parcelableStreamExtra(intent)?.let { return it }
+
+        val clip = intent.clipData
+        if (clip != null && clip.itemCount > 0) {
+            clip.getItemAt(0)?.uri?.let { return it }
         }
 
-        scope.cancel()
-        super.onDestroy()
+        return null
+    }
+
+    @Suppress("DEPRECATION")
+    private fun parcelableStreamExtra(intent: Intent): Uri? {
+        return if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM, Uri::class.java)
+        } else {
+            intent.getParcelableExtra(Intent.EXTRA_STREAM) as? Uri
+        }
     }
 }
 

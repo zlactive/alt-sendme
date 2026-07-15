@@ -32,6 +32,12 @@ impl<R: Runtime> NativeUtils<R> {
 }
 
 impl<R: Runtime> NativeUtils<R> {
+    pub fn consume_share_intent(&self, _: Channel) -> crate::Result<bool> {
+        Ok(false)
+    }
+}
+
+impl<R: Runtime> NativeUtils<R> {
     pub fn cancel_job(&self, _: AsyncJob) -> crate::Result<()> {
         Err(crate::Error::UnsupportedPlafrormError)
     }

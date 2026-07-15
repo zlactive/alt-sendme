@@ -29,6 +29,14 @@ pub(crate) async fn select_send_folder<R: Runtime>(
 }
 
 #[command]
+pub(crate) async fn consume_share_intent<R: Runtime>(
+    app: AppHandle<R>,
+    channel: Channel,
+) -> Result<bool> {
+    app.native_utils().consume_share_intent(channel)
+}
+
+#[command]
 pub(crate) async fn cancel_job<R: Runtime>(
     app: tauri::AppHandle<R>,
     job: AsyncJob,

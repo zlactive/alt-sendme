@@ -109,7 +109,11 @@ export function IndexPage() {
 							</TabsList>
 						</FrameHeader>
 						<FramePanel>
-							<TabsContent value="send">
+							<TabsContent
+								forceMount
+								value="send"
+								className="data-[state=inactive]:hidden"
+							>
 								<Sender onTransferStateChange={setIsSharing} />
 							</TabsContent>
 							<TabsContent

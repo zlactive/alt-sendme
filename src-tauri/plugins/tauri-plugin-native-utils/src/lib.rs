@@ -39,6 +39,7 @@ pub fn init<R: Runtime>() -> TauriPlugin<R> {
             commands::select_download_folder,
             commands::select_send_document,
             commands::select_send_folder,
+            commands::consume_share_intent,
             commands::cancel_job,
         ])
         .setup(|app, api| {

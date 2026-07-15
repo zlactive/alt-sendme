@@ -250,6 +250,7 @@ function invokeWebStub<T>(cmd: string, args?: Record<string, unknown>): T {
 		case 'toggle_context_menu':
 		case 'plugin:native-utils|select_send_document':
 		case 'plugin:native-utils|select_send_folder':
+		case 'plugin:native-utils|consume_share_intent':
 		case 'plugin:native-utils|cancel_job':
 			return null as T
 		default:
