@@ -339,7 +339,10 @@ pub async fn receive_file(
         let stale_hash = state.lock().await.last_cancelled_recv_hash.take();
         if let Some(stale_hash) = stale_hash {
             if &stale_hash != new_hash {
-                let stale_dir = std::env::temp_dir().join(format!(".sendme-recv-{}", stale_hash));
+                let base = std::env::var("ALT_SENDME_TEMP_DIR")
+                    .map(std::path::PathBuf::from)
+                    .unwrap_or_else(|_| std::env::temp_dir());
+                let stale_dir = base.join(format!(".sendme-recv-{}", stale_hash));
                 if stale_dir.exists() {
                     if let Err(e) = tokio::fs::remove_dir_all(&stale_dir).await {
                         tracing::warn!("Failed to remove stale partial recv store: {}", e);

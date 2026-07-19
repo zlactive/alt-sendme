@@ -20,7 +20,10 @@ use tauri::{Emitter as _, Manager as _, RunEvent};
 
 /// Clean up any orphaned .sendme-* directories from previous runs
 fn cleanup_orphaned_directories() {
-    let scan_dirs = vec![std::env::current_dir().ok(), Some(std::env::temp_dir())];
+    let tmp = std::env::var("ALT_SENDME_TEMP_DIR")
+        .map(std::path::PathBuf::from)
+        .unwrap_or_else(|_| std::env::temp_dir());
+    let scan_dirs = vec![std::env::current_dir().ok(), Some(tmp)];
     for base_dir in scan_dirs.into_iter().flatten() {
         if let Ok(entries) = fs::read_dir(&base_dir) {
             for entry in entries.flatten() {
@@ -211,6 +214,12 @@ fn app_state_initial() -> AppState {
 
 #[allow(unused_variables)]
 fn setup_common(app: &tauri::App) {
+    // On Android, `std::env::temp_dir()` returns the unwritable
+    // `/data/local/tmp/`. Route temp files to the app's cache dir instead.
+    #[cfg(target_os = "android")]
+    if let Ok(cache_dir) = app.path().app_cache_dir() {
+        std::env::set_var("ALT_SENDME_TEMP_DIR", cache_dir);
+    }
     cleanup_orphaned_directories();
     tracing::debug!("File drop support enabled via dragDropEnabled config");
 
